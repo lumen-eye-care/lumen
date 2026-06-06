@@ -1,0 +1,11 @@
+# Normalize line endings to LF across all platforms to avoid CRLF churn
+* text=auto eol=lf
+
+# Binary files — never normalize
+*.docx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
