@@ -14,7 +14,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.9.0
+          node-version: 22
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
@@ -29,7 +29,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.9.0
+          node-version: 22
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
@@ -43,7 +43,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.9.0
+          node-version: 22
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       # Fails the build if Performance < 80 or Accessibility < 90 (see lighthouserc.json).

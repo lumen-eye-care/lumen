@@ -25,7 +25,9 @@ pnpm supabase db push # apply migrations (staging / prod)
 
 ## Tech stack
 
-Next.js 16 App Router · TypeScript strict · Tailwind v4 (CSS-first `@theme`) · Supabase (Postgres + Auth + Storage) · Paystack (MoMo + card) · Vercel (Hobby) · Resend (3K/mo free).
+Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 (CSS-first `@theme`) · Supabase (Postgres + Auth + Storage) · Paystack (MoMo + card) · Vercel (Hobby) · Resend (3K/mo free).
+
+**Runtime:** Node.js 20.9.0+ (20.x for compatibility); CI runs Node 22 (required by dev dependencies like rolldown).
 
 **No SMS in v1.** No phone OTP. No AR try-on SDK. No prescription OCR. See "Out of Scope" in the Handoff doc, Section 19.
 
