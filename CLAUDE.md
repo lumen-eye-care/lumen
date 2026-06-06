@@ -8,6 +8,8 @@ Lumen Eye Care is a Ghana-based DTC eyewear brand launching its first frames col
 
 The full specification lives in `docs/Lumen_Handoff_v1.docx` (committed at handover). This file is the always-in-context summary.
 
+**Live status:** See `docs/PROGRESS.md` for the current build state, blockers, and next steps (updated at merge-to-main points).
+
 ## Quick commands
 
 ```bash
