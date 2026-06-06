@@ -8,7 +8,9 @@ Lumen Eye Care is a Ghana-based DTC eyewear brand launching its first frames col
 
 The full specification lives in `docs/Lumen_Handoff_v1.docx` (committed at handover). This file is the always-in-context summary.
 
-**Live status:** See `docs/PROGRESS.md` for the current build state, blockers, and next steps (updated at merge-to-main points).
+**Live status:** See `docs/PROGRESS.md` for the current build state, blockers, and next steps (updated at merge-to-main points). It is auto-loaded into every session via the import below.
+
+@docs/PROGRESS.md
 
 ## Quick commands
 
@@ -323,7 +325,7 @@ Production values live in Vercel project settings. **Never commit `.env.local`.*
 
 - **Product or scope question** → WhatsApp Charity (+233 24 562 8432).
 - **Technical blocker** → flag in PR description with `BLOCKED:` prefix.
-- **Design ambiguity** → stay faithful to the prototype in `Clients/Lumen/Designs/`.
+- **Design ambiguity** → stay faithful to the prototype in `docs/design/` (HTML mockups + JSX components + `styles.css` brand tokens).
 - **Security question / something feels off** → stop, ask before continuing. Don't ship security shortcuts.
 - **Out-of-scope creep** → check Handoff Section 19. If unsure, ask before building.
 
