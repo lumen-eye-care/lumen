@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+ * Lumen brand design tokens (mirror the prototype's styles.css).
+ * Tailwind v4 is CSS-first: tokens declared in @theme generate utilities
+ * (e.g. --color-lumen-blue -> bg-lumen-blue / text-lumen-blue, --radius-md -> rounded-md).
+ */
+@theme {
+  --color-lumen-ink: #0a1f35;
+  --color-lumen-blue: #0f4c81;
+  --color-lumen-sage: #3d6b5c;
+  --color-lumen-warm: #d97757;
+  --color-lumen-cream: #faf7f2;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Bound to the next/font CSS variables set on <html> in layout.tsx. */
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-body: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Bare aliases so CLAUDE.md's documented var(--lumen-ink) form keeps working
+ * alongside the Tailwind --color-lumen-* namespace.
+ */
+:root {
+  --lumen-ink: var(--color-lumen-ink);
+  --lumen-blue: var(--color-lumen-blue);
+  --lumen-sage: var(--color-lumen-sage);
+  --lumen-warm: var(--color-lumen-warm);
+  --lumen-cream: var(--color-lumen-cream);
+}
+
+body {
+  background-color: var(--color-lumen-cream);
+  color: var(--color-lumen-ink);
+  font-family: var(--font-body);
+}

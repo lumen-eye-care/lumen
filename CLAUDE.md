@@ -8,6 +8,8 @@ Lumen Eye Care is a Ghana-based DTC eyewear brand launching its first frames col
 
 The full specification lives in `docs/Lumen_Handoff_v1.docx` (committed at handover). This file is the always-in-context summary.
 
+**Live status:** See `docs/PROGRESS.md` for the current build state, blockers, and next steps (updated at merge-to-main points).
+
 ## Quick commands
 
 ```bash
@@ -23,7 +25,9 @@ pnpm supabase db push # apply migrations (staging / prod)
 
 ## Tech stack
 
-Next.js 14 App Router · TypeScript strict · Tailwind + CSS variables · Supabase (Postgres + Auth + Storage) · Paystack (MoMo + card) · Vercel (Hobby) · Resend (3K/mo free).
+Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 (CSS-first `@theme`) · Supabase (Postgres + Auth + Storage) · Paystack (MoMo + card) · Vercel (Hobby) · Resend (3K/mo free).
+
+**Runtime:** Node.js 20.9.0+ (20.x for compatibility); CI runs Node 22 (required by dev dependencies like rolldown).
 
 **No SMS in v1.** No phone OTP. No AR try-on SDK. No prescription OCR. See "Out of Scope" in the Handoff doc, Section 19.
 
@@ -45,7 +49,7 @@ src/
   lib/               # pure utilities (formatters, validators, safe-redirect)
   server/            # server-only code: db access, paystack, resend, auth-guards
   db/                # Supabase migrations + generated types
-  styles/            # tailwind config, global CSS
+  styles/            # global CSS (Tailwind v4 CSS-first, no config file)
 ```
 
 ## Brand tokens (mirror prototype's styles.css)
@@ -81,7 +85,7 @@ Spacing scale: `4, 8, 12, 16, 24, 32, 48, 64, 80, 120` (px).
 
 ### 1. CORS — no wildcards, ever
 
-Next.js App Router is same-origin by default; that's the safe state. **Never set `Access-Control-Allow-Origin: '*'` in any route handler, middleware, or `next.config.js`.** If a route genuinely needs cross-origin access (none should in v1), allowlist explicitly:
+Next.js App Router is same-origin by default; that's the safe state. **Never set `Access-Control-Allow-Origin: '*'` in any route handler, proxy, or `next.config.js`.** If a route genuinely needs cross-origin access (none should in v1), allowlist explicitly:
 
 ```ts
 // src/server/cors.ts
@@ -123,7 +127,7 @@ return Response.redirect(new URL(dest, request.url));
 
 ### 3. Admin authorization — three-layer defense
 
-Middleware alone isn't enough. **Every admin-capable handler verifies role itself**, and RLS in Postgres is the third layer. Read the role from `app_metadata.role` (server-controlled), **never** from `user_metadata` (user-editable, untrustworthy) or any client input.
+Proxy (edge) alone isn't enough. **Every admin-capable handler verifies role itself**, and RLS in Postgres is the third layer. Read the role from `app_metadata.role` (server-controlled), **never** from `user_metadata` (user-editable, untrustworthy) or any client input.
 
 ```ts
 // src/server/auth-guards.ts
@@ -158,7 +162,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 }
 ```
 
-Three layers, in order: (a) middleware on `/admin/*` paths (fast denial), (b) `requireAdmin()` in every handler (defense in depth), (c) Postgres RLS policies (last line of defense — even a bypassed handler can't read other people's rows).
+Three layers, in order: (a) proxy on `/admin/*` paths (fast denial), (b) `requireAdmin()` in every handler (defense in depth), (c) Postgres RLS policies (last line of defense — even a bypassed handler can't read other people's rows).
 
 ### 4. Paystack webhook — verify signature on raw body
 
@@ -225,7 +229,7 @@ All session cookies set with `Secure` (HTTPS only), `HttpOnly` (no JavaScript ac
 
 ### 9. Content Security Policy headers — defense against XSS
 
-Add CSP headers in `middleware.ts` to limit what scripts/fonts/images can load. Strict default:
+Add CSP headers in `src/proxy.ts` to limit what scripts/fonts/images can load. Strict default:
 
 ```ts
 const cspHeader = `
