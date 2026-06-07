@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-06-07 — Sprint 1: US-P0-04 sign up & sign in
+
+**Branch:** `claude/priceless-pascal-36f72a`
+
+**What landed (auth UI + actions on the existing security spine):**
+- `(auth)` route group: `/sign-in`, `/sign-up`, `/reset-password`, `/update-password` (Server Component pages + `"use client"` forms via `useActionState`), shared layout + `_components/auth-ui.tsx`.
+- `src/app/(auth)/actions.ts`: `signUp` / `signIn` / `requestPasswordReset` / `updatePassword` / `signOut` on the RLS-gated publishable-key client. Every action re-validates with zod (`src/lib/auth-schemas.ts`, +tests), redirects through `safeRedirect()`, and returns **generic** errors (no account enumeration). Name flows to `public.users` via the existing `handle_new_user` trigger; role is never set from the client.
+- `src/app/auth/confirm/route.ts`: email-confirm + recovery landing using `verifyOtp({ type, token_hash })`, `next` guarded by `safeRedirect()`.
+- e2e: `e2e/auth.spec.ts` — render checks run always; full sign-up→sign-in flow `test.skip`-guarded behind `SUPABASE_LINKED` until cloud setup lands.
+
+**Verified:** typecheck ✓, lint ✓, unit 17/17 ✓, build ✓ (routes `/sign-in` `/sign-up` `/reset-password` `/update-password` `/auth/confirm`). Live auth still **BLOCKED** on Supabase link (below).
+
+**Pre-launch auth dashboard config (not code — track + do before prod):**
+1. **Email templates → token_hash flow** so links hit `/auth/confirm` (e.g. confirm: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account`; recovery: `type=recovery&next=/update-password`).
+2. **Redirect URL allowlist**: add `${SITE_URL}/auth/confirm` for localhost + staging + prod, or links are rejected.
+3. **Custom SMTP (Resend)** — built-in email is rate-limited (~few/hr) and won't meet the ≤30s criterion; set SPF/DKIM/DMARC.
+4. **Email enumeration protection** ON (so `signUp` obfuscates existing emails). **Min password length = 8** to match `auth-schemas.ts`.
+5. **Leaked-password protection (HaveIBeenPwned)** — Pro-plan only; flag as a launch-cost decision. **CAPTCHA (Turnstile)** deferred (would need a CSP `script-src`/`frame-src` widen for `challenges.cloudflare.com`).
+6. Dev: email confirmation OFF to test sign-up→sign-in without an inbox; ON in prod.
+
+---
+
 ## 2026-06-07 — Sprint 0: Staging Supabase wiring (code prep)
 
 **Branch:** `claude/clever-mayer-148317`
@@ -15,13 +37,9 @@
 
 **Decisions:** staging is **dev-owned** (not blocked on Charity); new `sb_` keys adopted now.
 
-**Still pending (needs dashboard + credentials — run by a dev):**
-1. Create `lumen-staging` (dev org, Postgres 17), `supabase login` + `link --project-ref`
-2. `supabase db push` (apply init migration), then `gen types --linked --lang typescript --schema public > src/db/types.ts`
-3. Verify `relrowsecurity = true` for all six tables (`webhook_events` RLS-on/no-policy and `prescription_access_log` admin-read-only are by-design)
-4. Set the 3 Supabase env vars in `.env.local` + Vercel staging
+**Done (verified):** ① `lumen-staging` created + linked, ② `db push` applied + types generated (`src/db/types.ts` is real — six tables, live PG metadata), ③ RLS `relrowsecurity = true` confirmed on all six tables, ④ the 3 `sb_*` env vars set in `.env.local` + Vercel staging.
 
-**New gotcha:** Storage buckets `frames` (public) + `prescriptions` (private) are **not** created by the init migration — needs a follow-up `supabase/migrations/<ts>_storage.sql` (browse/US-P0-01 needs the `frames` bucket).
+**Storage buckets — now captured as code:** `supabase/migrations/20260607000001_storage.sql` provisions `frames` (public, admin-write) + `prescriptions` (private; owner/admin object policies, signed-URL access). Idempotent (`on conflict do update` + `drop policy if exists`), safe over manually-created buckets. **Apply with `supabase db push`** (pending). Browse/US-P0-01 unblocks once the `frames` bucket exists.
 
 ---
 
