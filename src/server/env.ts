@@ -8,8 +8,10 @@ import { z } from "zod";
  */
 const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().min(1),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  // New-format Supabase API keys (sb_publishable_… / sb_secret_…). Legacy
+  // anon/service_role JWTs are deprecated (deletion end of 2026).
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  SUPABASE_SECRET_KEY: z.string().min(1),
   PAYSTACK_PUBLIC_KEY: z.string().min(1),
   PAYSTACK_SECRET_KEY: z.string().min(1),
   RESEND_API_KEY: z.string().min(1),
