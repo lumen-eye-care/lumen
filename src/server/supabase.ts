@@ -4,15 +4,15 @@ import { cookies } from "next/headers";
 
 /**
  * Supabase client for Server Components, Server Actions, and Route Handlers.
- * Cookie-bound to the request session; anon key, so RLS applies. In Next 16
- * cookies() is async, hence the await.
+ * Cookie-bound to the request session; publishable key, so RLS applies. In
+ * Next 16 cookies() is async, hence the await.
  */
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {

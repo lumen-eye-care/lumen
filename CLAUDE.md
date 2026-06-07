@@ -50,8 +50,11 @@ src/
   components/        # shared React components (atoms, molecules, organisms)
   lib/               # pure utilities (formatters, validators, safe-redirect)
   server/            # server-only code: db access, paystack, resend, auth-guards
-  db/                # Supabase migrations + generated types
+  db/                # generated Supabase types (types.ts)
   styles/            # global CSS (Tailwind v4 CSS-first, no config file)
+supabase/
+  migrations/        # Supabase migrations (applied via `supabase db push`)
+  config.toml        # local Supabase project config
 ```
 
 ## Brand tokens (mirror prototype's styles.css)
@@ -182,9 +185,9 @@ const event = JSON.parse(raw);
 // then check event.id against webhook_events table for idempotency
 ```
 
-### 5. Service role key — server-only, `import 'server-only'`
+### 5. Secret key — server-only, `import 'server-only'`
 
-`SUPABASE_SERVICE_ROLE_KEY` lives in `.env.local` (gitignored) and Vercel server env vars. Anything that uses it lives in `src/server/` with `import 'server-only'` at the top of the module — Next.js will hard-error if any client code imports it.
+`SUPABASE_SECRET_KEY` (new-format `sb_secret_…`, replaces the deprecated legacy service_role key) lives in `.env.local` (gitignored) and Vercel server env vars. Anything that uses it lives in `src/server/` with `import 'server-only'` at the top of the module — Next.js will hard-error if any client code imports it.
 
 ```ts
 // src/server/supabase-admin.ts
@@ -192,7 +195,7 @@ import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  process.env.SUPABASE_SECRET_KEY!,
 );
 ```
 
@@ -300,8 +303,8 @@ Full acceptance criteria in `docs/Lumen_Handoff_v1.docx` Section 6. Flow diagram
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # sb_publishable_… (replaces legacy anon key)
+SUPABASE_SECRET_KEY=                    # sb_secret_… (replaces legacy service_role key)
 PAYSTACK_PUBLIC_KEY=
 PAYSTACK_SECRET_KEY=
 RESEND_API_KEY=
@@ -351,7 +354,8 @@ src/
   components/                      # shared UI
   lib/                             # pure utilities (formatters, validators, safe-redirect)
   server/                          # server-only (db, paystack, resend, auth-guards)
-  db/migrations/                   # Supabase migrations
+  db/                              # generated Supabase types (types.ts)
+supabase/migrations/               # Supabase migrations (db push)
 .github/workflows/                 # CI: typecheck + lint + test + lighthouse
 ```
 
