@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-06-08 — Sprint 3: US-P0-01 browse frames — /shop catalogue + marketing shell
+
+**What landed (PR #9 — built on existing schema + seed data, no migration needed):**
+- **Marketing shell** `src/app/(marketing)/layout.tsx` + `src/components/organisms/{site-header,site-footer}.tsx` — sticky scroll-shadow nav with mobile hamburger drawer, 5-col footer; reused by every storefront route going forward. Home page (`app/page.tsx`) includes chrome explicitly to avoid a Next.js duplicate-route conflict with the `(marketing)` group.
+- **Design system atoms** ported from `docs/design/shared.jsx`: `icon.tsx` (24-glyph SVG set), `logo-mark.tsx`, `frame-svg.tsx` (6-shape procedural renderer — near-zero HTTP weight for slow-4G / mid-range Android baseline).
+- **Server data layer** `src/server/frames.ts` (`server-only`) — `getActiveCategories()`, `getActiveFrames(categorySlug?)`, `getFrameBySlug(slug)` via the RLS-gated publishable-key client. `Json → FrameColor[]` type-narrower; no admin-client bypass anywhere in the shop path.
+- **Filter module + tests** `src/lib/shop-filters.ts` — URL is the single source of truth for filter/sort state (shareable, SEO-friendly, back-button safe). `parseShopParams()` whitelists every param (no raw user strings reach SQL); `applyShopFilters()` pure in-memory faceting + sort (featured/newest/price-low/price-high) + per-facet counts. 25 new tests (52/52 total).
+- **`/shop` page** `src/app/(marketing)/shop/page.tsx` — Server Component, `force-dynamic`, async `searchParams`; DB-driven `hero_title`/`hero_subtitle` from `frame_categories`; `<ShopTabs>` category switcher; desktop sidebar + mobile slide-in filter drawer; active-filter chips; result count; skeleton `loading.tsx`; empty state + contacts-clinic-redirect state.
+- **`FrameCard`** `src/components/molecules/frame-card.tsx` — `next/image` with `priority` on first 4 cards + lazy below fold; `FrameSVG` fallback when `photo_urls` is empty (current state of seed data); badge colour-coded (BESTSELLER/NEW/LIMITED); `formatGhs(price_ghs)` price; colour swatches.
+- **Stub PDP** `src/app/(marketing)/shop/[slug]/page.tsx` — `getFrameBySlug` → `notFound()` on bad slug; shows FrameSVG/photo, price, swatches, stock indicator, "lens builder coming soon" WhatsApp notice; back-to-shop link. Real US-P0-02 PDP is next.
+- **Cart placeholder** `src/app/(commerce)/cart/page.tsx` — stub so header cart icon has no 404 until US-P0-03/05 land.
+
+**Verified (2026-06-08):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · 52/52 tests ✓ · `pnpm build` ✓ (`/shop` + `/shop/[slug]` dynamic, `/cart` static) · `pnpm seed` data confirmed rendering in dev.
+
+**Open caveats:**
+- Frame `photo_urls` are not seeded — `FrameSVG` is the rendered visual until admins upload photos via `/admin/frames`. No code change needed; photos appear automatically once uploaded.
+- `app/(marketing)/page.tsx` has a `redirect("/shop")` default export only to satisfy Next.js build validation; outer `app/page.tsx` handles `/` in practice.
+
+**Next steps:**
+1. **US-P0-02 frame detail** — real PDP with colour selector, stub lens builder accordion, "add to bag" CTA (lens/prescription options deferred to US-P2-02).
+2. **US-P0-09 clinics** — self-contained; `clinics` table is seeded; no other dependencies.
+3. **US-P0-03/05/06/07 cart + checkout** — the commerce funnel.
+
+---
+
 ## 2026-06-08 — Sprint 2: US-P1-07 basic admin (frames CRUD + orders)
 
 **What landed (no migration — built entirely on the existing schema + 3 security layers):**
