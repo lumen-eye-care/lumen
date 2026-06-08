@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   // Don't advertise the framework/version (security rule: reduce fingerprinting).
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    // Admin frame-photo uploads post a File through a Server Action; the default
+    // body limit (~1 MB) would reject them. The `frames` bucket caps at 5 MB.
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   images: {
     // Frame photography is served from the public Supabase Storage bucket.
     remotePatterns: [

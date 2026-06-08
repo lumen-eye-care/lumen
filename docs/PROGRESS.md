@@ -4,6 +4,48 @@
 
 ---
 
+## 2026-06-08 — Sprint 2: US-P1-07 basic admin (frames CRUD + orders)
+
+**What landed (no migration — built entirely on the existing schema + 3 security layers):**
+- **Admin shell** `src/app/admin/{layout,page}.tsx` + `_components/{admin-ui,admin-nav}.tsx` — utilitarian sidebar layout on brand tokens (Handoff §4). `requireAdmin()` runs in the layout AND every page/action (rule 3: proxy → handler → RLS); `force-dynamic` so no shell is cached cross-user.
+- **Frames CRUD** `src/app/admin/frames/**` — list (incl. archived via admin RLS), create, edit, **soft-delete = archive** (`is_active=false`, preserves `order_items` history), restore. Full storefront field set (name, slug, price, stock, description, category, shape, gender, material, badge, colours, photos). Photo upload posts a File through the server action → validated (mime/size) → uploaded to the public `frames` bucket via the RLS client (storage `frames admin write` requires `is_admin()`). `revalidatePath('/shop')` after every write. Price entered in GHS, stored integer pesewa.
+- **Orders** `src/app/admin/orders/**` — read-only list + detail (items, customer, totals, payment); **mark-shipped** action flips `status='shipped'` (already a valid enum value) via RLS client + sends a best-effort Resend email (status persists even if email fails). Reuses `formatGhs`.
+- **Validation** `src/lib/frame-schemas.ts` (+ tests) — zod, re-validated server-side in every action.
+- **Seed bootstrap** — `src/lib/seed.ts` now creates the env-driven admin user (`app_metadata.role='admin'`, via `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`) + 2 mock orders so `/admin` is testable. `.env.example` documents the new vars.
+- **Config** — `next.config.ts` `serverActions.bodySizeLimit: '6mb'` for photo posts (Supabase host already in `images.remotePatterns`).
+
+**Verified (2026-06-08):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · 27/27 tests ✓ · `pnpm build` ✓ (all `/admin/*` routes dynamic) · `pnpm seed` ✓ (admin user + mock orders) · runtime: unauthenticated `/admin` + `/admin/frames` → 307 to `/sign-in?redirect=…` (proxy gate), `/sign-in` 200, no dev-log errors.
+
+**Scope note:** US-P1-07 covers **frames + orders** only. `frame_categories` / `clinics` / `journal_posts` remain DB/seed-managed (admin RLS allows writes) until **US-P2-04 Full Admin**. The frame form *selects* a category but can't create one yet.
+
+**Open caveat:** shipped-email needs Resend domain verification (SPF/DKIM/DMARC) before it leaves spam; built non-fatal so fulfilment never blocks. `ADMIN_EMAIL_DOMAINS` auto-grant-on-signup is still unbuilt — admins are provisioned via seed for now.
+
+---
+
+## 2026-06-08 — Schema: content catalogue (data-driven requirement)
+
+**Migration:** `supabase/migrations/20260608000001_content_catalogue.sql`
+
+**What landed:**
+- `frame_categories` — lookup table replacing `frames.type CHECK('optical','sun')` enum. Each shop collection tab is now a DB row with its own `hero_title` / `hero_subtitle` copy. New collections (e.g. contacts, kids) are a DB insert, no code change.
+- `frames` altered — `category_id` (FK → `frame_categories`), `gender` (`men`/`women`/`unisex`), `material` (filterable class) added. Old hardcoded `type` column + `frames_type_check` constraint dropped.
+- `clinics` — new table (US-P0-09). Per-day `opening_hours jsonb`, `services text[]`, `is_flagship`, `latitude`/`longitude` for map pin. Was fully hardcoded in `docs/design/clinics.jsx`.
+- `journal_categories` + `journal_posts` — new tables (US-P2-03). Posts have draft/published status; public RLS shows `published` only. `body` field (markdown) added — not in the prototype. Was fully hardcoded in `docs/design/journal.jsx`.
+- `journal` storage bucket — public read / admin write; mirrors `frames` bucket pattern.
+- All five tables: RLS ON, `public.is_admin()` admin policies (Security rule 6).
+
+**Applied + verified (2026-06-08):**
+- `pnpm supabase db push` — migration applied to staging ✓
+  - Note: `20260608000001_frames_active.sql` (from `feature/admin-frames-orders`) was already on remote; our migration numbered `00002` to avoid collision. `frames_active.sql` brought into this branch's migrations dir for history consistency.
+- `pnpm supabase gen types` → `src/db/types.ts` regenerated; all 5 new tables present ✓
+- `pnpm typecheck` ✓ · `pnpm lint` ✓ · 17/17 unit tests ✓
+- `pnpm seed` — 3 frame categories, 8 frames, 4 clinics, 5 journal categories, 6 journal posts inserted into staging ✓
+  - `package.json` seed script updated: `tsx --env-file=.env.local src/lib/seed.ts` (Node 20.6+ `--env-file` flag; no dotenv dependency needed)
+
+**Deferred (known hardcoded):** lens types / add-ons / Rx options in `docs/design/frame-detail.jsx` — defer to US-P2-02 Lens Builder migration.
+
+---
+
 ## 2026-06-07 — Sprint 1: US-P0-04 sign up & sign in
 
 **Branch:** `claude/priceless-pascal-36f72a`
