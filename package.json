@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "seed": "tsx src/lib/seed.ts",
+    "seed": "tsx --env-file=.env.local src/lib/seed.ts",
     "supabase": "supabase"
   },
   "dependencies": {

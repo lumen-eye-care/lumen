@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -14,13 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      clinics: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_flagship: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          opening_hours: Json
+          optometrist_count: number
+          phone: string | null
+          services: string[]
+          slug: string
+          sort_order: number
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_flagship?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          opening_hours?: Json
+          optometrist_count?: number
+          phone?: string | null
+          services?: string[]
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_flagship?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          opening_hours?: Json
+          optometrist_count?: number
+          phone?: string | null
+          services?: string[]
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      frame_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       frames: {
         Row: {
           badge: string | null
+          category_id: string | null
           colors: Json
           created_at: string
           description: string | null
+          gender: string | null
           id: string
+          is_active: boolean
+          material: string | null
           materials: Json
           name: string
           photo_urls: string[]
@@ -28,15 +128,18 @@ export type Database = {
           shape: string | null
           slug: string
           stock: number
-          type: string | null
           updated_at: string
         }
         Insert: {
           badge?: string | null
+          category_id?: string | null
           colors?: Json
           created_at?: string
           description?: string | null
+          gender?: string | null
           id?: string
+          is_active?: boolean
+          material?: string | null
           materials?: Json
           name: string
           photo_urls?: string[]
@@ -44,15 +147,18 @@ export type Database = {
           shape?: string | null
           slug: string
           stock?: number
-          type?: string | null
           updated_at?: string
         }
         Update: {
           badge?: string | null
+          category_id?: string | null
           colors?: Json
           created_at?: string
           description?: string | null
+          gender?: string | null
           id?: string
+          is_active?: boolean
+          material?: string | null
           materials?: Json
           name?: string
           photo_urls?: string[]
@@ -60,10 +166,106 @@ export type Database = {
           shape?: string | null
           slug?: string
           stock?: number
-          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "frames_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "frame_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
+      }
+      journal_posts: {
+        Row: {
+          author: string | null
+          body: string | null
+          category_id: string | null
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          is_featured: boolean
+          published_at: string | null
+          read_minutes: number | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          body?: string | null
+          category_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_featured?: boolean
+          published_at?: string | null
+          read_minutes?: number | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          body?: string | null
+          category_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_featured?: boolean
+          published_at?: string | null
+          read_minutes?: number | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "journal_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
