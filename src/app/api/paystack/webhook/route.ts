@@ -1,6 +1,11 @@
-import { supabaseAdmin } from "@/server/supabase-admin";
+import { getSupabaseAdmin } from "@/server/supabase-admin";
 import { verifyWebhookSignature } from "@/server/paystack";
 import { isPaidChargeValid, sendOrderConfirmationEmail } from "@/server/checkout";
+
+/** Strip CR/LF + cap length so a payload value can't forge or flood log lines. */
+function safeLog(value: unknown): string {
+  return String(value).replace(/[\r\n\t]+/g, " ").slice(0, 120);
+}
 
 /**
  * POST /api/paystack/webhook — the fulfilment source of truth (CLAUDE.md rule 4).
@@ -45,31 +50,33 @@ export async function POST(req: Request) {
     return new Response("OK", { status: 200 });
   }
 
+  const db = getSupabaseAdmin();
+
   // Look up the order this charge belongs to.
-  const { data: order } = await supabaseAdmin
+  const { data: order } = await db
     .from("orders")
     .select("id, status, total_ghs, payment_method, payment_reference, users(email, name)")
     .eq("payment_reference", reference)
     .maybeSingle();
 
   if (!order) {
-    console.warn("[paystack] webhook for unknown reference", reference);
+    console.warn("[paystack] webhook for unknown reference", safeLog(reference));
     return new Response("OK", { status: 200 });
   }
 
   // Anti-tamper: amount + currency must match what we expect to charge.
   if (!isPaidChargeValid({ event: event.event, currency, amountPesewa }, order.total_ghs)) {
     console.error("[paystack] charge mismatch — not fulfilling", {
-      reference,
+      reference: safeLog(reference),
       expected: order.total_ghs,
       got: amountPesewa,
-      currency,
+      currency: safeLog(currency),
     });
     return new Response("OK", { status: 200 });
   }
 
   // Idempotency: claim the event. A duplicate (23505) means it's already handled.
-  const { error: claimError } = await supabaseAdmin.from("webhook_events").insert({
+  const { error: claimError } = await db.from("webhook_events").insert({
     paystack_event_id: eventId,
     event: event.event,
     payload: event as never,
@@ -83,7 +90,7 @@ export async function POST(req: Request) {
   }
 
   // Fulfil: pending → paid only. The status-guard trigger blocks downgrades.
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await db
     .from("orders")
     .update({ status: "paid" })
     .eq("id", order.id)
