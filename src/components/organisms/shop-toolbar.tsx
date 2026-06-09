@@ -8,12 +8,11 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Icon } from "@/components/atoms/icon";
+import { SortSelect } from "@/components/molecules/sort-select";
 import {
   buildShopUrl,
-  SHOP_SORT_OPTIONS,
   MATERIAL_OPTIONS,
   type ParsedShopParams,
-  type ShopSort,
 } from "@/lib/shop-filters";
 
 type ShopToolbarProps = {
@@ -95,20 +94,9 @@ export function ShopToolbar({
           )}
         </p>
 
-        <label className="flex items-center gap-2 text-sm text-lumen-ink/70">
-          Sort:
-          <select
-            value={params.sort}
-            onChange={(e) => navigate({ sort: e.target.value as ShopSort })}
-            className="rounded-md border border-lumen-ink/15 bg-transparent py-1.5 pl-2 pr-6 text-sm text-lumen-ink focus:border-lumen-blue focus:outline-none"
-          >
-            {SHOP_SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* Sort lives in the mobile filter bar on small screens, so the toolbar
+            only shows it from lg up to avoid a duplicate control. */}
+        <SortSelect params={params} className="hidden lg:flex" />
       </div>
 
       {/* Active filter chips */}

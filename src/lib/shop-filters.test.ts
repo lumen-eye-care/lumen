@@ -3,6 +3,7 @@ import {
   parseShopParams,
   applyShopFilters,
   buildShopUrl,
+  countActiveFilters,
   type ParsedShopParams,
 } from "@/lib/shop-filters";
 import type { ShopFrame } from "@/server/frames";
@@ -285,5 +286,23 @@ describe("buildShopUrl", () => {
     const params = parseShopParams({});
     const url = buildShopUrl(params, { shapes: ["round", "oval"] });
     expect(url).toContain("shape=round%2Coval");
+  });
+});
+
+describe("countActiveFilters", () => {
+  it("is zero for default params (sort/cat don't count)", () => {
+    expect(countActiveFilters(parseShopParams({ cat: "sun", sort: "newest" }))).toBe(0);
+  });
+
+  it("counts each selected facet, including price bounds", () => {
+    const params = parseShopParams({
+      shape: "round,oval",
+      gender: "men",
+      colour: "Midnight",
+      min: "100",
+      max: "500",
+    });
+    // 2 shapes + 1 gender + 1 colour + min + max = 6
+    expect(countActiveFilters(params)).toBe(6);
   });
 });
