@@ -62,26 +62,28 @@ export function FrameCard({ frame, priority = false }: FrameCardProps) {
         )}
       </div>
 
-      {/* Info */}
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate font-display text-[1.05rem] text-lumen-ink">
-              {name}
-            </p>
-            {meta && (
-              <p className="mt-0.5 truncate text-xs text-lumen-ink/50">{meta}</p>
-            )}
-          </div>
-          <p className="shrink-0 text-right text-sm font-medium text-lumen-ink">
-            <span className="text-xs font-normal text-lumen-ink/50">From </span>
-            {formatGhs(price_ghs)}
+      {/* Info — name, meta and price each get their own row so the name is
+          never squeezed by the (wide) "From GH₵580.00" price on narrow cards. */}
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <div className="min-w-0">
+          <p className="truncate font-display text-[1.05rem] text-lumen-ink">
+            {name}
           </p>
+          {meta && (
+            <p className="mt-0.5 truncate text-xs text-lumen-ink/50">{meta}</p>
+          )}
         </div>
+        <p className="text-sm font-medium text-lumen-ink">
+          <span className="text-xs font-normal text-lumen-ink/50">From </span>
+          {formatGhs(price_ghs)}
+        </p>
 
         {/* Colour swatches */}
         {colors.length > 0 && (
-          <div className="flex items-center gap-1.5" aria-label="Available colours">
+          <div
+            className="mt-auto flex items-center gap-1.5 pt-1"
+            aria-label="Available colours"
+          >
             {colors.map((c) => (
               <span
                 key={c.name}
