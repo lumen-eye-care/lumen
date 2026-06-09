@@ -55,18 +55,21 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (!order) {
-    // encodeURIComponent neutralises CR/LF so a payload value can't forge log lines.
-    console.warn("[paystack] webhook for unknown reference", encodeURIComponent(reference));
+    // Strip CR/LF inline so a payload value can't forge or flood log lines.
+    console.warn(
+      "[paystack] webhook for unknown reference",
+      reference.replace(/[\r\n]+/g, " "),
+    );
     return new Response("OK", { status: 200 });
   }
 
   // Anti-tamper: amount + currency must match what we expect to charge.
   if (!isPaidChargeValid({ event: event.event, currency, amountPesewa }, order.total_ghs)) {
     console.error("[paystack] charge mismatch — not fulfilling", {
-      reference: encodeURIComponent(reference),
+      reference: reference.replace(/[\r\n]+/g, " "),
       expected: order.total_ghs,
       got: amountPesewa,
-      currency: encodeURIComponent(currency),
+      currency: currency.replace(/[\r\n]+/g, " "),
     });
     return new Response("OK", { status: 200 });
   }
