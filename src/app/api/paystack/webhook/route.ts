@@ -2,11 +2,6 @@ import { getSupabaseAdmin } from "@/server/supabase-admin";
 import { verifyWebhookSignature } from "@/server/paystack";
 import { isPaidChargeValid, sendOrderConfirmationEmail } from "@/server/checkout";
 
-/** Strip CR/LF + cap length so a payload value can't forge or flood log lines. */
-function safeLog(value: unknown): string {
-  return String(value).replace(/[\r\n\t]+/g, " ").slice(0, 120);
-}
-
 /**
  * POST /api/paystack/webhook — the fulfilment source of truth (CLAUDE.md rule 4).
  *
@@ -60,17 +55,18 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (!order) {
-    console.warn("[paystack] webhook for unknown reference", safeLog(reference));
+    // encodeURIComponent neutralises CR/LF so a payload value can't forge log lines.
+    console.warn("[paystack] webhook for unknown reference", encodeURIComponent(reference));
     return new Response("OK", { status: 200 });
   }
 
   // Anti-tamper: amount + currency must match what we expect to charge.
   if (!isPaidChargeValid({ event: event.event, currency, amountPesewa }, order.total_ghs)) {
     console.error("[paystack] charge mismatch — not fulfilling", {
-      reference: safeLog(reference),
+      reference: encodeURIComponent(reference),
       expected: order.total_ghs,
       got: amountPesewa,
-      currency: safeLog(currency),
+      currency: encodeURIComponent(currency),
     });
     return new Response("OK", { status: 200 });
   }
