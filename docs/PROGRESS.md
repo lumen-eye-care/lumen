@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-06-09 — Sprint 5: US-P0-05/06/07 checkout funnel (MoMo · card · COD)
+
+**What landed (migration `20260609000001_checkout.sql` + Paystack hosted checkout):**
+- **Decisions (deviate from signed Handoff — see memory `checkout-decisions`):** **E-Levy dropped** (repealed in Ghana 2 Apr 2025; `e_levy_amount` stays 0, no disclosure). **Sign-in required** for checkout (guest deferred; RLS `orders insert own` stays clean). **Paystack hosted-checkout redirect** for MoMo+card (one Initialize → `authorization_url`); COD bypasses Paystack (`cod_pending`).
+- **Migration** — delivery snapshot columns (`delivery_name/phone/city/address/landmark`) + unique `idempotency_key` on `orders`; an **append-only status trigger** blocks `paid → pending/failed/*` so a replayed/late webhook can't downgrade a fulfilled order. RLS unchanged. Types regenerated.
+- **Server re-pricing spine** `src/lib/checkout-pricing.ts` (pure `priceLines` + `isPaidChargeValid`, unit-tested) + `src/server/checkout.ts` (`repriceCart` loads frames from DB and prices server-side — **never trusts the client cart**; `createPendingOrder` inserts order+items via the RLS client; best-effort confirmation email mirrors `admin/orders/actions.ts`). `src/lib/checkout-schemas.ts` (zod; Ghana phone → E.164 via `libphonenumber-js`).
+- **Route handlers** — `POST /api/checkout/initiate` (sign-in 401-gate, `Idempotency-Key` reuse, re-price, Paystack init with explicit `currency:'GHS'`), `POST /api/paystack/webhook` (raw-body HMAC → ack non-charge → amount/currency anti-tamper → claim `webhook_events.paystack_event_id` for idempotency → `pending→paid` via service-role → email; 401 on bad sig), `GET /api/orders/status?reference=` (RLS-scoped poll).
+- **UI** `src/app/(commerce)/checkout/**` — `/checkout` (server `requireUser` + client form: delivery + MoMo/card/COD + summary), `/checkout/callback` (polls status up to 5 min, success/failure/timeout states), `/checkout/success` (order summary, clears cart). Checkout CTA enabled in `cart-view.tsx` + `cart-drawer.tsx`; `/checkout` added to the `proxy.ts` auth gate.
+- **Paystack helper hardening** `src/server/paystack.ts` — `initializeTransaction` now takes `currency`; `paystackFetch` surfaces Paystack's error message (caught the "Invalid Email" + currency issues during verification).
+
+**Verified (2026-06-09):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · 97/97 tests ✓ (+21) · `pnpm build` ✓ (all 6 checkout routes). **Webhook (headless, signed payloads):** valid→`paid`, replay→`200` no-op, bad-sig→`401`, amount-mismatch→not fulfilled, `paid→pending` blocked by trigger. **COD (signed-in, Preview MCP):** order `cod_pending`, DB-priced GH₵580, cart cleared, visible in `/admin/orders`. **MoMo/card init:** Paystack returns `checkout.paystack.com` URL for both channels.
+
+**Open caveats:**
+- A failed Paystack init leaves a dangling `pending` order (created before the Paystack call) — harmless (never payable); a later reaper or pre-init validation could tidy it.
+- Live in-browser redirect couldn't be exercised with the seed admin (`admin@lumen.local` — Paystack rejects non-routable emails); real customer emails are fine. Order-confirmation emails no-op until `RESEND_API_KEY` + domain verification.
+- Webhook fulfilment needs the Paystack dashboard webhook URL set per environment; local dev can't receive Paystack callbacks (verified by simulating signed events).
+
+**Next steps:**
+1. **US-P0-08 view orders** — `/account/orders` list + detail so customers see these orders (the success/callback pages already link there).
+2. **US-P0-09 clinics** — self-contained; `clinics` table seeded.
+
+---
+
 ## 2026-06-09 — Sprint 4: US-P0-02 frame detail + US-P0-03 add to cart + shared UI-state primitives
 
 **What landed (no migration — client-side cart on the existing schema):**

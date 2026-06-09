@@ -128,15 +128,13 @@ export function CartDrawer() {
                 Lenses, delivery &amp; any extras are calculated at checkout.
               </p>
 
-              {/* Checkout is deferred to the commerce-funnel story. */}
-              <button
-                type="button"
-                disabled
-                title="Checkout coming soon"
-                className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md bg-lumen-blue/40 px-5 py-3 text-sm font-medium text-lumen-cream"
+              <Link
+                href="/checkout"
+                onClick={close}
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
               >
-                Checkout — coming soon
-              </button>
+                Checkout
+              </Link>
               <Link
                 href="/cart"
                 onClick={close}

@@ -67,8 +67,14 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Fast denial: unauthenticated hits on protected areas.
-  if (!user && (pathname.startsWith("/account") || pathname.startsWith("/admin"))) {
+  // Fast denial: unauthenticated hits on protected areas. Checkout requires
+  // sign-in in v1 (guest checkout deferred); the page also calls requireUser().
+  if (
+    !user &&
+    (pathname.startsWith("/account") ||
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/checkout"))
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = "/sign-in";
     url.searchParams.set("redirect", pathname);
