@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   // Don't advertise the framework/version (security rule: reduce fingerprinting).
@@ -39,4 +40,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * Sentry wrapper. `tunnelRoute` proxies browser events through a same-origin
+ * route (/monitoring) so no CSP connect-src widening is needed (rule 9) and
+ * ad-blockers can't drop them. Source maps are deleted after upload so they are
+ * never publicly served (no source disclosure). The build is a no-op when the
+ * SENTRY_* build vars are absent.
+ */
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  // SENTRY_AUTH_TOKEN (build-only secret) is read from the environment.
+  silent: !process.env.CI,
+  telemetry: false,
+  tunnelRoute: "/monitoring",
+  widenClientFileUpload: true,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+});

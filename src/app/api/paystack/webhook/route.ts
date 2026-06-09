@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { getSupabaseAdmin } from "@/server/supabase-admin";
 import { verifyWebhookSignature } from "@/server/paystack";
 import { isPaidChargeValid, sendOrderConfirmationEmail } from "@/server/checkout";
@@ -71,6 +72,19 @@ export async function POST(req: Request) {
       got: amountPesewa,
       currencyOk: currency === "GHS",
     });
+    // Security-relevant: someone presented a valid signature but the wrong
+    // amount/currency. Alert on it. Context is order id + numbers only — never
+    // the raw payload (rule 10).
+    Sentry.captureMessage("paystack charge mismatch — not fulfilling", {
+      level: "warning",
+      tags: { area: "paystack-webhook" },
+      extra: {
+        orderId: order.id,
+        expected: order.total_ghs,
+        got: amountPesewa,
+        currencyOk: currency === "GHS",
+      },
+    });
     return new Response("OK", { status: 200 });
   }
 
@@ -85,6 +99,10 @@ export async function POST(req: Request) {
       return new Response("OK", { status: 200 }); // already processed
     }
     console.error("[paystack] webhook_events insert error", claimError.message);
+    Sentry.captureException(new Error("webhook_events insert failed"), {
+      tags: { area: "paystack-webhook" },
+      extra: { orderId: order.id, code: claimError.code },
+    });
     return new Response("Server Error", { status: 500 });
   }
 
@@ -97,6 +115,10 @@ export async function POST(req: Request) {
 
   if (updateError) {
     console.error("[paystack] order fulfilment update error", updateError.message);
+    Sentry.captureException(new Error("order fulfilment update failed"), {
+      tags: { area: "paystack-webhook" },
+      extra: { orderId: order.id, code: updateError.code },
+    });
     return new Response("Server Error", { status: 500 });
   }
 

@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-06-09 — Observability: Sentry + Vercel Analytics + /api/health
+
+**Why now:** checkout is live in prod with no monitoring. Added a *proportionate*
+layer (Handoff §2: Sentry free tier + Vercel default analytics, no GA4).
+
+**What landed (no migration; deps `@sentry/nextjs@10`, `@vercel/analytics`, `@vercel/speed-insights`):**
+- **Decision — Sentry transport = tunnel, not direct ingest.** `next.config.ts`
+  wraps in `withSentryConfig` with `tunnelRoute:'/monitoring'`, so browser events go
+  same-origin (covered by `connect-src 'self'`) → **zero CSP widening** (rule 9) and
+  ad-blockers can't drop them. Source maps deleted after upload (no public source
+  disclosure). `proxy.ts` carries a comment so nobody "fixes" the CSP by adding the
+  ingest domain; `/monitoring` + `/api/health` excluded from the proxy matcher.
+- **PII scrubbing (rule 10)** — `src/lib/sentry-scrub.ts` (pure, **6 unit tests**) is
+  the shared `beforeSend`/`beforeSendTransaction` for all three configs
+  (`sentry.server/edge.config.ts`, `instrumentation-client.ts` via `instrumentation.ts`
+  + `onRequestError`). Drops `user`, request body/cookies/query-string/sensitive
+  headers, and redacts email/phone/reference-shaped values. `sendDefaultPii:false`,
+  **no Session Replay**, `tracesSampleRate:0` (errors-only, stays inside 5K/mo).
+- **Payment-path captures** — webhook (`insert`/`update` errors + charge-mismatch)
+  and checkout-initiate (both Paystack-init `catch`es) tagged `area:'paystack-webhook'`
+  / `area:'checkout'`, context = **order id + codes only**. The 401 signature failure
+  is intentionally **not** captured (attacker-driven quota burn).
+- **Vercel Analytics + Speed Insights** in `src/app/layout.tsx` (no env vars).
+- **`/api/health`** — app + Supabase HEAD-count probe via the RLS client (no secret,
+  rule 5); 200 ok / 503 on DB failure; body leaks no error text or version.
+- **Env** — `NEXT_PUBLIC_SENTRY_DSN` (public, optional in `env.ts`; SDK no-ops without
+  it) + build-only secret `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT`.
+
+**Open caveats (dashboard/deploy steps — see `docs/observability.md`):** create the
+Sentry project + DSN; set the build-only `SENTRY_*` vars in Vercel; enable Analytics +
+Speed Insights; create the **payment-path alert** (`area in (paystack-webhook,checkout)`
++ `environment:production` → email); add **UptimeRobot** monitors for `/` and
+`/api/health`. Sentry stays inert until the DSN is set.
+
+---
+
 ## 2026-06-09 — Sprint 5: US-P0-05/06/07 checkout funnel (MoMo · card · COD)
 
 **What landed (migration `20260609000001_checkout.sql` + Paystack hosted checkout):**
