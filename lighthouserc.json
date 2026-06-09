@@ -3,7 +3,7 @@
     "collect": {
       "startServerCommand": "pnpm start",
       "url": ["http://localhost:3000/"],
-      "numberOfRuns": 1,
+      "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",
         "screenEmulation": {
