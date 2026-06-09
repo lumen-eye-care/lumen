@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Geist } from "next/font/google";
 import "@/styles/globals.css";
+import { CartProvider } from "@/components/cart/cart-provider";
+import { ToastProvider } from "@/components/atoms/toast";
+import { CartDrawer } from "@/components/organisms/cart-drawer";
 
 const display = Instrument_Serif({
   weight: "400",
@@ -36,7 +39,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-dvh bg-lumen-cream text-lumen-ink antialiased">
-        {children}
+        <CartProvider>
+          <ToastProvider>
+            {children}
+            <CartDrawer />
+          </ToastProvider>
+        </CartProvider>
       </body>
     </html>
   );

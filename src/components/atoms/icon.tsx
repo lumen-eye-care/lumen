@@ -24,12 +24,15 @@ export type IconName =
   | "insta"
   | "mail"
   | "map"
+  | "minus"
   | "phone"
   | "pin"
+  | "plus"
   | "search"
   | "share"
   | "star"
   | "sun"
+  | "trash"
   | "truck"
   | "twitter"
   | "upload"
@@ -127,6 +130,11 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M9 3v15M15 6v15" />
     </>
   ),
+  minus: (
+    <>
+      <path d="M5 12h14" />
+    </>
+  ),
   phone: (
     <>
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92Z" />
@@ -136,6 +144,11 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
       <circle cx="12" cy="10" r="3" />
+    </>
+  ),
+  plus: (
+    <>
+      <path d="M12 5v14M5 12h14" />
     </>
   ),
   search: (
@@ -164,6 +177,11 @@ const paths: Record<IconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="5" />
       <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6" />
     </>
   ),
   truck: (
