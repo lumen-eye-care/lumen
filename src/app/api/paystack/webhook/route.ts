@@ -55,21 +55,21 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (!order) {
-    // Strip CR/LF inline so a payload value can't forge or flood log lines.
-    console.warn(
-      "[paystack] webhook for unknown reference",
-      reference.replace(/[\r\n]+/g, " "),
-    );
+    // Don't log the raw (payload-controlled) reference — it's a log-injection
+    // sink. The reference is recoverable from the Paystack dashboard if needed.
+    console.warn("[paystack] webhook for an unrecognised payment reference");
     return new Response("OK", { status: 200 });
   }
 
   // Anti-tamper: amount + currency must match what we expect to charge.
   if (!isPaidChargeValid({ event: event.event, currency, amountPesewa }, order.total_ghs)) {
+    // Log only untainted values (order id from the DB, numeric amounts, a flag) —
+    // never the raw payload strings, to avoid log injection.
     console.error("[paystack] charge mismatch — not fulfilling", {
-      reference: reference.replace(/[\r\n]+/g, " "),
+      orderId: order.id,
       expected: order.total_ghs,
       got: amountPesewa,
-      currency: currency.replace(/[\r\n]+/g, " "),
+      currencyOk: currency === "GHS",
     });
     return new Response("OK", { status: 200 });
   }
