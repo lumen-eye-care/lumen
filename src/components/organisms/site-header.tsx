@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoMark } from "@/components/atoms/logo-mark";
 import { Icon } from "@/components/atoms/icon";
+import { useCart } from "@/components/cart/cart-provider";
 
 const NAV_LINKS = [
   { href: "/shop", label: "Shop glasses" },
@@ -23,6 +24,7 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { count, hydrated, open } = useCart();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -92,13 +94,21 @@ export function SiteHeader() {
             <Icon name="user" size={18} />
           </Link>
 
-          <Link
-            href="/cart"
-            aria-label="Cart"
-            className="flex h-11 w-11 items-center justify-center rounded-md text-lumen-ink/70 transition-colors hover:bg-lumen-ink/5 hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          <button
+            type="button"
+            onClick={open}
+            aria-label={
+              hydrated && count > 0 ? `Bag, ${count} item${count === 1 ? "" : "s"}` : "Bag"
+            }
+            className="relative flex h-11 w-11 items-center justify-center rounded-md text-lumen-ink/70 transition-colors hover:bg-lumen-ink/5 hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
           >
             <Icon name="cart" size={18} />
-          </Link>
+            {hydrated && count > 0 && (
+              <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-lumen-warm px-1 text-[10px] font-semibold leading-none text-lumen-cream">
+                {count > 9 ? "9+" : count}
+              </span>
+            )}
+          </button>
 
           <Link
             href="/clinics"

@@ -255,6 +255,18 @@ export function applyShopFilters(
   return { filtered: result, total, facets };
 }
 
+/** Count of active (non-default) filter facets — drives the "Filters (N)" badge. */
+export function countActiveFilters(p: ParsedShopParams): number {
+  return (
+    p.shapes.length +
+    p.genders.length +
+    p.materials.length +
+    p.colours.length +
+    (p.minGhs !== null ? 1 : 0) +
+    (p.maxGhs !== null ? 1 : 0)
+  );
+}
+
 // ─── URL builder helpers ──────────────────────────────────────────────────────
 
 /**

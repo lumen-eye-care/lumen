@@ -4,6 +4,7 @@ import { getActiveCategories, getActiveFrames } from "@/server/frames";
 import { parseShopParams, applyShopFilters } from "@/lib/shop-filters";
 import { FrameCard } from "@/components/molecules/frame-card";
 import { ShopFilters } from "@/components/organisms/shop-filters";
+import { MobileFilterBar } from "@/components/organisms/mobile-filter-bar";
 import { ShopToolbar } from "@/components/organisms/shop-toolbar";
 import { ShopTabs } from "@/components/organisms/shop-tabs";
 import { Icon } from "@/components/atoms/icon";
@@ -99,12 +100,17 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             </Link>
           </div>
         ) : (
-          <div className="flex items-start gap-8">
-            {/* Filters sidebar */}
-            <ShopFilters params={params} facets={facets} />
+          <>
+            {/* Mobile: Filters + Sort on one full-width row above the grid.
+                Hidden from lg up, where the sidebar + toolbar take over. */}
+            <MobileFilterBar params={params} facets={facets} />
 
-            {/* Main content */}
-            <div className="min-w-0 flex-1">
+            <div className="lg:flex lg:items-start lg:gap-8">
+              {/* Filters sidebar (desktop only) */}
+              <ShopFilters params={params} facets={facets} />
+
+              {/* Main content */}
+              <div className="min-w-0 flex-1">
               <ShopToolbar
                 params={params}
                 filteredCount={filtered.length}
@@ -142,8 +148,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                   ))}
                 </div>
               )}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

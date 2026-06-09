@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-06-09 — Sprint 4: US-P0-02 frame detail + US-P0-03 add to cart + shared UI-state primitives
+
+**What landed (no migration — client-side cart on the existing schema):**
+- **Cart store (zero-dep)** `src/lib/cart.ts` + `src/components/cart/cart-provider.tsx` — pure reducer/selectors (`addItem`/`changeQty`/`removeItem`/`selectCount`/`selectSubtotalPesewa`, `parseStoredCart`) behind a React Context + `useReducer` provider. **Chose Context over Zustand** to avoid a runtime dep + stay SSR-safe (no module-level global; 2026 App-Router guidance warns those leak across requests). Persisted to `localStorage` (`lumen.cart.v1`); hydration runs in an effect with the `hydrated` flag folded into the reducer (single dispatch — satisfies React 19's `set-state-in-effect` lint). Line key = `frameId::colorName`; qty capped at the stock snapshot. **22 new tests (74/74 total).** Frame-only — lens/Rx deferred to US-P2-02. `// NOTE`: checkout must re-price server-side from DB, never trust the client cart.
+- **PDP — US-P0-02** `src/app/(marketing)/shop/[slug]/page.tsx` stays a Server Component (data + breadcrumb + metadata + related frames); interactive parts extracted to `src/components/organisms/frame-purchase-panel.tsx` (`"use client"`) — colour selector (updates swatch/`FrameSVG`/photo), stock-aware **Add to bag** → `cart.add()` + toast + opens drawer; out-of-stock disables. Non-interactive "lens builder coming soon" notice (US-P2-02). "You might also like" reuses `FrameCard` (`getActiveFrames(category)` minus current, 4). LCP image gets `priority` + `sizes`. Dropped the design's invented "4.9 · 248 reviews" / MoMo-installment copy (no real data).
+- **Cart drawer + page — US-P0-03** `src/components/organisms/cart-drawer.tsx` (global slide-over, mounted in root layout: `role=dialog`/`aria-modal`, ESC, focus move+trap, body-scroll-lock) + `src/app/(commerce)/cart/{page,cart-view}.tsx` (real bag: server wrapper keeps metadata+chrome, client `CartView` renders lines/subtotal/empty-state, with a pre-hydration skeleton to avoid empty-flash). Shared `src/components/cart/cart-line-item.tsx` (qty steppers + remove). `site-header.tsx` cart icon now **opens the drawer + shows a live count badge**.
+- **Shared UI-state primitives (the gap we had)** `src/components/atoms/toast.tsx` (`ToastProvider`/`useToast`, single `aria-live=polite` region, auto-dismiss) · `src/components/atoms/empty-state.tsx` (reusable, link or button CTA) · `src/app/(commerce)/error.tsx` (first route-level error boundary — turns swallowed data errors into a recoverable state). `icon.tsx` gained `plus`/`minus`/`trash`.
+- **Tooling** `.claude/launch.json` added for the Preview MCP dev server.
+
+**Verified (2026-06-09):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · 74/74 tests ✓ · `pnpm build` ✓ (`/cart` static shell + client view; `/shop/[slug]` dynamic). **Live (Preview MCP, no DB needed for the client cart):** seeded localStorage → reload hydrates badge=3 + both lines + subtotal GH₵1,880.00; drawer opens with scroll-lock; qty stepper caps at stock (button disables, persisted qty clamped); remove drops line+badge; ESC closes + restores scroll; `/cart` empty state renders.
+
+**Open caveats:**
+- **PDP "Add to bag" button not exercised end-to-end here** — this worktree has no `.env.local`/Supabase link, so `/shop/[slug]` `notFound()`s without seeded frames. The button routes through the unit-tested + live-verified `frameToCartItem`→`add()` path. Wire env + `pnpm seed` for a full manual pass.
+- Frame `photo_urls` still unseeded → `FrameSVG` is the rendered visual (cart thumbnails included) until admins upload photos.
+- `error.tsx` is commerce-segment only; retrofitting other segments + loading states is a later pass.
+
+**Next steps:**
+1. **US-P0-09 clinics** — self-contained; `clinics` table seeded; no dependencies.
+2. **US-P0-05/06/07 checkout** — MoMo / card / COD on the cart store; server-side re-pricing + Paystack init + idempotency.
+3. **Wire this worktree's `.env.local` + `supabase link` + `pnpm seed`** to manually verify the PDP add-to-bag flow against real frames.
+
+---
+
 ## 2026-06-08 — Sprint 3: US-P0-01 browse frames — /shop catalogue + marketing shell
 
 **What landed (PR #9 — built on existing schema + seed data, no migration needed):**
