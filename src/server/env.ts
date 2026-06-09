@@ -16,6 +16,9 @@ const envSchema = z.object({
   PAYSTACK_SECRET_KEY: z.string().min(1),
   RESEND_API_KEY: z.string().min(1),
   NEXT_PUBLIC_SITE_URL: z.string().min(1),
+  // Public by design (only permits sending events). Optional: the Sentry SDK
+  // no-ops when it's absent, so local/CI builds work without observability.
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   LUMEN_PRESCRIPTION_UPLOAD_ENABLED: z
     .enum(["true", "false"])
     .default("false"),

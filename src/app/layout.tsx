@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Geist } from "next/font/google";
 import "@/styles/globals.css";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { ToastProvider } from "@/components/atoms/toast";
 import { CartDrawer } from "@/components/organisms/cart-drawer";
@@ -45,6 +47,9 @@ export default function RootLayout({
             <CartDrawer />
           </ToastProvider>
         </CartProvider>
+        {/* Core Web Vitals + page views only — no GA4 in v1 (Handoff §2). */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

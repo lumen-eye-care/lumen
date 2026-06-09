@@ -27,7 +27,7 @@ pnpm supabase db push # apply migrations (staging / prod)
 
 ## Tech stack
 
-Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 (CSS-first `@theme`) · Supabase (Postgres + Auth + Storage) · Paystack (MoMo + card) · Vercel (Hobby) · Resend (3K/mo free).
+Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 (CSS-first `@theme`) · Supabase (Postgres + Auth + Storage) · Paystack (MoMo + card) · Vercel (Hobby) · Resend (3K/mo free) · Sentry (errors) · Vercel Analytics + Speed Insights.
 
 **Runtime:** Node.js 20.9.0+ (20.x for compatibility); CI runs Node 22 (required by dev dependencies like rolldown).
 
@@ -35,7 +35,7 @@ Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 (CSS-first
 
 ## Architecture in one paragraph
 
-Server Components render catalogue + content. Client Components handle cart, lens builder, try-on, checkout step controls. Server Actions and Route Handlers gate writes via Supabase auth + RLS. Paystack via REST + webhook. Resend for transactional email. Two Supabase Storage buckets: `frames` (public) and `prescriptions` (private, signed URLs, audit logged).
+Server Components render catalogue + content. Client Components handle cart, lens builder, try-on, checkout step controls. Server Actions and Route Handlers gate writes via Supabase auth + RLS. Paystack via REST + webhook. Resend for transactional email. Two Supabase Storage buckets: `frames` (public) and `prescriptions` (private, signed URLs, audit logged). Observability: Sentry (PII-scrubbed errors, tunneled — no CSP widening) + Vercel Analytics/Speed Insights; `/api/health` for uptime. See `docs/observability.md`.
 
 ## Folder structure
 
@@ -311,6 +311,10 @@ RESEND_API_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 LUMEN_PRESCRIPTION_UPLOAD_ENABLED=false
 ADMIN_EMAIL_DOMAINS=
+NEXT_PUBLIC_SENTRY_DSN=                  # public DSN; SDK no-ops if unset
+SENTRY_AUTH_TOKEN=                       # SERVER/BUILD-ONLY secret (source-map upload)
+SENTRY_ORG=                              # build-only
+SENTRY_PROJECT=                          # build-only
 ```
 
 Production values live in Vercel project settings. **Never commit `.env.local`.**

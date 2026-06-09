@@ -17,6 +17,11 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
+  // Sentry is intentionally absent here: browser events are tunneled through a
+  // same-origin route (next.config.ts `tunnelRoute: '/monitoring'`), already
+  // covered by 'self'. Do NOT add the Sentry ingest domain — that would widen
+  // the policy for no reason (rule 9). Revisit only if Session Replay or an EU
+  // (*.de.sentry.io) region is ever enabled.
   "connect-src 'self' https://*.supabase.co https://api.paystack.co",
   "frame-src https://checkout.paystack.com",
   "base-uri 'self'",
@@ -96,7 +101,9 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on everything except static assets and image files.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?)$).*)",
+    // Run on everything except static assets and image files. Also skip the
+    // Sentry tunnel (/monitoring) and the uptime probe (/api/health) so neither
+    // pays for a session refresh on every hit.
+    "/((?!_next/static|_next/image|favicon.ico|monitoring|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?)$).*)",
   ],
 };

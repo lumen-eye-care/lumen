@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/server/supabase";
 import { checkoutSchema } from "@/lib/checkout-schemas";
 import {
@@ -81,6 +82,10 @@ export async function POST(req: Request) {
         });
       } catch (err) {
         console.error("[checkout] Paystack re-init failed", err);
+        Sentry.captureException(err, {
+          tags: { area: "checkout" },
+          extra: { stage: "paystack-reinit", orderId: existing.id },
+        });
         return NextResponse.json({ error: "Payment could not be started." }, { status: 502 });
       }
     }
@@ -119,6 +124,10 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error("[checkout] Paystack initialize failed", err);
+    Sentry.captureException(err, {
+      tags: { area: "checkout" },
+      extra: { stage: "paystack-initialize", orderId: order.orderId },
+    });
     return NextResponse.json({ error: "Payment could not be started." }, { status: 502 });
   }
 }
