@@ -12,10 +12,11 @@ export function SiteFooter() {
   return (
     <footer className="mt-20 border-t border-lumen-ink/8 bg-lumen-ink text-lumen-cream/80">
       <div className="mx-auto max-w-[1280px] px-6 pb-8 pt-12">
-        {/* Grid */}
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+        {/* Grid — 2×2 quadrant of link sections on mobile, 5-col on desktop.
+            Brand + newsletter spans full width on top until the lg layout. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-5 lg:gap-10">
           {/* Brand col */}
-          <div className="lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <div className="mb-4 flex items-center gap-2">
               <LogoMark size={26} color="#fff" />
               <span className="font-display text-lg font-normal text-lumen-cream">
