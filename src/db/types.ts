@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       clinics: {
@@ -319,9 +344,15 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          delivery_address: string | null
+          delivery_city: string | null
+          delivery_landmark: string | null
+          delivery_name: string | null
+          delivery_phone: string | null
           delivery_type: string | null
           e_levy_amount: number
           id: string
+          idempotency_key: string | null
           payment_method: string | null
           payment_reference: string | null
           status: string
@@ -332,9 +363,15 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_landmark?: string | null
+          delivery_name?: string | null
+          delivery_phone?: string | null
           delivery_type?: string | null
           e_levy_amount?: number
           id?: string
+          idempotency_key?: string | null
           payment_method?: string | null
           payment_reference?: string | null
           status?: string
@@ -345,9 +382,15 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_landmark?: string | null
+          delivery_name?: string | null
+          delivery_phone?: string | null
           delivery_type?: string | null
           e_levy_amount?: number
           id?: string
+          idempotency_key?: string | null
           payment_method?: string | null
           payment_reference?: string | null
           status?: string
@@ -588,6 +631,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

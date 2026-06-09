@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { EmptyState } from "@/components/atoms/empty-state";
 import { CartLineItem } from "@/components/cart/cart-line-item";
 import { formatGhs } from "@/lib/format-money";
@@ -74,15 +75,12 @@ export function CartView() {
           Lenses, delivery &amp; any extras are calculated at checkout.
         </p>
 
-        {/* Checkout is built in the commerce-funnel story (US-P0-05/06/07). */}
-        <button
-          type="button"
-          disabled
-          title="Checkout coming soon"
-          className="mt-4 flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md bg-lumen-blue/40 px-5 py-3 text-sm font-medium text-lumen-cream"
+        <Link
+          href="/checkout"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
         >
-          Checkout — coming soon
-        </button>
+          Checkout
+        </Link>
       </div>
     </main>
   );

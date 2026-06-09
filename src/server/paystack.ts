@@ -42,7 +42,15 @@ async function paystackFetch<T>(
     },
   });
   if (!res.ok) {
-    throw new Error(`Paystack ${path} failed: ${res.status} ${res.statusText}`);
+    // Surface Paystack's own message (e.g. currency/channel errors) for diagnosis.
+    let detail = "";
+    try {
+      const body = (await res.json()) as { message?: string };
+      if (body?.message) detail = ` — ${body.message}`;
+    } catch {
+      // non-JSON body; ignore
+    }
+    throw new Error(`Paystack ${path} failed: ${res.status} ${res.statusText}${detail}`);
   }
   return (await res.json()) as PaystackResponse<T>;
 }
@@ -51,6 +59,7 @@ export function initializeTransaction(payload: {
   email: string;
   amount: number; // pesewa
   reference: string;
+  currency?: string;
   channels?: string[];
   callback_url?: string;
   metadata?: Record<string, unknown>;
