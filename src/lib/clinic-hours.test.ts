@@ -53,7 +53,8 @@ describe("parseOpeningHours", () => {
   });
 
   it("rejects a week with a missing day key", () => {
-    const { sun: _sun, ...missing } = week;
+    const missing: Record<string, unknown> = { ...week };
+    delete missing.sun;
     expect(parseOpeningHours(missing as unknown as Json)).toBeNull();
   });
 
