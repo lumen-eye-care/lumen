@@ -243,6 +243,17 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# Branded "Confirm signup" email (token_hash flow). The hosted project needs the
+# same HTML pasted into Dashboard → Authentication → Emails → Confirm signup; this
+# block applies it to local `supabase start`. See supabase/templates/confirm-signup.html.
+[auth.email.template.confirmation]
+subject = "Confirm your Lumen account"
+content_path = "./supabase/templates/confirm-signup.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Lumen password"
+content_path = "./supabase/templates/reset-password.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

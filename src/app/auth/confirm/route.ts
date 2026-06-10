@@ -5,9 +5,14 @@ import { safeRedirect } from "@/lib/safe-redirect";
 
 /**
  * Email confirmation + password recovery landing (US-P0-04). Supabase email
- * templates point here with the token_hash flow:
+ * templates point here with the token_hash flow. `next` carries where the user
+ * was so confirmation returns them there (e.g. /checkout), not always /account.
  *
- *   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account
+ * Confirm signup — the link is built by appending the token to emailRedirectTo
+ * (which signUp set to `…/auth/confirm?next=<relative path>`), so the template is:
+ *   {{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email
+ *   → …/auth/confirm?next=%2Fcheckout&token_hash=…&type=email
+ * Recovery (static next):
  *   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/update-password
  *
  * verifyOtp establishes the session (sets cookies via the SSR client), then we
