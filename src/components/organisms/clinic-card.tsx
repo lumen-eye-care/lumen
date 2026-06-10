@@ -34,7 +34,10 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
       : null;
 
   return (
-    <article className="overflow-hidden rounded-xl bg-white ring-1 ring-lumen-ink/8 md:grid md:grid-cols-[280px_1fr]">
+    <article
+      id={clinic.slug}
+      className="scroll-mt-24 overflow-hidden rounded-xl bg-white ring-1 ring-lumen-ink/8 md:grid md:grid-cols-[280px_1fr]"
+    >
       {/* Map placeholder */}
       <div className="relative flex min-h-[160px] items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(15,76,129,0.12),transparent_60%)] bg-lumen-blue/5 md:min-h-full">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-lumen-ink shadow-sm ring-1 ring-lumen-ink/8">

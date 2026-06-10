@@ -73,6 +73,13 @@ function cityFromAddress(address: string): string | null {
  */
 export const getClinicFooterData = unstable_cache(
   async (): Promise<ClinicFooterData> => {
+    // No Supabase env (e.g. bare CI/Lighthouse builds) → empty, render fallback.
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ) {
+      return { clinics: [], count: 0, cities: [] };
+    }
     const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("clinics")
