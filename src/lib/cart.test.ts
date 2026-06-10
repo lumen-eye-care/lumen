@@ -10,6 +10,7 @@ import {
   selectCount,
   selectSubtotalPesewa,
   parseStoredCart,
+  decideCartOnAuth,
   CART_STORAGE_KEY,
   type CartItem,
   type CartState,
@@ -206,5 +207,42 @@ describe("parseStoredCart", () => {
 
   it("exposes a versioned storage key", () => {
     expect(CART_STORAGE_KEY).toBe("lumen.cart.v1");
+  });
+});
+
+describe("decideCartOnAuth", () => {
+  it("clears and drops the owner on sign-out (null next user)", () => {
+    expect(decideCartOnAuth("user-a", null)).toEqual({
+      clear: true,
+      nextOwner: null,
+    });
+  });
+
+  it("keeps an anonymous bag and claims it on first sign-in", () => {
+    expect(decideCartOnAuth(null, "user-a")).toEqual({
+      clear: false,
+      nextOwner: "user-a",
+    });
+  });
+
+  it("keeps the bag when the same user re-authenticates (e.g. token refresh)", () => {
+    expect(decideCartOnAuth("user-a", "user-a")).toEqual({
+      clear: false,
+      nextOwner: "user-a",
+    });
+  });
+
+  it("clears and hands the owner over when a different user signs in", () => {
+    expect(decideCartOnAuth("user-a", "user-b")).toEqual({
+      clear: true,
+      nextOwner: "user-b",
+    });
+  });
+
+  it("is a no-op clear when signed out with no prior owner", () => {
+    expect(decideCartOnAuth(null, null)).toEqual({
+      clear: true,
+      nextOwner: null,
+    });
   });
 });

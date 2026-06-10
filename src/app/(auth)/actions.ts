@@ -82,8 +82,13 @@ export async function signUp(
   if (data.session) {
     redirect(next);
   }
+  // Generic on purpose (rule 10 / app-flow §2): with Supabase email-enumeration
+  // protection ON, an already-registered email returns this same response (and the
+  // owner is emailed a sign-in link), so the copy must read true for both cases
+  // without revealing whether the address already has an account.
   return {
-    success: "Check your email for a link to confirm your account.",
+    success:
+      "Check your email to continue. If you already have a Lumen account, we've sent a sign-in link instead.",
   };
 }
 

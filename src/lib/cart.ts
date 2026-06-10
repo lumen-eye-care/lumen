@@ -18,6 +18,13 @@ import type { ShopFrame } from "@/server/frames";
 /** Versioned localStorage key — bump the suffix if the item shape changes. */
 export const CART_STORAGE_KEY = "lumen.cart.v1";
 
+/**
+ * localStorage key recording which auth user "owns" the persisted bag. The bag
+ * lives per-browser, so this lets us clear it when the user changes (sign-out or
+ * a different account signing in) instead of leaking one person's bag to the next.
+ */
+export const CART_OWNER_KEY = "lumen.cart.owner";
+
 /** A single bag line. Keyed by frame + colour (a colour swap is a new line). */
 export type CartItem = {
   frameId: string;
@@ -130,6 +137,32 @@ export function removeItem(state: CartState, key: string): CartState {
 
 export function clearCart(): CartState {
   return EMPTY_CART;
+}
+
+// ─── Auth scoping ───────────────────────────────────────────────────────────────
+
+/**
+ * Decide what to do with the persisted bag when the authenticated user changes.
+ * Pure so it can be unit-tested; the side effects (clearing the cart, writing the
+ * owner marker) live in the CartAuthSync client component.
+ *
+ *  - signed out (nextUserId null)            → clear, drop the owner
+ *  - anonymous bag, then sign-in (no owner)  → keep (claim it for that user)
+ *  - same user as the owner                  → keep
+ *  - a different user signs in               → clear, hand the owner over
+ *
+ * The anonymous→sign-in case is deliberately preserved so a shopper who builds a
+ * bag while logged out keeps it through the sign-in required at checkout.
+ */
+export function decideCartOnAuth(
+  prevOwner: string | null,
+  nextUserId: string | null,
+): { clear: boolean; nextOwner: string | null } {
+  if (!nextUserId) return { clear: true, nextOwner: null };
+  if (!prevOwner || prevOwner === nextUserId) {
+    return { clear: false, nextOwner: nextUserId };
+  }
+  return { clear: true, nextOwner: nextUserId };
 }
 
 // ─── Selectors ────────────────────────────────────────────────────────────────
