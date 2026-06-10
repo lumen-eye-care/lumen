@@ -63,8 +63,8 @@ export default async function MyOrderDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="font-display text-3xl text-lumen-ink">{ref}</h1>
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <h1 className="font-display text-3xl break-words text-lumen-ink">{ref}</h1>
           <p className="text-sm text-lumen-ink/55">
             Placed {dateFmt.format(new Date(order.created_at))}
           </p>
@@ -123,8 +123,10 @@ export default async function MyOrderDetailPage({
               </div>
               {order.payment_reference && (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-lumen-ink/60">Reference</dt>
-                  <dd className="text-lumen-ink">{order.payment_reference}</dd>
+                  <dt className="shrink-0 text-lumen-ink/60">Reference</dt>
+                  <dd className="min-w-0 break-all text-right text-lumen-ink">
+                    {order.payment_reference}
+                  </dd>
                 </div>
               )}
             </dl>
