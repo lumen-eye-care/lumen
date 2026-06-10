@@ -20,6 +20,16 @@ export function CartAuthSync() {
   const { clear } = useCart();
 
   useEffect(() => {
+    // Supabase env is absent in some builds (e.g. the Lighthouse CI build, which
+    // builds without secrets). Skip rather than let createBrowserClient throw at
+    // the root and tear the client tree down — mirrors the guard in proxy.ts.
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ) {
+      return;
+    }
+
     const supabase = createClient();
     const {
       data: { subscription },
