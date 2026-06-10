@@ -9,7 +9,7 @@
  * Run with:  pnpm seed
  *
  * NEVER run against production — the script bails early if NEXT_PUBLIC_SITE_URL
- * contains "lumenframes.com".
+ * points at a production domain ("lumeneye.org" / "lumenframes.com").
  *
  * Behaviour: upserts on slug so re-running is idempotent.
  */
@@ -21,7 +21,7 @@ import type { Database, TablesInsert } from "@/db/types";
 // Guard — abort immediately on production
 // ---------------------------------------------------------------------------
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-if (siteUrl.includes("lumenframes.com")) {
+if (siteUrl.includes("lumeneye.org") || siteUrl.includes("lumenframes.com")) {
   console.error("SEED ABORTED: refusing to run against production.");
   process.exit(1);
 }

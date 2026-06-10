@@ -31,7 +31,7 @@ export type {
 
 // Must be a sender on the verified Resend domain (PROGRESS.md: verification still
 // pending — until then this lands in spam / fails, handled gracefully).
-const ORDERS_FROM = "Lumen Eye Care <orders@lumenframes.com>";
+const ORDERS_FROM = "Lumen Eye Care <orders@lumeneye.org>";
 
 /** Load the requested frames (RLS shows only active) and price them server-side. */
 export async function repriceCart(lines: CartLineInput[]): Promise<RepriceResult> {
