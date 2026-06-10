@@ -24,6 +24,15 @@ export type Clinic = {
  * the explicit filter documents intent (and applies for admins too).
  */
 export async function getActiveClinics(): Promise<Clinic[]> {
+  // No Supabase env (e.g. env-less CI / preview) → empty, so the page renders
+  // its empty state instead of throwing in createClient(). Mirrors the guard in
+  // getClinicFooterData and the "no-op without env" pattern used elsewhere.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    return [];
+  }
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("clinics")
