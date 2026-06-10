@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-06-10 — Sprint 6: US-P0-09 clinics — /clinics page + admin clinics CRUD + data-driven footer
+
+**Status: all P0 stories (US-P0-01…09) now built.**
+
+**What landed (no migration — `clinics` table already shipped in `20260608000002_content_catalogue.sql`):**
+- **Opening-hours helpers** `src/lib/clinic-hours.ts` (+23 tests) — defensive `Json → OpeningHours` narrower (`parseOpeningHours`, mirrors `parseColors`) + `isOpenNow`/`todayHours`/`formatWeek`/`accraDayAndMinutes`/`formatGhanaPhone`. All Date-injectable; "open now" resolves in **Africa/Accra** via `Intl.DateTimeFormat` regardless of server TZ. `src/lib/wa-link.ts` (`waMeUrl`, +2 tests).
+- **Server module** `src/server/clinics.ts` — `getActiveClinics()` (RLS publishable-key client, frames.ts pattern) + `getClinicFooterData()` for shared chrome via a new **cookie-less public client** `src/server/supabase-public.ts` (no `cookies()` → static pages stay static), wrapped in `unstable_cache({ tags:["clinics"] })`; admin actions bust it with `revalidateTag("clinics","max")`.
+- **`/clinics` page** `src/app/(marketing)/clinics/**` — `force-dynamic` server component; hero count/cities **derived from data** (nothing hardcodes "4 locations"); `ClinicCard` (server-rendered open/closed status in Accra time, 7-day hours with "(today)" marker, service chips, map *placeholder* — no SDK per CSP/bundle budget) + `HomeVisitBanner` (hardcoded ₵250 copy from prototype). Booking CTAs are **interim wa.me deep links** (`// TODO(US-P1-01)`); EmptyState + loading skeleton.
+- **Admin clinics CRUD** `src/app/admin/clinics/**` (+ `src/lib/clinic-schemas.ts`, +10 tests) — list/create/edit/archive-restore, **pulled forward from US-P2-04** so Charity can manage locations without a dev. `requireAdmin()` in every page+action, zod re-validation server-side (Ghana phones → E.164, per-day hours editor with closed-day normalisation), RLS-client writes, soft-delete via `is_active`. Nav item added.
+- **Data-driven footer** `site-footer.tsx` now async — clinic names + location blurb from `getClinicFooterData` (generic fallback if none load); deep-links to `/clinics#<slug>`. **Twitter → X** (`x.com`, new `xSocial` glyph; old bird glyph + `clock` glyph handled in `icon.tsx`).
+
+**Verified (2026-06-10):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **146/146 tests** ✓ (+35).
+
+**Open caveats:**
+- **Pre-existing Turbopack + pnpm + Sentry build/dev break** in fresh worktree installs: `@sentry/nextjs` server/edge SDK can't resolve its transitive `@sentry/opentelemetry` through pnpm's nested symlinks on Windows (reproduced on the base commit a0ad9b8 — *not* introduced here). Fixed with a `.npmrc` `public-hoist-pattern` for `@sentry/*` + `@opentelemetry/*` (no version changes). `pnpm build` + live preview unblocked after reinstall.
+- This worktree has **no `.env.local`/Supabase link**, so live `/clinics` shows the empty state and the footer uses the generic fallback. e2e `e2e/clinics.spec.ts` render checks run always; seeded-card checks are `test.skip`-guarded behind `SUPABASE_LINKED`. Wire env + `pnpm seed` for the full pass.
+
+**Next steps (P0 complete → P1 / Tier 2):**
+1. **US-P1-01 request appointment** — swap the clinics' interim wa.me CTAs for `/book?clinic=<slug>` (the `// TODO(US-P1-01)` markers).
+2. **US-P1-06 account dashboard**, **US-P1-05 order tracking**, **US-P1-02 lens quiz**.
+
+---
+
+## 2026-06-09 — US-P0-08 view orders + auth-email/cart-scoping fixes (PRs #14–#19, backfilled)
+
+Backfilled into the log (these merged to main but predate this entry):
+- **US-P0-08 `/account/orders`** (PR #14, `3c24974`) — customer order list + detail behind `requireUser()` (layout gate), RLS-scoped reads, `OrderStatusPill` + `orderStatusDisplay` tone helper, `force-dynamic`. The checkout success/callback pages link here.
+- **Fixes:** order_items customer INSERT RLS policy (#15, `3e7d08d`); branded auth emails + redirect-back on signup confirm (#16/#17); email sender + seed prod-guard pointed at lumeneye.org with hostname-parse fix for CodeQL (#18); long payment-reference + order-detail overflow wrap (#17); **cart cleared on auth-user change** + dual-purpose signup copy, with `CartAuthSync` a no-op when Supabase env is absent (#19).
+
+---
+
 ## 2026-06-09 — Observability: Sentry + Vercel Analytics + /api/health
 
 **Why now:** checkout is live in prod with no monitoring. Added a *proportionate*
