@@ -167,12 +167,17 @@ export function Th({ children }: { children: ReactNode }) {
 export function Td({
   children,
   className = "",
+  colSpan,
 }: {
   children: ReactNode;
   className?: string;
+  colSpan?: number;
 }) {
   return (
-    <td className={`border-b border-lumen-ink/5 px-4 py-3 align-middle ${className}`}>
+    <td
+      colSpan={colSpan}
+      className={`border-b border-lumen-ink/5 px-4 py-3 align-middle ${className}`}
+    >
       {children}
     </td>
   );

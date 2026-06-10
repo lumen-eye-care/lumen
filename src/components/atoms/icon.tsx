@@ -15,6 +15,7 @@ export type IconName =
   | "cart"
   | "check"
   | "chev"
+  | "clock"
   | "drop"
   | "eye"
   | "fb"
@@ -34,10 +35,10 @@ export type IconName =
   | "sun"
   | "trash"
   | "truck"
-  | "twitter"
   | "upload"
   | "user"
-  | "x";
+  | "x"
+  | "xSocial";
 
 const paths: Record<IconName, React.ReactNode> = {
   arrow: (
@@ -76,6 +77,12 @@ const paths: Record<IconName, React.ReactNode> = {
   chev: (
     <>
       <path d="m6 9 6 6 6-6" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
     </>
   ),
   drop: (
@@ -192,11 +199,6 @@ const paths: Record<IconName, React.ReactNode> = {
       <circle cx="18.5" cy="18.5" r="2.5" />
     </>
   ),
-  twitter: (
-    <>
-      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3Z" />
-    </>
-  ),
   upload: (
     <>
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
@@ -211,6 +213,12 @@ const paths: Record<IconName, React.ReactNode> = {
   x: (
     <>
       <path d="M18 6 6 18M6 6l12 12" />
+    </>
+  ),
+  // X (formerly Twitter) brand mark — outline-stroked like fb/insta.
+  xSocial: (
+    <>
+      <path d="M18.24 3h3.31l-7.23 8.26L22.82 22h-6.66l-5.21-6.82L4.99 22H1.68l7.73-8.84L1.25 3h6.83l4.71 6.23L18.24 3Z" />
     </>
   ),
 };

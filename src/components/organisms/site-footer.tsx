@@ -1,14 +1,27 @@
 /**
  * Global site footer — ported + typed from docs/design/shared.jsx Footer.
- * Server component (no interactivity). Newsletter input is non-functional
+ * Async server component: clinic names + the location blurb come from the
+ * DB (cookie-less cached read — static pages stay static; admin clinic
+ * actions bust the "clinics" tag). Newsletter input is non-functional
  * markup for now — email capture wired in Sprint 1 email tasks.
  */
 
 import Link from "next/link";
 import { LogoMark } from "@/components/atoms/logo-mark";
 import { Icon } from "@/components/atoms/icon";
+import { getClinicFooterData } from "@/server/clinics";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { clinics, count, cities } = await getClinicFooterData();
+  const cityList = new Intl.ListFormat("en", {
+    style: "long",
+    type: "conjunction",
+  }).format(cities);
+  const locationBlurb =
+    count > 0 && cities.length > 0
+      ? `${count} ${count === 1 ? "location" : "locations"} across ${cityList}, plus home visits.`
+      : "Clinics across Ghana, plus home visits.";
+
   return (
     <footer className="mt-20 border-t border-lumen-ink/8 bg-lumen-ink text-lumen-cream/80">
       <div className="mx-auto max-w-[1280px] px-6 pb-8 pt-12">
@@ -24,8 +37,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p className="mb-6 text-sm leading-relaxed text-lumen-cream/60">
-              A modern eye clinic and considered eyewear house. Four locations
-              across Accra and Kumasi, plus home visits.
+              A modern eye clinic and considered eyewear house. {locationBlurb}
             </p>
             {/* Newsletter stub */}
             <div className="flex overflow-hidden rounded-md border border-lumen-cream/15">
@@ -62,12 +74,17 @@ export function SiteFooter() {
             <FooterLink href="/try-on">Virtual try-on</FooterLink>
           </FooterCol>
 
-          {/* Clinics */}
+          {/* Clinics — names come from the DB; generic link when none load */}
           <FooterCol title="Clinics">
-            <FooterLink href="/clinics">East Legon, Accra</FooterLink>
-            <FooterLink href="/clinics">Osu, Accra</FooterLink>
-            <FooterLink href="/clinics">Airport Residential</FooterLink>
-            <FooterLink href="/clinics">Adum, Kumasi</FooterLink>
+            {clinics.length > 0 ? (
+              clinics.map((clinic) => (
+                <FooterLink key={clinic.slug} href={`/clinics#${clinic.slug}`}>
+                  {clinic.name}
+                </FooterLink>
+              ))
+            ) : (
+              <FooterLink href="/clinics">Our clinics</FooterLink>
+            )}
             <FooterLink href="/clinics">Home visits</FooterLink>
           </FooterCol>
 
@@ -96,13 +113,13 @@ export function SiteFooter() {
               <Icon name="insta" size={16} />
             </a>
             <a
-              href="https://twitter.com"
-              aria-label="Twitter / X"
+              href="https://x.com"
+              aria-label="X"
               target="_blank"
               rel="noopener noreferrer"
               className="text-lumen-cream/40 transition-colors hover:text-lumen-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
             >
-              <Icon name="twitter" size={16} />
+              <Icon name="xSocial" size={16} />
             </a>
             <a
               href="https://facebook.com"
