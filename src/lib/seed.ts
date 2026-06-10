@@ -21,7 +21,20 @@ import type { Database, TablesInsert } from "@/db/types";
 // Guard — abort immediately on production
 // ---------------------------------------------------------------------------
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-if (siteUrl.includes("lumeneye.org") || siteUrl.includes("lumenframes.com")) {
+// Match on the parsed hostname, not a substring of the URL: `includes("lumeneye.org")`
+// also matches https://lumeneye.org.evil.com and https://evil.com/?x=lumeneye.org
+// (CodeQL js/incomplete-url-substring-sanitization).
+let siteHost = "";
+try {
+  siteHost = new URL(siteUrl).hostname.toLowerCase();
+} catch {
+  siteHost = "";
+}
+const PROD_DOMAINS = ["lumeneye.org", "lumenframes.com"];
+const isProduction = PROD_DOMAINS.some(
+  (domain) => siteHost === domain || siteHost.endsWith(`.${domain}`),
+);
+if (isProduction) {
   console.error("SEED ABORTED: refusing to run against production.");
   process.exit(1);
 }
