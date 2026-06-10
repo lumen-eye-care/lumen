@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from "@/components/cart/cart-provider";
+import { CartAuthSync } from "@/components/cart/cart-auth-sync";
 import { ToastProvider } from "@/components/atoms/toast";
 import { CartDrawer } from "@/components/organisms/cart-drawer";
 
@@ -42,6 +43,7 @@ export default function RootLayout({
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-dvh bg-lumen-cream text-lumen-ink antialiased">
         <CartProvider>
+          <CartAuthSync />
           <ToastProvider>
             {children}
             <CartDrawer />
