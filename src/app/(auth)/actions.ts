@@ -64,7 +64,12 @@ export async function signUp(
       // Stored in raw_user_meta_data; the handle_new_user trigger copies it into
       // public.users.name. NOT a security claim — role stays the DB default.
       data: { name: parsed.data.name },
-      emailRedirectTo: `${siteUrl()}/auth/confirm`,
+      // Carry where they were (e.g. /checkout) into the confirmation link so the
+      // email lands them back there, not always /account. `next` is already a
+      // safe relative path (safeRedirect above). The email template appends the
+      // token to this URL: `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`,
+      // and /auth/confirm re-checks `next` through safeRedirect (rule 2).
+      emailRedirectTo: `${siteUrl()}/auth/confirm?next=${encodeURIComponent(next)}`,
     },
   });
 
