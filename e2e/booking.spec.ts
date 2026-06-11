@@ -11,7 +11,7 @@ test.describe("/book page renders", () => {
     // Accepts the form page (h1) or the empty state (h2) — both are valid
     // depending on whether Supabase env is wired. Just confirm no server error.
     expect(res?.status()).toBeLessThan(500);
-    await expect(page.getByRole("heading")).toBeVisible();
+    await expect(page.getByRole("heading").first()).toBeVisible();
   });
 
   test("clinic-card 'Book here' link points to /book, not wa.me", async ({

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { appointmentSchema, APPOINTMENT_SERVICES } from "./appointment-schemas";
 
 const VALID_BASE = {
-  clinic_id: "11111111-1111-1111-1111-111111111111",
+  clinic_id: "11111111-1111-4111-8111-111111111111",
   clinic_name: "East Legon clinic",
   service: "eye-test" as const,
   name: "Kofi Mensah",
