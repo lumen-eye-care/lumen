@@ -66,9 +66,7 @@ const preferredDateSchema = z
 export const appointmentSchema = z.object({
   clinic_id: z.string().uuid("Select a clinic."),
   clinic_name: z.string().trim().min(1).max(120),
-  service: z.enum(APPOINTMENT_SERVICES, {
-    errorMap: () => ({ message: "Select a service." }),
-  }),
+  service: z.enum(APPOINTMENT_SERVICES, "Select a service."),
   name: z
     .string()
     .trim()

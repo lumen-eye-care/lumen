@@ -6,13 +6,12 @@ import { test, expect } from "@playwright/test";
 // Seeded-form tests require a linked Supabase instance (SUPABASE_LINKED=1).
 
 test.describe("/book page renders", () => {
-  test("shows breadcrumb and either the form heading or empty state", async ({
-    page,
-  }) => {
-    await page.goto("/book");
-    // Either the form page or the empty state renders without a 500.
-    const h1 = page.getByRole("heading", { level: 1 });
-    await expect(h1).toBeVisible();
+  test("renders without a 500 error", async ({ page }) => {
+    const res = await page.goto("/book");
+    // Accepts the form page (h1) or the empty state (h2) — both are valid
+    // depending on whether Supabase env is wired. Just confirm no server error.
+    expect(res?.status()).toBeLessThan(500);
+    await expect(page.getByRole("heading")).toBeVisible();
   });
 
   test("clinic-card 'Book here' link points to /book, not wa.me", async ({
