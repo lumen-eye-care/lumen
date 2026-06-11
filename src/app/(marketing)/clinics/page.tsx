@@ -99,6 +99,7 @@ export default async function ClinicsPage() {
         {/* ── Home visits ─────────────────────────────────────────────────── */}
         <div className="mt-14">
           <HomeVisitBanner
+            clinicSlug={flagship?.slug ?? null}
             whatsapp={flagship?.whatsapp ?? null}
             phone={flagship?.phone ?? null}
           />

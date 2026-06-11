@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-06-11 — Sprint 7: US-P1-01 request appointment — /book flow + admin inbox
+
+**Status: first P1 story shipped.** Public appointment requests now replace the interim clinic wa.me CTAs.
+
+**What landed (migration `20260611000001_appointments.sql`):**
+- **`appointments` table** — RLS-on, `set_updated_at` trigger, status text+CHECK (`requested|confirmed|cancelled|completed`, default `requested`), service text+CHECK. `user_id` (nullable FK `auth.users` on delete set null — null for anon), `clinic_id` (nullable FK `clinics`), `clinic_name` snapshot (clinic may be renamed/archived). Policies: `insert public` (`with check (true)` — anon + auth can create), `select own` (`auth.uid() = user_id`), `admin all` (`is_admin()`). `src/db/types.ts` regenerated.
+- **Schema** `src/lib/appointment-schemas.ts` (+16 tests) — zod; `service` enum, **reuses `phoneSchema`/`normalizeGhanaPhone`** from checkout-schemas, email required (the confirmation channel), preferred-date not-in-past via `transform+ctx.addIssue`, notes max-len. `SERVICE_LABELS`/`APPOINTMENT_STATUSES` exported.
+- **Server module** `src/server/appointments.ts` (`server-only`) — `createAppointment()` (RLS-client insert, env-guard), `listAppointments()`/`getAppointment()` (admin), `updateAppointmentStatus()`, `sendAppointmentEmails()` (best-effort, `Promise.allSettled`, non-fatal — customer + optional ops inbox `APPOINTMENTS_NOTIFY_EMAIL`; mirrors checkout email).
+- **`/book` page** `src/app/(marketing)/book/**` — `force-dynamic` server component reads `?clinic=<slug>`/`?service=`, loads clinics via `getActiveClinics()` for the `<select>`, picks default clinic by slug → flagship → first. Single-column mobile-first `BookForm` (`"use client"`, `useActionState`, numeric phone keypad, native date) + success state. Server action re-validates (security boundary), captures `user_id` if signed in, then create + email.
+- **Admin inbox** `src/app/admin/appointments/{page,[id]}` + actions — list + detail + status update; `requireAdmin()` in every page/action. Nav item added.
+- **Clinic CTAs swapped** — `clinic-card.tsx` "Book here" → `/book?clinic=<slug>`; `home-visit-banner.tsx` "Book a home visit" → `/book?clinic=<flagship-slug>&service=home-visit` (slug threaded from `clinics/page.tsx`). Secondary "Chat on WhatsApp" links retained; `TODO(US-P1-01)` markers removed.
+
+**Verified (2026-06-11):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · `pnpm test` ✓ (+16) · `pnpm build` ✓ · e2e render checks ✓ — all green in CI.
+  - Two CI fixes during the branch: Zod v4 `z.enum()` drops `{ errorMap }` (→ string-param `error`); the test fixture needed an **RFC-variant UUID** (`…-4111-8111-…`) because Zod v4's `z.string().uuid()` enforces variant bits, and the `/book` render check was scoped to `.first()` (EmptyState `h2` + footer `h3`s tripped Playwright strict mode).
+
+**Open caveats:**
+- **Not yet exercised live** — this worktree has no `.env.local`/Supabase link, so the full submit→row→admin→status flow and anon-vs-owner RLS check are **pending a wired env + `pnpm seed`**. Migration is committed but **not yet `db push`ed** to staging/prod; `src/db/types.ts` was hand-aligned to the migration and should be regenerated via `gen types` after push.
+- **Confirmation emails no-op** until the Resend domain is verified (SPF/DKIM/DMARC) and `APPOINTMENTS_NOTIFY_EMAIL` is set — built non-fatal so the insert never blocks.
+- **Spam / rate-limiting / CAPTCHA on the public form is deferred** (noted in the plan as out-of-scope for v1) — revisit if abuse appears.
+
+**Next steps (P1 continues):**
+1. **US-P1-06 account dashboard** · **US-P1-05 order tracking** · **US-P1-02 lens quiz**.
+2. Wire this worktree's env + `db push` the appointments migration + `pnpm seed`, then run the `SUPABASE_LINKED=1` e2e submission flow and the anon/owner RLS checks.
+
+---
+
 ## 2026-06-10 — Sprint 6: US-P0-09 clinics — /clinics page + admin clinics CRUD + data-driven footer
 
 **Status: all P0 stories (US-P0-01…09) now built.**

@@ -54,10 +54,10 @@ test.describe("clinic cards (needs Supabase)", () => {
     await expect(flagship.getByText("Sun")).toBeVisible();
     await expect(flagship.getByText("Closed")).toBeVisible();
 
-    // Interim booking channels (US-P1-01 not built yet).
+    // Booking now routes to /book (US-P1-01).
     await expect(
       flagship.getByRole("link", { name: /Book here/i }),
-    ).toHaveAttribute("href", /^https:\/\/wa\.me\//);
+    ).toHaveAttribute("href", /^\/book\?clinic=/);
     await expect(
       flagship.getByRole("link", { name: /^Call$/ }),
     ).toHaveAttribute("href", /^tel:\+233/);
