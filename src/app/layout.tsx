@@ -32,6 +32,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
+  // Relative "./" resolves against each page's own path → self-referencing
+  // canonical (and og:url) that drops query strings, e.g. /shop?cat=sun → /shop.
+  alternates: { canonical: "./" },
+  openGraph: {
+    type: "website",
+    siteName: "Lumen Eye Care",
+    locale: "en_GH",
+    url: "./",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({

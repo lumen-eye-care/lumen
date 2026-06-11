@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getFrameBySlug, getActiveFrames } from "@/server/frames";
+import { getFrameBySlug, getActiveFrames, type ShopFrame } from "@/server/frames";
+import { formatGhs } from "@/lib/format-money";
 import { FrameCard } from "@/components/molecules/frame-card";
 import { FramePurchasePanel } from "@/components/organisms/frame-purchase-panel";
 import { Icon } from "@/components/atoms/icon";
@@ -12,15 +13,54 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+/** ~160-char meta description: name + material + price, then the frame copy. */
+function metaDescription(frame: ShopFrame): string {
+  const summary = `${frame.name} — ${frame.material ?? "premium"} frames by Lumen Eye Care, ${formatGhs(frame.price_ghs)}.`;
+  const body = frame.description?.trim();
+  const full = body ? `${summary} ${body}` : summary;
+  return full.length > 160 ? `${full.slice(0, 157).trimEnd()}…` : full;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const frame = await getFrameBySlug(slug);
   if (!frame) return { title: "Frame not found" };
+  const description = metaDescription(frame);
   return {
     title: frame.name,
-    description:
-      frame.description ??
-      `${frame.name} — ${frame.material ?? "premium eyewear"} by Lumen Eye Care.`,
+    description,
+    alternates: { canonical: `/shop/${frame.slug}` },
+    openGraph: {
+      title: frame.name,
+      description,
+      url: `/shop/${frame.slug}`,
+      // Frame photo when uploaded; omitting falls back to the root
+      // opengraph-image brand card.
+      ...(frame.photo_urls.length > 0 && { images: [frame.photo_urls[0]] }),
+    },
+  };
+}
+
+/** schema.org Product for rich results (audit 2.2). Price in GHS, not pesewa. */
+function productJsonLd(frame: ShopFrame, siteUrl: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: frame.name,
+    ...(frame.description && { description: frame.description }),
+    ...(frame.photo_urls.length > 0 && { image: frame.photo_urls }),
+    ...(frame.material && { material: frame.material }),
+    brand: { "@type": "Brand", name: "Lumen Eye Care" },
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/shop/${frame.slug}`,
+      priceCurrency: "GHS",
+      price: (frame.price_ghs / 100).toFixed(2),
+      availability:
+        frame.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+    },
   };
 }
 
@@ -37,8 +77,21 @@ export default async function FrameDetailPage({ params }: Props) {
     .filter((f) => f.id !== frame.id)
     .slice(0, 4);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
   return (
     <div className="mx-auto max-w-[1280px] px-6 py-8">
+      {/* Product JSON-LD — Next's documented pattern needs dangerouslySetInnerHTML;
+          input is our own DB row and "<" is escaped, so no script breakout. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd(frame, siteUrl)).replace(
+            /</g,
+            "\\u003c",
+          ),
+        }}
+      />
       {/* Breadcrumb */}
       <nav
         className="mb-8 flex items-center gap-1.5 text-xs text-lumen-ink/40"
