@@ -1,0 +1,22 @@
+# Dependabot — security audit 2.8 (supply chain).
+# Security updates are always on once this file exists; the schedules below
+# also keep deps fresh on a weekly cadence without flooding the two-dev team.
+version: 2
+updates:
+  - package-ecosystem: "npm" # covers pnpm-lock.yaml
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # One PR per week for routine patch/minor bumps; majors stay separate.
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 2
