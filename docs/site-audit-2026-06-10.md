@@ -9,6 +9,15 @@ timings, unauthenticated probes of every gated route), plus code review of the
 auth/admin/payment paths in this repo. PageSpeed Insights could **not** be run
 (anonymous API quota exhausted — see "Tests still to run").
 
+**Status (2026-06-11, branch `claude/vigilant-wiles-feecc6`):**
+- ✅ 2.1 broken links — header/footer dead links removed, booking links → `/book`, placeholder socials removed (real handles still needed from Charity).
+- ✅ 2.2 SEO basics — robots.ts, sitemap.ts (frames from DB, 1 h revalidate), brand opengraph-image, canonical/OG/Twitter metadata, PDP JSON-LD + richer description.
+- ✅ 2.4 rate limiting — `@upstash/ratelimit` sliding windows on sign-in/signup/reset/checkout-initiate; **needs `UPSTASH_REDIS_REST_URL/TOKEN` in Vercel** (no-op until set), then run tests 5–6 below.
+- ✅ 2.5 sessions revoked on password change (`signOut({scope:"others"})`).
+- ✅ 2.6 code half — `reauthentication_needed` handled; **dashboard toggle still pending** (§5 item 4).
+- ✅ 2.8 — `pnpm audit --prod --audit-level=high` in CI, Dependabot config, postcss moderate cleared via pnpm override (audit baseline clean).
+- ⬜ Remaining: §5 item 4 dashboard checklist (2.6 toggle, 2.7 MFA, 2.9 Resend, 2.10 Sentry/UptimeRobot, 2.11 Supabase auth settings), item 5 `perf/shop-caching` (2.3 — do the region check first), P2 rows 2.12–2.15.
+
 ---
 
 ## 1. What is VERIFIED GOOD — do not redo, do not "fix"
