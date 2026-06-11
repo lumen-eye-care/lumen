@@ -7,6 +7,7 @@ import {
 } from "@/lib/clinic-hours";
 import { waMeUrl } from "@/lib/wa-link";
 import type { Clinic } from "@/server/clinics";
+import Link from "next/link";
 
 /**
  * One clinic on /clinics (US-P0-09). Server component — every action is a
@@ -22,16 +23,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
   const hours = clinic.opening_hours;
   const open = hours ? isOpenNow(hours, now) : null;
 
-  // TODO(US-P1-01): point booking at /book?clinic=<slug> once the
-  // appointment-request flow lands; wa.me is the interim channel.
-  const bookHref = clinic.whatsapp
-    ? waMeUrl(
-        clinic.whatsapp,
-        `Hi! I'd like to book an eye test at the ${clinic.name}.`,
-      )
-    : clinic.phone
-      ? `tel:${clinic.phone}`
-      : null;
+  const bookHref = `/book?clinic=${clinic.slug}`;
 
   return (
     <article
@@ -135,16 +127,13 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
         )}
 
         <div className="flex flex-wrap gap-2.5">
-          {bookHref && (
-            <a
-              href={bookHref}
-              {...(bookHref.startsWith("https://wa.me/") ? EXTERNAL : {})}
-              className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-            >
-              Book here
-              <Icon name="arrow" size={14} />
-            </a>
-          )}
+          <Link
+            href={bookHref}
+            className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          >
+            Book here
+            <Icon name="arrow" size={14} />
+          </Link>
           {clinic.phone && (
             <a
               href={`tel:${clinic.phone}`}

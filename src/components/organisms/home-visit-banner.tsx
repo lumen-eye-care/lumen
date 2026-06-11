@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "@/components/atoms/icon";
 import { waMeUrl } from "@/lib/wa-link";
 
@@ -16,12 +17,14 @@ const INFO_ROWS = [
 ];
 
 type HomeVisitBannerProps = {
-  /** Flagship clinic contacts (E.164); buttons are omitted when absent. */
+  /** Slug of the flagship clinic (for /book CTA). */
+  clinicSlug: string | null;
+  /** E.164 WhatsApp number — kept as secondary "chat" CTA. */
   whatsapp: string | null;
   phone: string | null;
 };
 
-export function HomeVisitBanner({ whatsapp, phone }: HomeVisitBannerProps) {
+export function HomeVisitBanner({ clinicSlug, whatsapp, phone }: HomeVisitBannerProps) {
   return (
     <section
       aria-labelledby="home-visit-heading"
@@ -47,19 +50,24 @@ export function HomeVisitBanner({ whatsapp, phone }: HomeVisitBannerProps) {
           children. We cover all of Accra and Kumasi.
         </p>
         <div className="flex flex-wrap gap-3">
-          {whatsapp && (
-            // TODO(US-P1-01): point at the appointment-request flow once built.
-            <a
-              href={waMeUrl(
-                whatsapp,
-                "Hi! I'd like to book a home visit eye test.",
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
+          {clinicSlug && (
+            <Link
+              href={`/book?clinic=${clinicSlug}&service=home-visit`}
               className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-blue/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
             >
               Book a home visit
               <Icon name="arrow" size={14} />
+            </Link>
+          )}
+          {whatsapp && (
+            <a
+              href={waMeUrl(whatsapp, "Hi! I'd like to book a home visit eye test.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border border-white/20 px-5 py-3 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
+            >
+              <Icon name="phone" size={14} />
+              Chat on WhatsApp
             </a>
           )}
           {phone && (
