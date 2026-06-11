@@ -8,6 +8,8 @@ import {
   findOrderByIdempotencyKey,
 } from "@/server/checkout";
 import { initializeTransaction } from "@/server/paystack";
+import { rateLimitKey } from "@/lib/rate-limit";
+import { checkRateLimit } from "@/server/rate-limit";
 
 /**
  * POST /api/checkout/initiate — create a pending order and a Paystack transaction
@@ -25,6 +27,20 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Please sign in to check out." }, { status: 401 });
+  }
+
+  // 10 initiations/hour per user (audit 2.4) — caps pending-order bloat from a
+  // scripted client. Idempotency-Key retries also consume budget; 10/h covers
+  // a legitimate session with room for several retries.
+  const limited = await checkRateLimit("checkoutInitiate", rateLimitKey(user.id));
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many checkout attempts. Please wait and try again." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limited.retryAfterSeconds) },
+      },
+    );
   }
 
   let body: unknown;

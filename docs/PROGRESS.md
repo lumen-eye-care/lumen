@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-06-11 — Production-audit fixes: broken links · SEO basics · auth hardening · CI supply-chain (audit §5 items 1/2/3/6)
+
+**Status: 4 of 6 audit work items shipped** (working from `docs/site-audit-2026-06-10.md`, now committed with per-item status markers).
+
+**What landed (4 commits, no migration):**
+- **2.1 broken links** — header/footer no longer link unbuilt routes (`/lens-guide`, `/journal`, `/try-on`, `/account/prescriptions` all 404'd in prod; `TODO(US-P2-…)` markers for restoration). Booking links → `/book` (+ `?service=home-visit`); header nav gains "Book appointment". Placeholder social icons (bare `instagram.com` etc.) removed until Charity supplies real handles.
+- **2.2 SEO basics** — `app/robots.ts` (disallow gated routes), `app/sitemap.ts` (static routes + active-frame PDPs via the cookie-less public client, env-guarded, 1 h revalidate), `app/opengraph-image.tsx` (1200×630 brand card, pixel-verified against brand tokens), root-layout `alternates.canonical "./"` (per-page self-canonical, drops query strings — verified `/shop?cat=sun` → `/shop`) + openGraph/twitter blocks, PDP canonical/OG + ~160-char description + `Product` JSON-LD (GHS from pesewa, In/OutOfStock).
+- **2.4/2.5/2.6 auth hardening** — `@upstash/ratelimit@2.0.8` sliding windows (sign-in 5/15 min per IP+email · signup 5/h per IP · reset 3/h per email, enumeration-safe generic reply · checkout-initiate 10/h per user, 429+Retry-After). Keys SHA-256-hashed (no raw PII in Upstash, rule 10); **no-op without `UPSTASH_REDIS_REST_URL/TOKEN`**, fails open on Redis errors. `src/lib/rate-limit.ts` (+10 tests) / `src/server/rate-limit.ts`. `updatePassword` now revokes other sessions (`signOut({scope:"others"})`) and maps `reauthentication_needed` to a clear message.
+- **2.8 supply chain** — CI gate `pnpm audit --prod --audit-level=high`, `.github/dependabot.yml` (weekly npm + actions, minor/patch grouped), baseline postcss moderate (GHSA-qx2v-qp2m-jg93 via next@16.2.7) cleared with pnpm override → 8.5.15; audit clean.
+
+**Verified (2026-06-11):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **172/172 tests** ✓ (+10) · `pnpm build` ✓ · `pnpm audit --prod` clean ✓ · live preview: all remaining header/footer hrefs 200, robots/sitemap/og-image 200, canonical/OG tags correct on `/`, `/shop?cat=sun`, `/book`.
+
+**Open caveats / next:**
+- **Set `UPSTASH_REDIS_REST_URL/TOKEN` in Vercel** (create free Upstash Redis DB) — limiter is inert until then; afterwards run audit tests 5–6 (429 on 6th sign-in; two-browser session revocation).
+- **Audit §5 item 4 — dashboard checklist (no code):** Supabase "Secure password change" toggle + MFA for admin + auth rate limits/enumeration settings; Resend key + domain DNS; Sentry DSN + alert; UptimeRobot.
+- **§5 item 5 — `perf/shop-caching` (2.3):** do the Vercel-function-region vs Supabase-region check first (dashboards), then the `/shop` caching pass.
+- Real social handles + journal/lens-guide/try-on links restore with their P2 stories.
+
+---
+
 ## 2026-06-11 — Sprint 7: US-P1-01 request appointment — /book flow + admin inbox
 
 **Status: first P1 story shipped.** Public appointment requests now replace the interim clinic wa.me CTAs.

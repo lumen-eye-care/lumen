@@ -8,7 +8,6 @@
 
 import Link from "next/link";
 import { LogoMark } from "@/components/atoms/logo-mark";
-import { Icon } from "@/components/atoms/icon";
 import { getClinicFooterData } from "@/server/clinics";
 
 export async function SiteFooter() {
@@ -57,21 +56,22 @@ export async function SiteFooter() {
           </div>
 
           {/* Eye care */}
+          {/* TODO(US-P1-03): restore "Upload prescription" → /account/prescriptions
+              once the flag-gated route exists */}
           <FooterCol title="Eye care">
-            <FooterLink href="/clinics">Book an eye test</FooterLink>
-            <FooterLink href="/clinics">Home visit booking</FooterLink>
-            <FooterLink href="/account/prescriptions">
-              Upload prescription
+            <FooterLink href="/book">Book an eye test</FooterLink>
+            <FooterLink href="/book?service=home-visit">
+              Home visit booking
             </FooterLink>
             <FooterLink href="/clinics">Contact lens fitting</FooterLink>
           </FooterCol>
 
           {/* Shop */}
+          {/* TODO(US-P2-01/02): restore "Virtual try-on" → /try-on and
+              "Lens guide" → /lens-guide when those stories ship */}
           <FooterCol title="Shop">
             <FooterLink href="/shop">All frames</FooterLink>
             <FooterLink href="/shop?cat=sun">Sunglasses</FooterLink>
-            <FooterLink href="/lens-guide">Lens guide</FooterLink>
-            <FooterLink href="/try-on">Virtual try-on</FooterLink>
           </FooterCol>
 
           {/* Clinics — names come from the DB; generic link when none load */}
@@ -89,10 +89,11 @@ export async function SiteFooter() {
           </FooterCol>
 
           {/* Company */}
+          {/* TODO(US-P2-03): restore "Our story" + "Journal" → /journal when
+              the journal ships */}
           <FooterCol title="Company">
-            <FooterLink href="/journal">Our story</FooterLink>
-            <FooterLink href="/journal">Journal</FooterLink>
             <FooterLink href="/clinics">Contact</FooterLink>
+            <FooterLink href="/book">Book an appointment</FooterLink>
           </FooterCol>
         </div>
 
@@ -102,35 +103,9 @@ export async function SiteFooter() {
             © 2026 Lumen Eye Care Ltd · Licensed by AHPC Ghana · TIN
             C0012876452
           </p>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://instagram.com"
-              aria-label="Instagram"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-lumen-cream/40 transition-colors hover:text-lumen-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
-            >
-              <Icon name="insta" size={16} />
-            </a>
-            <a
-              href="https://x.com"
-              aria-label="X"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-lumen-cream/40 transition-colors hover:text-lumen-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
-            >
-              <Icon name="xSocial" size={16} />
-            </a>
-            <a
-              href="https://facebook.com"
-              aria-label="Facebook"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-lumen-cream/40 transition-colors hover:text-lumen-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
-            >
-              <Icon name="fb" size={16} />
-            </a>
-          </div>
+          {/* TODO(launch): social icons (insta / xSocial / fb in icon.tsx)
+              removed until Charity supplies the real profile URLs — the
+              prototype linked bare placeholder domains. */}
         </div>
       </div>
     </footer>

@@ -16,8 +16,9 @@ import { useCart } from "@/components/cart/cart-provider";
 const NAV_LINKS = [
   { href: "/shop", label: "Shop glasses" },
   { href: "/clinics", label: "Eye tests" },
-  { href: "/lens-guide", label: "Lens guide" },
-  { href: "/journal", label: "Journal" },
+  { href: "/book", label: "Book appointment" },
+  // TODO(US-P2-02): restore { href: "/lens-guide", label: "Lens guide" }
+  // TODO(US-P2-03): restore { href: "/journal", label: "Journal" }
 ] as const;
 
 export function SiteHeader() {

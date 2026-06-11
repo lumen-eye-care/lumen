@@ -19,6 +19,10 @@ const envSchema = z.object({
   // Public by design (only permits sending events). Optional: the Sentry SDK
   // no-ops when it's absent, so local/CI builds work without observability.
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  // Upstash Redis for rate limiting (audit 2.4). Optional: the limiter no-ops
+  // without them (dev/CI/preview), same pattern as Sentry.
+  UPSTASH_REDIS_REST_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   LUMEN_PRESCRIPTION_UPLOAD_ENABLED: z
     .enum(["true", "false"])
     .default("false"),

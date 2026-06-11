@@ -23,10 +23,26 @@ test.describe("clinics page renders", () => {
     await expect(page.getByText("₵250")).toBeVisible();
   });
 
-  test("footer links to X, not Twitter", async ({ page }) => {
+  // Placeholder social links (bare instagram.com / x.com / facebook.com)
+  // were removed in the 2026-06-10 audit 2.1 fix. This guards against them
+  // creeping back — when Charity supplies real profile URLs, replace this
+  // with assertions on the actual handles (and never the old twitter.com).
+  test("footer has no placeholder or twitter.com social links", async ({
+    page,
+  }) => {
     await page.goto("/clinics");
-    const x = page.getByRole("link", { name: "X", exact: true });
-    await expect(x).toHaveAttribute("href", "https://x.com");
+    const footer = page.getByRole("contentinfo");
+    await expect(footer).toBeVisible();
+    for (const placeholder of [
+      "https://twitter.com",
+      "https://x.com",
+      "https://instagram.com",
+      "https://facebook.com",
+    ]) {
+      await expect(
+        footer.locator(`a[href="${placeholder}"]`),
+      ).toHaveCount(0);
+    }
   });
 });
 
