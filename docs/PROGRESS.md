@@ -20,7 +20,7 @@
   - Two CI fixes during the branch: Zod v4 `z.enum()` drops `{ errorMap }` (→ string-param `error`); the test fixture needed an **RFC-variant UUID** (`…-4111-8111-…`) because Zod v4's `z.string().uuid()` enforces variant bits, and the `/book` render check was scoped to `.first()` (EmptyState `h2` + footer `h3`s tripped Playwright strict mode).
 
 **Open caveats:**
-- **Not yet exercised live** — this worktree has no `.env.local`/Supabase link, so the full submit→row→admin→status flow and anon-vs-owner RLS check are **pending a wired env + `pnpm seed`**. Migration is committed but **not yet `db push`ed** to staging/prod; `src/db/types.ts` was hand-aligned to the migration and should be regenerated via `gen types` after push.
+- **Migration `db push`ed to Lumen-staging (2026-06-11)** — `src/db/types.ts` regenerated from the live schema via `gen types --linked` (dropped a hand-aligned but incorrect `appointments→public.users` FK relationship; the FK targets `auth.users`). Prod still pending. The full submit→row→admin→status flow and anon-vs-owner RLS check remain **pending `pnpm seed` + a `SUPABASE_LINKED=1` e2e run** (Playwright browsers + dev server not available in the agent env).
 - **Confirmation emails no-op** until the Resend domain is verified (SPF/DKIM/DMARC) and `APPOINTMENTS_NOTIFY_EMAIL` is set — built non-fatal so the insert never blocks.
 - **Spam / rate-limiting / CAPTCHA on the public form is deferred** (noted in the plan as out-of-scope for v1) — revisit if abuse appears.
 
