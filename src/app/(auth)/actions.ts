@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/server/supabase";
 import { safeRedirect } from "@/lib/safe-redirect";
+import { rateLimitKey } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp } from "@/server/rate-limit";
 import {
   signUpSchema,
   signInSchema,
@@ -52,6 +54,12 @@ export async function signUp(
   });
   if (!parsed.success) {
     return { fieldErrors: firstFieldErrors(parsed.error.flatten().fieldErrors) };
+  }
+
+  // 5 signups/hour per IP (audit 2.4) — slows bulk account creation.
+  const limited = await checkRateLimit("signUp", rateLimitKey(await clientIp()));
+  if (!limited.ok) {
+    return { error: "Too many attempts. Please try again later." };
   }
 
   const next = safeRedirect(formData.get("redirect") as string | null, "/account");
@@ -105,6 +113,18 @@ export async function signIn(
     return { error: "Invalid email or password." };
   }
 
+  // 5 attempts/15 min per IP+email (audit 2.4) — blunts credential stuffing
+  // without letting one IP lock out an email for everyone (key includes both).
+  const limited = await checkRateLimit(
+    "signIn",
+    rateLimitKey(await clientIp(), parsed.data.email),
+  );
+  if (!limited.ok) {
+    return {
+      error: "Too many sign-in attempts. Please wait a few minutes and try again.",
+    };
+  }
+
   const next = safeRedirect(formData.get("redirect") as string | null, "/account");
   const supabase = await createClient();
 
@@ -133,6 +153,15 @@ export async function requestPasswordReset(
   };
   if (!parsed.success) return generic;
 
+  // 3 resets/hour per email (audit 2.4) — protects the target inbox and the
+  // Resend 3K/mo quota. Returns the same generic copy when limited, so the
+  // throttle reveals nothing (enumeration-safe).
+  const limited = await checkRateLimit(
+    "passwordReset",
+    rateLimitKey(parsed.data.email),
+  );
+  if (!limited.ok) return generic;
+
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${siteUrl()}/auth/confirm?next=/update-password`,
@@ -159,9 +188,31 @@ export async function updatePassword(
     password: parsed.data.password,
   });
   if (error) {
+    // Supabase "Secure password change" (dashboard toggle, audit 2.6): a session
+    // that hasn't recently signed in must reauthenticate. Our recovery flow
+    // already proves email ownership, so point them back at a fresh link.
+    if (
+      error.code === "reauthentication_needed" ||
+      error.code === "reauthentication_not_valid"
+    ) {
+      return {
+        error:
+          "For security, this session can't change the password directly. Request a fresh reset link and use it within the hour.",
+      };
+    }
     return {
       error: "Could not update your password. The link may have expired — request a new one.",
     };
+  }
+
+  // Audit 2.5: a password change must kill every *other* device's session, or
+  // an attacker who prompted the reset keeps their session alive. Best-effort —
+  // the password is already changed; never block the user on this.
+  const { error: revokeError } = await supabase.auth.signOut({
+    scope: "others",
+  });
+  if (revokeError) {
+    console.error("[auth] revoking other sessions failed", revokeError.code);
   }
 
   redirect("/account");
