@@ -154,6 +154,22 @@ Code can't prevent a weak/reused admin password. Supabase TOTP MFA is free-tier.
     labels on cart badge + toasts (axe DevTools or `/design:accessibility-review`).
 11. **`pnpm audit`** — run once now to baseline, before wiring into CI (2.8).
 
+**Status (2026-06-11):**
+- **1** — re-tried: anonymous PSI quota **still 429**; create a free Google API key
+  (2 min, no billing) and re-run with `&key=`. CI Lighthouse also runs on the PR.
+- **5, 6** — code landed (2.4/2.5) but **blocked on** `UPSTASH_*` env in Vercel +
+  this branch deploying.
+- **2, 3, 4, 7** — blocked on a linked staging env with seeded users / Paystack
+  test keys (agent worktree has no `.env.local`).
+- **8** — blocked on `RESEND_API_KEY` + domain DNS (2.9). **9** — physical device.
+- **10 (partial)** — automated DOM spot-checks pass on the local preview: cart
+  badge `aria-label` ("Bag, N items"), single `aria-live=polite role=status` toast
+  region, no suppressed focus outlines, no alt-less images, no unnamed
+  buttons/links, all rendered form controls labelled, `html lang="en"`. Still
+  manual: keyboard-only run + real screen reader; `/book` form not assessable
+  env-less (renders its empty state) — check on staging.
+- **11 — ✅ done** (baseline had 1 moderate, cleared via postcss override; audit clean).
+
 ---
 
 ## 4. Web research to do before implementing
