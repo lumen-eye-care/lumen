@@ -20,6 +20,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Design artifacts — not linted:
     "docs/design/**",
+    // Static/vendored assets served as-is (e.g. the Draco decoder for the
+    // /preview 3D viewer) — third-party minified JS, never linted.
+    "public/**",
   ]),
 ]);
 
