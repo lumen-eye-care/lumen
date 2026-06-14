@@ -8,15 +8,14 @@ import type { ShopFrame } from "@/server/frames";
 /**
  * Frames reel — the production-data moment. Real catalogue frames reveal in a
  * staggered grid as they scroll in; FrameSVG renders the silhouette until photo
- * uploads exist. Degrades to a curated FrameSVG showcase when no data loads, so
- * the section is never empty.
+ * uploads exist. Degrades to a curated FrameSVG showcase when no data loads.
  */
 
 const FALLBACK: { shape: string; tint: string }[] = [
-  { shape: "aviator", tint: "#f2f2f0" },
+  { shape: "aviator", tint: "#0A1F35" },
   { shape: "round", tint: "#d97757" },
   { shape: "cateye", tint: "#3d6b5c" },
-  { shape: "square", tint: "#f2f2f0" },
+  { shape: "square", tint: "#0A1F35" },
   { shape: "hex", tint: "#d97757" },
   { shape: "oval", tint: "#3d6b5c" },
 ];
@@ -26,19 +25,26 @@ export function FramesReel({ frames }: { frames: ShopFrame[] }) {
   const usingFallback = items.length === 0;
 
   return (
-    <section id="frames" className="relative px-6 py-28 sm:py-36">
+    <section
+      id="frames"
+      className="relative px-6 py-24 sm:py-32"
+      style={{ background: "var(--lm-deep)", scrollMarginTop: "var(--nav-h)" }}
+    >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-end justify-between gap-6" data-animate>
+        <div
+          className="flex flex-wrap items-end justify-between gap-6"
+          data-animate
+        >
           <div>
-            <p className="pv-label">The collection</p>
+            <p className="lm-label">The collection</p>
             <h2
-              className="pv-display mt-4"
+              className="lm-display mt-4"
               style={{ fontSize: "clamp(2.2rem, 6vw, 4rem)" }}
             >
               Frames worth looking through.
             </h2>
           </div>
-          <Link href="/shop" className="pv-ghost">
+          <Link href="/shop" className="lm-ghost">
             View all frames
             <Icon name="arrow" size={16} />
           </Link>
@@ -46,13 +52,15 @@ export function FramesReel({ frames }: { frames: ShopFrame[] }) {
 
         <div
           data-stagger
-          className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
           {usingFallback
             ? FALLBACK.map((f, i) => (
                 <FallbackCard key={i} shape={f.shape} tint={f.tint} />
               ))
-            : items.map((frame) => <FrameCardDark key={frame.id} frame={frame} />)}
+            : items.map((frame) => (
+                <FrameCardDark key={frame.id} frame={frame} />
+              ))}
         </div>
       </div>
     </section>
@@ -64,7 +72,7 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
   return (
     <Link
       href={`/shop/${frame.slug}`}
-      className="pv-card group block overflow-hidden p-6"
+      className="lm-card group block overflow-hidden p-6"
     >
       <div className="relative flex aspect-[4/3] items-center justify-center">
         {photo ? (
@@ -77,13 +85,13 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
           />
         ) : (
           <div className="w-3/4 transition-transform duration-500 group-hover:scale-105">
-            <FrameSVG shape={frame.shape} color="#f2f2f0" />
+            <FrameSVG shape={frame.shape} color="var(--lm-text)" />
           </div>
         )}
         {frame.badge && (
           <span
             className="absolute left-0 top-0 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide"
-            style={{ background: "var(--pv-warm)", color: "#1a0f0a" }}
+            style={{ background: "var(--lm-warm)", color: "#1a0f0a" }}
           >
             {frame.badge}
           </span>
@@ -92,16 +100,21 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
 
       <div className="mt-5 flex items-end justify-between">
         <div>
-          <h3 className="text-lg font-medium" style={{ color: "var(--pv-text)" }}>
+          <h3
+            className="text-lg font-medium"
+            style={{ color: "var(--lm-text)" }}
+          >
             {frame.name}
           </h3>
-          <p className="mt-1 text-sm" style={{ color: "var(--pv-faint)" }}>
-            {[frame.material, frame.category?.name]
-              .filter(Boolean)
-              .join(" · ") || "Eyewear"}
+          <p className="mt-1 text-sm" style={{ color: "var(--lm-faint)" }}>
+            {[frame.material, frame.category?.name].filter(Boolean).join(" · ") ||
+              "Eyewear"}
           </p>
         </div>
-        <p className="text-base font-semibold" style={{ color: "var(--pv-warm)" }}>
+        <p
+          className="text-base font-semibold"
+          style={{ color: "var(--lm-warm)" }}
+        >
           {formatGhs(frame.price_ghs)}
         </p>
       </div>
@@ -112,8 +125,8 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
             <span
               key={c.name}
               title={c.name}
-              className="h-4 w-4 rounded-full ring-1 ring-white/20"
-              style={{ background: c.hex }}
+              className="h-4 w-4 rounded-full"
+              style={{ background: c.hex, outline: "1px solid var(--lm-hair)" }}
             />
           ))}
         </div>
@@ -124,13 +137,13 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
 
 function FallbackCard({ shape, tint }: { shape: string; tint: string }) {
   return (
-    <div className="pv-card p-6">
+    <div className="lm-card p-6">
       <div className="flex aspect-[4/3] items-center justify-center">
         <div className="w-3/4">
           <FrameSVG shape={shape} color={tint} />
         </div>
       </div>
-      <p className="mt-5 text-sm" style={{ color: "var(--pv-faint)" }}>
+      <p className="mt-5 text-sm" style={{ color: "var(--lm-faint)" }}>
         Catalogue loads from the live store.
       </p>
     </div>

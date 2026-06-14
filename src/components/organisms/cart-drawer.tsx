@@ -72,7 +72,8 @@ export function CartDrawer() {
         type="button"
         aria-label="Close bag"
         onClick={close}
-        className="absolute inset-0 h-full w-full cursor-default bg-lumen-ink/40 backdrop-blur-[1px]"
+        className="absolute inset-0 h-full w-full cursor-default backdrop-blur-[1px]"
+        style={{ background: "color-mix(in srgb, var(--lm-deepest) 55%, transparent)" }}
       />
 
       {/* Panel */}
@@ -81,19 +82,25 @@ export function CartDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Your bag"
-        className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-lumen-cream shadow-[0_0_40px_rgba(10,31,53,0.25)]"
+        className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col shadow-[0_0_40px_var(--lm-shadow)]"
+        style={{ background: "var(--lm-base)" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-lumen-ink/8 px-5 py-4">
-          <h2 className="font-display text-xl text-lumen-ink">
-            Your bag{count > 0 && <span className="text-lumen-ink/40"> · {count}</span>}
+        <div
+          className="flex items-center justify-between border-b px-5 py-4"
+          style={{ borderColor: "var(--lm-hair)" }}
+        >
+          <h2 className="lm-display text-xl" style={{ color: "var(--lm-text)" }}>
+            Your bag
+            {count > 0 && <span style={{ color: "var(--lm-faint)" }}> · {count}</span>}
           </h2>
           <button
             ref={closeBtnRef}
             type="button"
             onClick={close}
             aria-label="Close bag"
-            className="flex h-9 w-9 items-center justify-center rounded-md text-lumen-ink/60 transition-colors hover:bg-lumen-ink/5 hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+            className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+            style={{ color: "var(--lm-muted)" }}
           >
             <Icon name="x" size={20} />
           </button>
@@ -110,36 +117,36 @@ export function CartDrawer() {
         ) : (
           <>
             {/* Line items */}
-            <div className="min-h-0 flex-1 divide-y divide-lumen-ink/8 overflow-y-auto px-5">
+            <div
+              className="min-h-0 flex-1 divide-y overflow-y-auto px-5 [&>*]:border-[color:var(--lm-hair)]"
+              style={{ borderColor: "var(--lm-hair)" }}
+            >
               {items.map((item) => (
                 <CartLineItem key={cartItemKey(item)} item={item} compact />
               ))}
             </div>
 
             {/* Footer */}
-            <div className="border-t border-lumen-ink/8 px-5 py-4">
+            <div
+              className="border-t px-5 py-4"
+              style={{ borderColor: "var(--lm-hair)" }}
+            >
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm text-lumen-ink/60">Subtotal</span>
-                <span className="text-lg font-medium text-lumen-ink">
+                <span className="text-sm" style={{ color: "var(--lm-muted)" }}>
+                  Subtotal
+                </span>
+                <span className="text-lg font-medium" style={{ color: "var(--lm-text)" }}>
                   {formatGhs(subtotalPesewa)}
                 </span>
               </div>
-              <p className="mb-3 text-xs text-lumen-ink/50">
+              <p className="mb-3 text-xs" style={{ color: "var(--lm-faint)" }}>
                 Lenses, delivery &amp; any extras are calculated at checkout.
               </p>
 
-              <Link
-                href="/checkout"
-                onClick={close}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-              >
+              <Link href="/checkout" onClick={close} className="lm-pill w-full justify-center">
                 Checkout
               </Link>
-              <Link
-                href="/cart"
-                onClick={close}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-lumen-ink/15 px-5 py-2.5 text-sm font-medium text-lumen-ink transition-colors hover:border-lumen-ink/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-              >
+              <Link href="/cart" onClick={close} className="lm-ghost mt-2 w-full justify-center">
                 View full bag
               </Link>
             </div>

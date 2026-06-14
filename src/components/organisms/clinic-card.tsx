@@ -28,12 +28,25 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
   return (
     <article
       id={clinic.slug}
-      className="scroll-mt-24 overflow-hidden rounded-xl bg-white ring-1 ring-lumen-ink/8 md:grid md:grid-cols-[280px_1fr]"
+      className="lm-card scroll-mt-24 overflow-hidden md:grid md:grid-cols-[280px_1fr]"
     >
       {/* Map placeholder */}
-      <div className="relative flex min-h-[160px] items-center justify-center bg-[radial-gradient(circle_at_30%_30%,rgba(15,76,129,0.12),transparent_60%)] bg-lumen-blue/5 md:min-h-full">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-lumen-ink shadow-sm ring-1 ring-lumen-ink/8">
-          <Icon name="pin" size={12} className="text-lumen-blue" />
+      <div
+        className="relative flex min-h-[160px] items-center justify-center md:min-h-full"
+        style={{
+          background:
+            "radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--lm-warm) 12%, transparent), transparent 60%), var(--lm-deep)",
+        }}
+      >
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+          style={{
+            background: "var(--lm-raise)",
+            color: "var(--lm-text)",
+            border: "1px solid var(--lm-hair)",
+          }}
+        >
+          <Icon name="pin" size={12} style={{ color: "var(--lm-warm)" }} />
           {clinic.name}
         </span>
       </div>
@@ -41,28 +54,34 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
       {/* Info */}
       <div className="p-6">
         <div className="mb-1.5 flex items-start justify-between gap-3">
-          <h2 className="font-display text-2xl text-lumen-ink">
+          <h2 className="lm-display text-2xl" style={{ color: "var(--lm-text)" }}>
             {clinic.name}
           </h2>
           {clinic.is_flagship && (
-            <span className="inline-block shrink-0 rounded-full bg-lumen-sage/15 px-2.5 py-0.5 text-xs font-medium text-lumen-sage">
+            <span
+              className="inline-block shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium"
+              style={{
+                background: "color-mix(in srgb, var(--lm-sage) 15%, transparent)",
+                color: "var(--lm-sage)",
+              }}
+            >
               Flagship
             </span>
           )}
         </div>
-        <p className="mb-4 text-sm text-lumen-ink/60">{clinic.address}</p>
+        <p className="mb-4 text-sm" style={{ color: "var(--lm-muted)" }}>
+          {clinic.address}
+        </p>
 
         <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
           {hours && (
             <span
-              className={`inline-flex items-center gap-1.5 font-semibold ${
-                open ? "text-lumen-sage" : "text-lumen-warm"
-              }`}
+              className="inline-flex items-center gap-1.5 font-semibold"
+              style={{ color: open ? "var(--lm-sage)" : "var(--lm-warm)" }}
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  open ? "bg-lumen-sage" : "bg-lumen-warm"
-                }`}
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: open ? "var(--lm-sage)" : "var(--lm-warm)" }}
               />
               {open
                 ? `Open · ${todayHours(hours, now)}`
@@ -73,7 +92,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
                   }`}
             </span>
           )}
-          <span className="text-lumen-ink/50">
+          <span style={{ color: "var(--lm-faint)" }}>
             {clinic.optometrist_count}{" "}
             {clinic.optometrist_count === 1 ? "optometrist" : "optometrists"}{" "}
             on staff
@@ -82,7 +101,10 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
 
         {hours && (
           <div className="mb-5">
-            <h3 className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-lumen-ink/40">
+            <h3
+              className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "var(--lm-faint)" }}
+            >
               <Icon name="clock" size={12} />
               Opening hours
             </h3>
@@ -90,11 +112,12 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
               {formatWeek(hours, now).map((row) => (
                 <li
                   key={row.label}
-                  className={`flex justify-between border-b border-lumen-ink/5 py-1 text-[13px] last:border-b-0 ${
-                    row.isToday
-                      ? "font-semibold text-lumen-ink"
-                      : "text-lumen-ink/55"
-                  }`}
+                  className="flex justify-between border-b py-1 text-[13px] last:border-b-0"
+                  style={{
+                    borderColor: "var(--lm-hair)",
+                    color: row.isToday ? "var(--lm-text)" : "var(--lm-muted)",
+                    fontWeight: row.isToday ? 600 : 400,
+                  }}
                 >
                   <span>
                     {row.label}
@@ -109,16 +132,23 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
 
         {clinic.services.length > 0 && (
           <div className="mb-6">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-lumen-ink/40">
+            <h3
+              className="mb-2 text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "var(--lm-faint)" }}
+            >
               Services here
             </h3>
             <ul className="flex flex-wrap gap-1.5">
               {clinic.services.map((service) => (
                 <li
                   key={service}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-lumen-ink/4 px-3 py-1 text-xs text-lumen-ink/70"
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
+                  style={{
+                    background: "var(--lm-tint)",
+                    color: "var(--lm-muted)",
+                  }}
                 >
-                  <Icon name="check" size={10} className="text-lumen-sage" />
+                  <Icon name="check" size={10} style={{ color: "var(--lm-sage)" }} />
                   {service}
                 </li>
               ))}
@@ -127,10 +157,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
         )}
 
         <div className="flex flex-wrap gap-2.5">
-          <Link
-            href={bookHref}
-            className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-          >
+          <Link href={bookHref} className="lm-pill">
             Book here
             <Icon name="arrow" size={14} />
           </Link>
@@ -138,7 +165,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
             <a
               href={`tel:${clinic.phone}`}
               title={formatGhanaPhone(clinic.phone)}
-              className="inline-flex items-center gap-2 rounded-md border border-lumen-ink/15 px-4 py-2.5 text-sm text-lumen-ink transition-colors hover:bg-lumen-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="lm-ghost"
             >
               <Icon name="phone" size={14} />
               Call
@@ -148,7 +175,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
             <a
               href={waMeUrl(clinic.whatsapp)}
               {...EXTERNAL}
-              className="inline-flex items-center gap-2 rounded-md border border-lumen-ink/15 px-4 py-2.5 text-sm text-lumen-ink transition-colors hover:bg-lumen-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="lm-ghost"
             >
               <Icon name="phone" size={14} />
               Chat on WhatsApp

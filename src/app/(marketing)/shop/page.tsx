@@ -43,31 +43,53 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   return (
     <div className="min-h-screen">
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="border-b border-lumen-ink/8 bg-lumen-cream px-6 pb-8 pt-8">
-        <div className="mx-auto max-w-[1280px]">
+      <section
+        className="lm-grain relative overflow-hidden border-b px-6 pb-10 pt-12"
+        style={{
+          borderColor: "var(--lm-hair)",
+          background:
+            "radial-gradient(120% 140% at 80% 0%, var(--lm-raise) 0%, var(--lm-base) 55%)",
+        }}
+      >
+        <div className="relative z-10 mx-auto max-w-[1280px]">
           {/* Breadcrumb */}
-          <nav className="mb-5 flex items-center gap-1.5 text-xs text-lumen-ink/40" aria-label="Breadcrumb">
+          <nav
+            className="mb-5 flex items-center gap-1.5 text-xs"
+            style={{ color: "var(--lm-faint)" }}
+            aria-label="Breadcrumb"
+          >
             <Link
               href="/"
-              className="hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
             >
               Home
             </Link>
             <Icon name="chev" size={10} className="-rotate-90" />
-            <span className="text-lumen-ink/70">Shop</span>
+            <span style={{ color: "var(--lm-muted)" }}>Shop</span>
           </nav>
 
-          <h1 className="mb-2 font-display text-4xl text-lumen-ink sm:text-5xl">
+          <p className="lm-label">The collection</p>
+          <h1
+            className="lm-display mt-3"
+            style={{ fontSize: "clamp(2.4rem, 6vw, 4rem)" }}
+          >
             {heroTitle.includes(",") ? (
               <>
                 {heroTitle.split(",")[0]},&nbsp;
-                <em className="italic">{heroTitle.split(",").slice(1).join(",").trim()}</em>
+                <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+                  {heroTitle.split(",").slice(1).join(",").trim()}
+                </em>
               </>
             ) : (
-              <em className="italic">{heroTitle}</em>
+              <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+                {heroTitle}
+              </em>
             )}
           </h1>
-          <p className="mb-6 max-w-xl text-sm leading-relaxed text-lumen-ink/60">
+          <p
+            className="mb-7 mt-3 max-w-xl text-sm leading-relaxed"
+            style={{ color: "var(--lm-muted)" }}
+          >
             {heroSubtitle}
           </p>
 
@@ -80,21 +102,24 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         {isContacts ? (
           /* Contacts — no catalogue yet */
           <div className="mx-auto max-w-lg py-16 text-center">
-            <div className="mb-4 flex justify-center text-lumen-ink/20">
+            <div
+              className="mb-4 flex justify-center"
+              style={{ color: "var(--lm-faint)" }}
+            >
               <Icon name="drop" size={48} strokeWidth={1} />
             </div>
-            <h2 className="mb-3 font-display text-2xl text-lumen-ink">
+            <h2 className="lm-display mb-3 text-2xl">
               Contact lenses — fitted in clinic
             </h2>
-            <p className="mb-6 text-sm leading-relaxed text-lumen-ink/60">
+            <p
+              className="mb-6 text-sm leading-relaxed"
+              style={{ color: "var(--lm-muted)" }}
+            >
               Contacts need a clinical fitting first. Book a 30-min consultation
               with an optometrist; we&apos;ll prescribe and order your trial pair
               on the same day.
             </p>
-            <Link
-              href="/clinics"
-              className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-            >
+            <Link href="/book" className="lm-pill mx-auto">
               Book a consultation
               <Icon name="arrow" size={14} />
             </Link>
@@ -120,18 +145,24 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               {filtered.length === 0 ? (
                 /* Empty state */
                 <div className="mt-12 text-center">
-                  <div className="mb-4 flex justify-center text-lumen-ink/20">
+                  <div
+                    className="mb-4 flex justify-center"
+                    style={{ color: "var(--lm-faint)" }}
+                  >
                     <Icon name="search" size={40} strokeWidth={1} />
                   </div>
-                  <h2 className="mb-2 font-display text-xl text-lumen-ink">
+                  <h2 className="lm-display mb-2 text-xl">
                     No frames match these filters
                   </h2>
-                  <p className="mb-5 text-sm text-lumen-ink/50">
+                  <p
+                    className="mb-5 text-sm"
+                    style={{ color: "var(--lm-muted)" }}
+                  >
                     Try broadening your search or clearing some filters.
                   </p>
                   <Link
                     href={`/shop${params.cat !== "optical" ? `?cat=${params.cat}` : ""}`}
-                    className="inline-flex items-center gap-2 rounded-md border border-lumen-ink/15 px-4 py-2 text-sm text-lumen-ink transition-colors hover:bg-lumen-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+                    className="lm-ghost mx-auto"
                   >
                     Clear all filters
                   </Link>

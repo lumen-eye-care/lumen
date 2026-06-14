@@ -33,12 +33,16 @@ export function MobileFilterBar({ params, facets }: MobileFilterBarProps) {
         <button
           type="button"
           onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 rounded-md border border-lumen-ink/15 px-3 py-2 text-sm text-lumen-ink transition-colors hover:bg-lumen-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+          style={{ border: "1px solid var(--lm-hair)", color: "var(--lm-text)" }}
         >
           <Icon name="chev" size={14} className="-rotate-90" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="rounded-full bg-lumen-blue px-1.5 py-0.5 text-[10px] font-semibold leading-none text-lumen-cream">
+            <span
+              className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none"
+              style={{ background: "var(--lm-warm)", color: "#1a0f0a" }}
+            >
               {activeFilterCount}
             </span>
           )}
@@ -51,21 +55,32 @@ export function MobileFilterBar({ params, facets }: MobileFilterBarProps) {
       {drawerOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-lumen-ink/30 backdrop-blur-sm"
+            className="fixed inset-0 z-40 backdrop-blur-sm"
+            style={{ background: "rgba(5,15,27,0.45)" }}
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed inset-y-0 left-0 z-50 flex w-[300px] max-w-[90vw] flex-col bg-lumen-cream shadow-xl"
+            className="fixed inset-y-0 left-0 z-50 flex w-[300px] max-w-[90vw] flex-col shadow-xl"
+            style={{ background: "var(--lm-base)" }}
             role="dialog"
             aria-label="Filters"
             aria-modal="true"
           >
-            <div className="flex items-center justify-between border-b border-lumen-ink/8 px-5 py-4">
-              <span className="text-sm font-semibold text-lumen-ink">
+            <div
+              className="flex items-center justify-between border-b px-5 py-4"
+              style={{ borderColor: "var(--lm-hair)" }}
+            >
+              <span
+                className="text-sm font-semibold"
+                style={{ color: "var(--lm-text)" }}
+              >
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="ml-2 rounded-full bg-lumen-blue/15 px-1.5 py-0.5 text-[10px] font-semibold text-lumen-blue">
+                  <span
+                    className="ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                    style={{ background: "var(--lm-tint)", color: "var(--lm-warm)" }}
+                  >
                     {activeFilterCount}
                   </span>
                 )}
@@ -74,7 +89,8 @@ export function MobileFilterBar({ params, facets }: MobileFilterBarProps) {
                 type="button"
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close filters"
-                className="flex h-8 w-8 items-center justify-center rounded-md text-lumen-ink/60 hover:bg-lumen-ink/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+                className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+                style={{ color: "var(--lm-muted)" }}
               >
                 <Icon name="x" size={16} />
               </button>
@@ -82,11 +98,11 @@ export function MobileFilterBar({ params, facets }: MobileFilterBarProps) {
             <div className="flex-1 overflow-y-auto px-5 py-2">
               <FilterPanel params={params} facets={facets} />
             </div>
-            <div className="border-t border-lumen-ink/8 p-4">
+            <div className="border-t p-4" style={{ borderColor: "var(--lm-hair)" }}>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="w-full rounded-md bg-lumen-blue py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+                className="lm-pill w-full justify-center"
               >
                 View results
               </button>

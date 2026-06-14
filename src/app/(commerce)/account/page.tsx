@@ -24,32 +24,39 @@ export default async function AccountPage() {
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-3xl text-lumen-ink">My account</h1>
-        <p className="text-sm text-lumen-ink/60">Signed in as {name}</p>
+        <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>My account</h1>
+        <p className="text-sm" style={{ color: "var(--lm-muted)" }}>Signed in as {name}</p>
       </header>
 
       <Link
         href="/account/orders"
-        className="flex items-center justify-between gap-4 rounded-xl border border-lumen-ink/10 bg-white p-5 transition-colors hover:border-lumen-ink/25"
+        className="lm-card flex items-center justify-between gap-4 p-5 transition-colors"
       >
         <span className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-lumen-blue/10 text-lumen-blue">
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-full"
+            style={{
+              background: "color-mix(in srgb, var(--lm-blue) 12%, transparent)",
+              color: "var(--lm-blue)",
+            }}
+          >
             <Icon name="cart" size={20} strokeWidth={1.5} />
           </span>
           <span className="flex flex-col">
-            <span className="font-medium text-lumen-ink">My orders</span>
-            <span className="text-sm text-lumen-ink/55">
+            <span className="font-medium" style={{ color: "var(--lm-text)" }}>My orders</span>
+            <span className="text-sm" style={{ color: "var(--lm-muted)" }}>
               Track and review what you&apos;ve placed
             </span>
           </span>
         </span>
-        <Icon name="chev" size={20} className="text-lumen-ink/40" />
+        <Icon name="chev" size={20} style={{ color: "var(--lm-faint)" }} />
       </Link>
 
       <form action={signOut}>
         <button
           type="submit"
-          className="text-sm font-medium text-lumen-ink/60 underline-offset-2 transition-colors hover:text-lumen-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          className="text-sm font-medium underline-offset-2 transition-colors hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+          style={{ color: "var(--lm-muted)" }}
         >
           Sign out
         </button>

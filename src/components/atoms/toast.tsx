@@ -80,12 +80,13 @@ function ToastItem({
 
   const tone =
     toast.kind === "error"
-      ? "border-lumen-warm/30 bg-lumen-warm text-lumen-cream"
-      : "border-lumen-ink/10 bg-lumen-ink text-lumen-cream";
+      ? { background: "var(--lm-warm)", color: "#1a0f0a", borderColor: "transparent" }
+      : { background: "var(--lm-text)", color: "var(--lm-base)", borderColor: "transparent" };
 
   return (
     <div
-      className={`pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-[0_8px_24px_rgba(10,31,53,0.18)] ${tone}`}
+      className="pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-[0_8px_24px_var(--lm-shadow)]"
+      style={tone}
     >
       <span className="flex h-5 w-5 shrink-0 items-center justify-center">
         <Icon name={toast.kind === "error" ? "x" : "check"} size={16} />
@@ -95,7 +96,7 @@ function ToastItem({
         type="button"
         onClick={() => onDismiss(toast.id)}
         aria-label="Dismiss notification"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-lumen-cream/70 transition-colors hover:bg-white/10 hover:text-lumen-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md opacity-70 transition-opacity hover:bg-black/10 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
       >
         <Icon name="x" size={14} />
       </button>

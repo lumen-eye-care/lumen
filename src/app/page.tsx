@@ -1,37 +1,53 @@
-import Link from "next/link";
 import { SiteHeader } from "@/components/organisms/site-header";
 import { SiteFooter } from "@/components/organisms/site-footer";
+import { getActiveFrames, type ShopFrame } from "@/server/frames";
+import { getActiveClinics, type Clinic } from "@/server/clinics";
+import { ImmersiveHero } from "@/components/home/immersive-hero";
+import { Manifesto } from "@/components/home/manifesto";
+import { TwoPaths } from "@/components/home/two-paths";
+import { FramesReel } from "@/components/home/frames-reel";
+import { LensQuizCta } from "@/components/home/lens-quiz-cta";
+import { ClinicsCta } from "@/components/home/clinics-cta";
 
 /**
- * Home page — lives outside the (marketing) route group so it doesn't
- * conflict with (marketing)/page.tsx. The marketing layout (SiteHeader +
- * SiteFooter) is included explicitly here; shop/clinics/etc. get it via the
- * (marketing) group layout.
+ * Home — the immersive landing. Lives outside the (marketing) route group so
+ * its hero can bleed full-bleed under the transparent fixed header (no main
+ * top-padding). Reads live staging data; the reel + closing CTA degrade
+ * gracefully when data can't be loaded.
  */
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+async function loadFrames(): Promise<ShopFrame[]> {
+  try {
+    return await getActiveFrames();
+  } catch (err) {
+    console.error("[home] frames load failed", err);
+    return [];
+  }
+}
+
+async function loadClinics(): Promise<Clinic[]> {
+  try {
+    return await getActiveClinics();
+  } catch (err) {
+    console.error("[home] clinics load failed", err);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const [frames, clinics] = await Promise.all([loadFrames(), loadClinics()]);
+
   return (
     <>
       <SiteHeader />
       <main>
-        <section className="mx-auto flex min-h-[80vh] max-w-2xl flex-col items-center justify-center gap-6 px-6 text-center">
-          <p className="text-sm uppercase tracking-[0.2em] text-lumen-sage">
-            Lumen Eye Care
-          </p>
-          <h1 className="font-display text-5xl leading-tight text-lumen-ink sm:text-6xl">
-            Premium eyewear,{" "}
-            <em className="italic text-lumen-blue">designed in Ghana</em>.
-          </h1>
-          <p className="max-w-md text-balance text-lumen-ink/70">
-            Italian acetate, Japanese titanium, Swiss lenses. Our inaugural
-            frames collection is here.
-          </p>
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-6 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-          >
-            Shop frames
-          </Link>
-        </section>
+        <ImmersiveHero />
+        <Manifesto />
+        <TwoPaths />
+        <FramesReel frames={frames} />
+        <LensQuizCta />
+        <ClinicsCta clinics={clinics} />
       </main>
       <SiteFooter />
     </>

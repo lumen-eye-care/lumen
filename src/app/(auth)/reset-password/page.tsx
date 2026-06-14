@@ -8,18 +8,21 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1 text-center">
-        <h1 className="font-display text-3xl text-lumen-ink">Reset password</h1>
-        <p className="text-sm text-lumen-ink/70">
+        <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>
+          Reset password
+        </h1>
+        <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
           Enter your email and we&apos;ll send you a link to set a new password.
         </p>
       </header>
 
       <ResetPasswordForm />
 
-      <p className="text-center text-sm text-lumen-ink/70">
+      <p className="text-center text-sm" style={{ color: "var(--lm-muted)" }}>
         <Link
           href="/sign-in"
-          className="text-lumen-blue underline-offset-2 hover:underline"
+          className="underline-offset-2 hover:underline"
+          style={{ color: "var(--lm-warm)" }}
         >
           Back to sign in
         </Link>

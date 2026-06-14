@@ -64,58 +64,74 @@ export default async function MyOrderDetailPage({
     <div className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1.5">
-          <h1 className="font-display text-3xl break-words text-lumen-ink">{ref}</h1>
-          <p className="text-sm text-lumen-ink/55">
+          <h1 className="lm-display text-3xl break-words" style={{ color: "var(--lm-text)" }}>{ref}</h1>
+          <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
             Placed {dateFmt.format(new Date(order.created_at))}
           </p>
           <OrderStatusPill status={order.status} />
         </div>
         <Link
           href="/account/orders"
-          className="shrink-0 text-sm text-lumen-blue underline-offset-2 hover:underline"
+          className="shrink-0 text-sm underline-offset-2 hover:underline"
+          style={{ color: "var(--lm-warm)" }}
         >
           ← All orders
         </Link>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <section className="rounded-xl border border-lumen-ink/10 bg-white p-5 lg:col-span-2">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-lumen-ink/60">
+        <section
+          className="rounded-xl p-5 lg:col-span-2"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+        >
+          <h2
+            className="mb-4 text-xs font-semibold uppercase tracking-wide"
+            style={{ color: "var(--lm-faint)" }}
+          >
             Items
           </h2>
           <ul className="flex flex-col gap-3">
             {items.map((it) => (
               <li key={it.id} className="flex justify-between gap-3 text-sm">
-                <span className="text-lumen-ink/80">
+                <span style={{ color: "var(--lm-muted)" }}>
                   {it.frames?.name ?? "Frame"}
                   {it.color_selected && ` · ${it.color_selected}`}
                   {it.quantity > 1 && (
-                    <span className="text-lumen-ink/50"> × {it.quantity}</span>
+                    <span style={{ color: "var(--lm-faint)" }}> × {it.quantity}</span>
                   )}
                 </span>
-                <span className="shrink-0 text-lumen-ink">
+                <span className="shrink-0" style={{ color: "var(--lm-text)" }}>
                   {formatGhs(it.price_ghs * it.quantity)}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex items-center justify-between border-t border-lumen-ink/8 pt-4">
-            <span className="text-sm text-lumen-ink/60">Total</span>
-            <span className="text-lg font-medium text-lumen-ink">
+          <div
+            className="mt-4 flex items-center justify-between border-t pt-4"
+            style={{ borderColor: "var(--lm-hair)" }}
+          >
+            <span className="text-sm" style={{ color: "var(--lm-muted)" }}>Total</span>
+            <span className="text-lg font-medium" style={{ color: "var(--lm-text)" }}>
               {formatGhs(order.total_ghs)}
             </span>
           </div>
         </section>
 
         <aside className="flex flex-col gap-6">
-          <section className="rounded-xl border border-lumen-ink/10 bg-white p-5">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-lumen-ink/60">
+          <section
+            className="rounded-xl p-5"
+            style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+          >
+            <h2
+              className="mb-3 text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--lm-faint)" }}
+            >
               Payment
             </h2>
             <dl className="flex flex-col gap-1.5 text-sm">
               <div className="flex justify-between gap-3">
-                <dt className="text-lumen-ink/60">Method</dt>
-                <dd className="text-lumen-ink">
+                <dt style={{ color: "var(--lm-muted)" }}>Method</dt>
+                <dd style={{ color: "var(--lm-text)" }}>
                   {order.payment_method
                     ? (METHOD_LABEL[order.payment_method] ?? order.payment_method)
                     : "—"}
@@ -123,8 +139,8 @@ export default async function MyOrderDetailPage({
               </div>
               {order.payment_reference && (
                 <div className="flex justify-between gap-3">
-                  <dt className="shrink-0 text-lumen-ink/60">Reference</dt>
-                  <dd className="min-w-0 break-all text-right text-lumen-ink">
+                  <dt className="shrink-0" style={{ color: "var(--lm-muted)" }}>Reference</dt>
+                  <dd className="min-w-0 break-all text-right" style={{ color: "var(--lm-text)" }}>
                     {order.payment_reference}
                   </dd>
                 </div>
@@ -132,16 +148,22 @@ export default async function MyOrderDetailPage({
             </dl>
           </section>
 
-          <section className="rounded-xl border border-lumen-ink/10 bg-white p-5">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-lumen-ink/60">
+          <section
+            className="rounded-xl p-5"
+            style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+          >
+            <h2
+              className="mb-3 text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--lm-faint)" }}
+            >
               Delivery
             </h2>
-            <div className="flex flex-col gap-1 text-sm text-lumen-ink/80">
+            <div className="flex flex-col gap-1 text-sm" style={{ color: "var(--lm-muted)" }}>
               {order.delivery_name && <span>{order.delivery_name}</span>}
               {order.delivery_phone && <span>{order.delivery_phone}</span>}
               {order.delivery_address && <span>{order.delivery_address}</span>}
               {order.delivery_landmark && (
-                <span className="text-lumen-ink/55">
+                <span style={{ color: "var(--lm-faint)" }}>
                   Near {order.delivery_landmark}
                 </span>
               )}
@@ -149,7 +171,7 @@ export default async function MyOrderDetailPage({
               {!order.delivery_name &&
                 !order.delivery_address &&
                 !order.delivery_city && (
-                  <span className="text-lumen-ink/50">
+                  <span style={{ color: "var(--lm-faint)" }}>
                     No delivery details on file.
                   </span>
                 )}

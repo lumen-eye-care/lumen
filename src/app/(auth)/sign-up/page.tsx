@@ -16,21 +16,22 @@ export default async function SignUpPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1 text-center">
-        <h1 className="font-display text-3xl text-lumen-ink">
+        <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>
           Create your account
         </h1>
-        <p className="text-sm text-lumen-ink/70">
+        <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
           So your orders are tracked and waiting when you return.
         </p>
       </header>
 
       <SignUpForm redirect={next} />
 
-      <p className="text-center text-sm text-lumen-ink/70">
+      <p className="text-center text-sm" style={{ color: "var(--lm-muted)" }}>
         Already have an account?{" "}
         <Link
           href={`/sign-in?redirect=${encodeURIComponent(next)}`}
-          className="text-lumen-blue underline-offset-2 hover:underline"
+          className="underline-offset-2 hover:underline"
+          style={{ color: "var(--lm-warm)" }}
         >
           Sign in
         </Link>

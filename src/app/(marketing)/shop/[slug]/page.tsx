@@ -5,6 +5,8 @@ import { getFrameBySlug, getActiveFrames, type ShopFrame } from "@/server/frames
 import { formatGhs } from "@/lib/format-money";
 import { FrameCard } from "@/components/molecules/frame-card";
 import { FramePurchasePanel } from "@/components/organisms/frame-purchase-panel";
+import { Frame3DSection } from "@/components/pdp/frame-3d-section";
+import { resolveFrameModel } from "@/lib/frame-3d";
 import { Icon } from "@/components/atoms/icon";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +81,9 @@ export default async function FrameDetailPage({ params }: Props) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+  // Phase-3 POC: null unless NEXT_PUBLIC_DEMO_3D_ENABLED=true (off in prod).
+  const modelSrc = resolveFrameModel();
+
   return (
     <div className="mx-auto max-w-[1280px] px-6 py-8">
       {/* Product JSON-LD — Next's documented pattern needs dangerouslySetInnerHTML;
@@ -94,32 +99,42 @@ export default async function FrameDetailPage({ params }: Props) {
       />
       {/* Breadcrumb */}
       <nav
-        className="mb-8 flex items-center gap-1.5 text-xs text-lumen-ink/40"
+        className="mb-8 flex items-center gap-1.5 text-xs"
+        style={{ color: "var(--lm-faint)" }}
         aria-label="Breadcrumb"
       >
         <Link
           href="/"
-          className="hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          className="transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
         >
           Home
         </Link>
         <Icon name="chev" size={10} className="-rotate-90" />
         <Link
           href={`/shop${frame.category ? `?cat=${frame.category.slug}` : ""}`}
-          className="hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          className="transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
         >
           Shop
         </Link>
         <Icon name="chev" size={10} className="-rotate-90" />
-        <span className="text-lumen-ink/70">{frame.name}</span>
+        <span style={{ color: "var(--lm-muted)" }}>{frame.name}</span>
       </nav>
 
       <FramePurchasePanel frame={frame} />
 
+      {/* 3D / AR preview (Phase-3 POC, flag-gated) */}
+      {modelSrc && (
+        <Frame3DSection
+          modelSrc={modelSrc}
+          name={frame.name}
+          poster={frame.photo_urls[0]}
+        />
+      )}
+
       {/* Related frames */}
       {related.length > 0 && (
         <section className="mt-20">
-          <h2 className="mb-6 font-display text-2xl text-lumen-ink">
+          <h2 className="lm-display mb-6 text-2xl" style={{ color: "var(--lm-text)" }}>
             You might also like
           </h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
@@ -133,7 +148,8 @@ export default async function FrameDetailPage({ params }: Props) {
       {/* Back link */}
       <Link
         href={`/shop${frame.category ? `?cat=${frame.category.slug}` : ""}`}
-        className="mt-10 inline-flex items-center gap-2 text-sm text-lumen-blue transition-colors hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+        className="mt-10 inline-flex items-center gap-2 text-sm transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+        style={{ color: "var(--lm-warm)" }}
       >
         <Icon name="arrowLeft" size={14} />
         Back to {frame.category?.name ? frame.category.name.toLowerCase() : "shop"}

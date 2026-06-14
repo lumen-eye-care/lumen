@@ -12,20 +12,25 @@ type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
 };
 
+const inputClass =
+  "w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-base)] px-3 py-2 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[color:var(--lm-warm)]";
+
 export function TextField({ label, name, error, ...props }: TextFieldProps) {
   const errorId = error ? `${name}-error` : undefined;
   return (
     <label className="flex flex-col gap-1.5 text-left">
-      <span className="text-sm font-medium text-lumen-ink">{label}</span>
+      <span className="text-sm font-medium" style={{ color: "var(--lm-text)" }}>
+        {label}
+      </span>
       <input
         name={name}
         aria-invalid={error ? true : undefined}
         aria-describedby={errorId}
-        className="rounded-md border border-lumen-ink/15 bg-white px-3 py-2 text-sm text-lumen-ink outline-none focus-visible:border-lumen-blue focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-lumen-blue"
+        className={inputClass}
         {...props}
       />
       {error ? (
-        <span id={errorId} className="text-xs text-lumen-warm">
+        <span id={errorId} className="text-xs" style={{ color: "var(--lm-warm)" }}>
           {error}
         </span>
       ) : null}
@@ -40,14 +45,23 @@ export function Alert({
   kind: "error" | "success";
   children: React.ReactNode;
 }) {
-  const styles =
-    kind === "error"
-      ? "border-lumen-warm/30 bg-lumen-warm/10 text-lumen-warm"
-      : "border-lumen-sage/30 bg-lumen-sage/10 text-lumen-sage";
   return (
     <p
       role={kind === "error" ? "alert" : "status"}
-      className={`rounded-md border px-3 py-2 text-sm ${styles}`}
+      className="rounded-md border px-3 py-2 text-sm"
+      style={
+        kind === "error"
+          ? {
+              borderColor: "color-mix(in srgb, var(--lm-warm) 30%, transparent)",
+              background: "color-mix(in srgb, var(--lm-warm) 10%, transparent)",
+              color: "var(--lm-warm)",
+            }
+          : {
+              borderColor: "color-mix(in srgb, var(--lm-sage) 30%, transparent)",
+              background: "color-mix(in srgb, var(--lm-sage) 10%, transparent)",
+              color: "var(--lm-sage)",
+            }
+      }
     >
       {children}
     </p>
