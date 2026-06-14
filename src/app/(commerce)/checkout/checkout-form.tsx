@@ -15,7 +15,7 @@ const METHOD_LABELS: Record<PaymentMethod, { title: string; hint: string }> = {
 };
 
 const inputClass =
-  "mt-1 w-full rounded-md border border-lumen-ink/15 bg-white px-3 py-2.5 text-sm text-lumen-ink placeholder:text-lumen-ink/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue";
+  "mt-1 w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-base)] px-3 py-2.5 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]";
 
 export function CheckoutForm() {
   const { items, subtotalPesewa, hydrated, clear } = useCart();
@@ -38,8 +38,8 @@ export function CheckoutForm() {
   if (!hydrated) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-16">
-        <div className="h-8 w-48 animate-pulse rounded bg-lumen-ink/8" />
-        <div className="mt-8 h-64 animate-pulse rounded-xl bg-lumen-ink/5" />
+        <div className="h-8 w-48 animate-pulse rounded" style={{ background: "var(--lm-tint)" }} />
+        <div className="mt-8 h-64 animate-pulse rounded-xl" style={{ background: "var(--lm-surface)" }} />
       </main>
     );
   }
@@ -106,18 +106,23 @@ export function CheckoutForm() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="mb-8 font-display text-3xl text-lumen-ink">Checkout</h1>
+      <h1 className="lm-display mb-8 text-3xl" style={{ color: "var(--lm-text)" }}>
+        Checkout
+      </h1>
 
       <form onSubmit={onSubmit} className="grid gap-10 lg:grid-cols-[1fr_22rem]">
         {/* Left: delivery + payment */}
         <div className="space-y-8">
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-lumen-ink/60">
+            <h2
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "var(--lm-faint)" }}
+            >
               Delivery details
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm sm:col-span-2">
-                <span className="text-lumen-ink/70">Full name</span>
+                <span style={{ color: "var(--lm-muted)" }}>Full name</span>
                 <input
                   className={inputClass}
                   value={name}
@@ -127,7 +132,7 @@ export function CheckoutForm() {
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-lumen-ink/70">Phone</span>
+                <span style={{ color: "var(--lm-muted)" }}>Phone</span>
                 <input
                   className={inputClass}
                   value={phone}
@@ -139,7 +144,7 @@ export function CheckoutForm() {
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-lumen-ink/70">City / town</span>
+                <span style={{ color: "var(--lm-muted)" }}>City / town</span>
                 <input
                   className={inputClass}
                   value={city}
@@ -149,7 +154,7 @@ export function CheckoutForm() {
                 />
               </label>
               <label className="block text-sm sm:col-span-2">
-                <span className="text-lumen-ink/70">Delivery address</span>
+                <span style={{ color: "var(--lm-muted)" }}>Delivery address</span>
                 <input
                   className={inputClass}
                   value={address}
@@ -160,8 +165,9 @@ export function CheckoutForm() {
                 />
               </label>
               <label className="block text-sm sm:col-span-2">
-                <span className="text-lumen-ink/70">
-                  Nearest landmark <span className="text-lumen-ink/40">(optional)</span>
+                <span style={{ color: "var(--lm-muted)" }}>
+                  Nearest landmark{" "}
+                  <span style={{ color: "var(--lm-faint)" }}>(optional)</span>
                 </span>
                 <input
                   className={inputClass}
@@ -174,18 +180,27 @@ export function CheckoutForm() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-lumen-ink/60">
+            <h2
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "var(--lm-faint)" }}
+            >
               Payment method
             </h2>
             <div className="space-y-3">
               {PAYMENT_METHODS.map((m) => (
                 <label
                   key={m}
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
-                    method === m
-                      ? "border-lumen-blue bg-lumen-blue/5"
-                      : "border-lumen-ink/15 hover:border-lumen-ink/30"
-                  }`}
+                  className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors"
+                  style={{
+                    borderColor:
+                      method === m
+                        ? "var(--lm-warm)"
+                        : "var(--lm-hair)",
+                    background:
+                      method === m
+                        ? "color-mix(in srgb, var(--lm-warm) 8%, transparent)"
+                        : "transparent",
+                  }}
                 >
                   <input
                     type="radio"
@@ -193,13 +208,13 @@ export function CheckoutForm() {
                     value={m}
                     checked={method === m}
                     onChange={() => setMethod(m)}
-                    className="mt-1 accent-lumen-blue"
+                    className="mt-1 accent-[color:var(--lm-warm)]"
                   />
                   <span>
-                    <span className="block text-sm font-medium text-lumen-ink">
+                    <span className="block text-sm font-medium" style={{ color: "var(--lm-text)" }}>
                       {METHOD_LABELS[m].title}
                     </span>
-                    <span className="block text-xs text-lumen-ink/55">
+                    <span className="block text-xs" style={{ color: "var(--lm-faint)" }}>
                       {METHOD_LABELS[m].hint}
                     </span>
                   </span>
@@ -211,8 +226,14 @@ export function CheckoutForm() {
 
         {/* Right: summary */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-xl border border-lumen-ink/8 bg-white p-5">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-lumen-ink/60">
+          <div
+            className="rounded-xl p-5"
+            style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+          >
+            <h2
+              className="mb-4 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "var(--lm-faint)" }}
+            >
               Order summary
             </h2>
             <ul className="space-y-3">
@@ -221,30 +242,41 @@ export function CheckoutForm() {
                   key={`${i.frameId}::${i.colorName}`}
                   className="flex justify-between gap-3 text-sm"
                 >
-                  <span className="text-lumen-ink/80">
+                  <span style={{ color: "var(--lm-muted)" }}>
                     {i.name} · {i.colorName}
-                    {i.qty > 1 && <span className="text-lumen-ink/50"> × {i.qty}</span>}
+                    {i.qty > 1 && (
+                      <span style={{ color: "var(--lm-faint)" }}> × {i.qty}</span>
+                    )}
                   </span>
-                  <span className="shrink-0 text-lumen-ink">
+                  <span className="shrink-0" style={{ color: "var(--lm-text)" }}>
                     {formatGhs(i.unitPricePesewa * i.qty)}
                   </span>
                 </li>
               ))}
             </ul>
-            <div className="mt-4 flex items-center justify-between border-t border-lumen-ink/8 pt-4">
-              <span className="text-sm text-lumen-ink/60">Total</span>
-              <span className="text-lg font-medium text-lumen-ink">
+            <div
+              className="mt-4 flex items-center justify-between border-t pt-4"
+              style={{ borderColor: "var(--lm-hair)" }}
+            >
+              <span className="text-sm" style={{ color: "var(--lm-muted)" }}>
+                Total
+              </span>
+              <span className="text-lg font-medium" style={{ color: "var(--lm-text)" }}>
                 {formatGhs(subtotalPesewa)}
               </span>
             </div>
-            <p className="mt-1 text-xs text-lumen-ink/50">
+            <p className="mt-1 text-xs" style={{ color: "var(--lm-faint)" }}>
               Prices confirmed at the server. Delivery arranged after your order.
             </p>
 
             {error && (
               <p
                 role="alert"
-                className="mt-4 rounded-md bg-lumen-warm/10 px-3 py-2 text-sm text-lumen-warm"
+                className="mt-4 rounded-md px-3 py-2 text-sm"
+                style={{
+                  background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
+                  color: "var(--lm-warm)",
+                }}
               >
                 {error}
               </p>
@@ -253,7 +285,7 @@ export function CheckoutForm() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="lm-pill mt-4 w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Processing…" : submitLabel}
             </button>

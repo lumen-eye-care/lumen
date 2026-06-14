@@ -61,12 +61,16 @@ export function ShopTabs({ categories, params }: ShopTabsProps) {
             role="tab"
             aria-selected={active}
             onClick={() => navigate(cat.slug)}
-            className={[
-              "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue",
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+            style={
               active
-                ? "bg-lumen-ink text-lumen-cream"
-                : "border border-lumen-ink/15 bg-lumen-cream text-lumen-ink hover:border-lumen-ink/40",
-            ].join(" ")}
+                ? { background: "var(--lm-text)", color: "var(--lm-base)" }
+                : {
+                    background: "var(--lm-surface)",
+                    color: "var(--lm-text)",
+                    border: "1px solid var(--lm-hair)",
+                  }
+            }
           >
             <Icon name={iconName} size={14} />
             {cat.name}

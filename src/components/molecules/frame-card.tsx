@@ -4,10 +4,10 @@ import { FrameSVG } from "@/components/atoms/frame-svg";
 import { formatGhs } from "@/lib/format-money";
 import type { ShopFrame } from "@/server/frames";
 
-const BADGE_STYLES: Record<string, string> = {
-  BESTSELLER: "bg-lumen-blue/10 text-lumen-blue",
-  NEW: "bg-lumen-sage/15 text-lumen-sage",
-  LIMITED: "bg-lumen-warm/15 text-lumen-warm",
+const BADGE_LABELS: Record<string, string> = {
+  BESTSELLER: "Best seller",
+  LIMITED: "Limited",
+  NEW: "New",
 };
 
 type FrameCardProps = {
@@ -26,19 +26,19 @@ export function FrameCard({ frame, priority = false }: FrameCardProps) {
   return (
     <Link
       href={`/shop/${slug}`}
-      className="group flex flex-col rounded-xl bg-white ring-1 ring-lumen-ink/8 transition-shadow hover:shadow-[0_8px_24px_rgba(10,31,53,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+      className="lm-card group flex flex-col overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
     >
       {/* Image / SVG area */}
-      <div className="relative flex items-center justify-center overflow-hidden rounded-t-xl bg-[#F6F2EB] px-6 py-8">
+      <div
+        className="relative flex items-center justify-center overflow-hidden px-6 py-8"
+        style={{ background: "var(--lm-deep)" }}
+      >
         {badge && (
           <span
-            className={`absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${BADGE_STYLES[badge] ?? "bg-lumen-ink/8 text-lumen-ink"}`}
+            className="absolute left-3 top-3 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ background: "var(--lm-warm)", color: "#1a0f0a" }}
           >
-            {badge === "BESTSELLER"
-              ? "Best seller"
-              : badge === "LIMITED"
-                ? "Limited"
-                : badge}
+            {BADGE_LABELS[badge] ?? badge}
           </span>
         )}
 
@@ -56,25 +56,37 @@ export function FrameCard({ frame, priority = false }: FrameCardProps) {
         ) : (
           <FrameSVG
             shape={shape}
-            color={colors[0]?.hex ?? "#1E3148"}
+            color="var(--lm-text)"
             className="h-[140px] w-full transition-transform duration-300 group-hover:scale-[1.03]"
           />
         )}
       </div>
 
-      {/* Info — name, meta and price each get their own row so the name is
-          never squeezed by the (wide) "From GH₵580.00" price on narrow cards. */}
+      {/* Info */}
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="min-w-0">
-          <p className="truncate font-display text-[1.05rem] text-lumen-ink">
+          <p
+            className="truncate font-display text-[1.05rem]"
+            style={{ color: "var(--lm-text)" }}
+          >
             {name}
           </p>
           {meta && (
-            <p className="mt-0.5 truncate text-xs text-lumen-ink/50">{meta}</p>
+            <p
+              className="mt-0.5 truncate text-xs"
+              style={{ color: "var(--lm-faint)" }}
+            >
+              {meta}
+            </p>
           )}
         </div>
-        <p className="text-sm font-medium text-lumen-ink">
-          <span className="text-xs font-normal text-lumen-ink/50">From </span>
+        <p className="text-sm font-semibold" style={{ color: "var(--lm-warm)" }}>
+          <span
+            className="text-xs font-normal"
+            style={{ color: "var(--lm-faint)" }}
+          >
+            From{" "}
+          </span>
           {formatGhs(price_ghs)}
         </p>
 
@@ -87,8 +99,12 @@ export function FrameCard({ frame, priority = false }: FrameCardProps) {
             {colors.map((c) => (
               <span
                 key={c.name}
-                className="h-[18px] w-[18px] rounded-full ring-1 ring-lumen-ink/15 ring-offset-1"
-                style={{ backgroundColor: c.hex }}
+                className="h-[18px] w-[18px] rounded-full"
+                style={{
+                  backgroundColor: c.hex,
+                  outline: "1px solid var(--lm-hair)",
+                  outlineOffset: "1px",
+                }}
                 title={c.name}
               />
             ))}

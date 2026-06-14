@@ -42,34 +42,50 @@ export default async function ClinicsPage() {
   return (
     <div className="min-h-screen">
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="border-b border-lumen-ink/8 bg-lumen-cream px-6 pb-10 pt-8 text-center">
-        <div className="mx-auto max-w-[1280px]">
+      <section
+        className="lm-grain relative overflow-hidden border-b px-6 pb-10 pt-8 text-center"
+        style={{
+          borderColor: "var(--lm-hair)",
+          background:
+            "radial-gradient(120% 120% at 50% 0%, var(--lm-raise) 0%, var(--lm-base) 60%)",
+        }}
+      >
+        <div className="relative z-10 mx-auto max-w-[1280px]">
           <nav
-            className="mb-5 flex items-center justify-center gap-1.5 text-xs text-lumen-ink/40"
+            className="mb-5 flex items-center justify-center gap-1.5 text-xs"
+            style={{ color: "var(--lm-faint)" }}
             aria-label="Breadcrumb"
           >
             <Link
               href="/"
-              className="hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
             >
               Home
             </Link>
             <Icon name="chev" size={10} className="-rotate-90" />
-            <span className="text-lumen-ink/70">Clinics</span>
+            <span style={{ color: "var(--lm-muted)" }}>Clinics</span>
           </nav>
 
           {clinics.length > 0 && (
-            <p className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-lumen-blue">
-              <span className="h-1.5 w-1.5 rounded-full bg-lumen-blue" />
+            <p
+              className="lm-label mb-3 inline-flex items-center gap-2"
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: "var(--lm-warm)" }}
+              />
               {clinics.length}{" "}
               {clinics.length === 1 ? "location" : "locations"} in Ghana
             </p>
           )}
-          <h1 className="mb-3 font-display text-4xl text-lumen-ink sm:text-5xl">
+          <h1
+            className="lm-display mb-3"
+            style={{ fontSize: "clamp(2.2rem, 5vw, 3.5rem)", color: "var(--lm-text)" }}
+          >
             Care, close to <em className="italic">where you are.</em>
           </h1>
           {clinics.length > 0 && (
-            <p className="mx-auto max-w-xl text-sm leading-relaxed text-lumen-ink/60">
+            <p className="mx-auto max-w-xl text-sm leading-relaxed" style={{ color: "var(--lm-muted)" }}>
               {clinics.length === 1
                 ? `Our clinic in ${cityList}`
                 : `${clinics.length} locations across ${cityList}`}

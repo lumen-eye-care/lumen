@@ -1,12 +1,22 @@
 import type { ButtonHTMLAttributes } from "react";
+import type { CSSProperties } from "react";
 
 type Variant = "primary" | "secondary" | "tertiary";
 
-const variantClasses: Record<Variant, string> = {
-  primary: "bg-lumen-blue text-lumen-cream hover:bg-lumen-ink",
-  secondary:
-    "bg-lumen-cream text-lumen-ink border border-lumen-ink/15 hover:border-lumen-ink/40",
-  tertiary: "bg-transparent text-lumen-blue hover:underline",
+const variantStyles: Record<Variant, CSSProperties> = {
+  primary: {
+    background: "var(--lm-warm)",
+    color: "#1a0f0a",
+  },
+  secondary: {
+    background: "var(--lm-raise)",
+    color: "var(--lm-text)",
+    border: "1px solid var(--lm-hair)",
+  },
+  tertiary: {
+    background: "transparent",
+    color: "var(--lm-warm)",
+  },
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -14,17 +24,18 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 /**
- * Reference atom showing the brand-token + variant pattern. The rest of the
- * component inventory (CLAUDE.md / Handoff §5) is built in Sprint 1.
+ * Reference atom — variant pattern using --lm-* theme vars.
  */
 export function Button({
   variant = "primary",
   className = "",
+  style,
   ...props
 }: ButtonProps) {
   return (
     <button
-      className={`rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${className}`}
+      className={`rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)] disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      style={{ ...variantStyles[variant], ...style }}
       {...props}
     />
   );

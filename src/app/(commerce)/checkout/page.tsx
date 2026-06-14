@@ -21,7 +21,9 @@ export default async function CheckoutPage() {
   return (
     <>
       <SiteHeader />
-      <CheckoutForm />
+      <div style={{ paddingTop: "var(--nav-h)" }}>
+        <CheckoutForm />
+      </div>
       <SiteFooter />
     </>
   );

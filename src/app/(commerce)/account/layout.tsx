@@ -17,7 +17,12 @@ export default async function AccountLayout({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto w-full max-w-4xl px-6 py-12">{children}</main>
+      <main
+        className="mx-auto w-full max-w-4xl px-6 pb-12"
+        style={{ paddingTop: "calc(var(--nav-h) + 2rem)" }}
+      >
+        {children}
+      </main>
       <SiteFooter />
     </>
   );

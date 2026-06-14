@@ -61,11 +61,14 @@ export function CallbackView({ reference }: { reference: string | null }) {
       {state === "polling" && (
         <>
           <div
-            className="mb-6 h-10 w-10 animate-spin rounded-full border-2 border-lumen-ink/15 border-t-lumen-blue"
+            className="mb-6 h-10 w-10 animate-spin rounded-full border-2"
+            style={{ borderColor: "var(--lm-hair)", borderTopColor: "var(--lm-warm)" }}
             aria-hidden
           />
-          <h1 className="font-display text-2xl text-lumen-ink">Confirming your payment…</h1>
-          <p className="mt-2 text-sm text-lumen-ink/60">
+          <h1 className="lm-display text-2xl" style={{ color: "var(--lm-text)" }}>
+            Confirming your payment…
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--lm-muted)" }}>
             If you paid with Mobile Money, approve the prompt on your phone. This can take a
             moment — please don&apos;t close this page.
           </p>
@@ -74,15 +77,14 @@ export function CallbackView({ reference }: { reference: string | null }) {
 
       {state === "timeout" && (
         <>
-          <h1 className="font-display text-2xl text-lumen-ink">Still processing</h1>
-          <p className="mt-2 text-sm text-lumen-ink/60">
+          <h1 className="lm-display text-2xl" style={{ color: "var(--lm-text)" }}>
+            Still processing
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--lm-muted)" }}>
             Your payment is taking longer than usual. If it went through, we&apos;ll email you a
             confirmation and it will appear in your account shortly.
           </p>
-          <Link
-            href="/account/orders"
-            className="mt-6 rounded-md border border-lumen-ink/15 px-5 py-2.5 text-sm font-medium text-lumen-ink transition-colors hover:border-lumen-ink/40"
-          >
+          <Link href="/account/orders" className="lm-ghost mt-6">
             View my orders
           </Link>
         </>
@@ -90,14 +92,13 @@ export function CallbackView({ reference }: { reference: string | null }) {
 
       {state === "failed" && (
         <>
-          <h1 className="font-display text-2xl text-lumen-ink">Payment not completed</h1>
-          <p className="mt-2 text-sm text-lumen-ink/60">
+          <h1 className="lm-display text-2xl" style={{ color: "var(--lm-text)" }}>
+            Payment not completed
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--lm-muted)" }}>
             Your payment didn&apos;t go through. Your bag is still saved — you can try again.
           </p>
-          <Link
-            href="/checkout"
-            className="mt-6 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink"
-          >
+          <Link href="/checkout" className="lm-pill mt-6">
             Back to checkout
           </Link>
         </>
@@ -105,15 +106,14 @@ export function CallbackView({ reference }: { reference: string | null }) {
 
       {state === "error" && (
         <>
-          <h1 className="font-display text-2xl text-lumen-ink">Something went wrong</h1>
-          <p className="mt-2 text-sm text-lumen-ink/60">
+          <h1 className="lm-display text-2xl" style={{ color: "var(--lm-text)" }}>
+            Something went wrong
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--lm-muted)" }}>
             We couldn&apos;t read your payment reference. If you were charged, check your orders
             or contact us.
           </p>
-          <Link
-            href="/account/orders"
-            className="mt-6 rounded-md border border-lumen-ink/15 px-5 py-2.5 text-sm font-medium text-lumen-ink transition-colors hover:border-lumen-ink/40"
-          >
+          <Link href="/account/orders" className="lm-ghost mt-6">
             View my orders
           </Link>
         </>
