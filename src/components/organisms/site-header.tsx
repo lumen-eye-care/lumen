@@ -13,6 +13,8 @@ import { LogoMark } from "@/components/atoms/logo-mark";
 import { Icon } from "@/components/atoms/icon";
 import { useCart } from "@/components/cart/cart-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { createClient } from "@/lib/supabase-browser";
+import { getInitials } from "@/lib/initials";
 
 const NAV_LINKS = [
   { href: "/shop", label: "Shop glasses" },
@@ -25,6 +27,7 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountInitials, setAccountInitials] = useState<string | null>(null);
   const pathname = usePathname();
   const { count, hydrated, open } = useCart();
 
@@ -37,6 +40,33 @@ export function SiteHeader() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Reflect signed-in state in the account icon (initials avatar vs guest icon).
+  // Mirrors CartAuthSync: env-guarded, onAuthStateChange fires INITIAL_SESSION on
+  // subscribe so the current session resolves on mount. Read-only — RLS unchanged.
+  useEffect(() => {
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ) {
+      return;
+    }
+    const supabase = createClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user;
+      setAccountInitials(
+        user
+          ? getInitials(
+              (user.user_metadata?.name as string | undefined) ?? null,
+              user.email ?? "",
+            )
+          : null,
+      );
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   // Close mobile menu on route change (stable string comparison → no loop).
@@ -96,13 +126,29 @@ export function SiteHeader() {
         <div className="flex items-center gap-1">
           <ThemeToggle />
 
+          {/* Always points at /account: signed-in users land on the dashboard;
+              signed-out users hit requireUser() in the account layout and are
+              bounced to /sign-in. When signed in, show the initials avatar so the
+              header reflects logged-in (vs guest) state. */}
           <Link
-            href="/sign-in"
-            aria-label="Account"
+            href="/account"
+            aria-label={accountInitials ? "Your account" : "Account"}
             className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
             style={{ color: "var(--lm-muted)" }}
           >
-            <Icon name="user" size={18} />
+            {accountInitials ? (
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold"
+                style={{
+                  background: "color-mix(in srgb, var(--lm-blue) 16%, transparent)",
+                  color: "var(--lm-blue)",
+                }}
+              >
+                {accountInitials}
+              </span>
+            ) : (
+              <Icon name="user" size={18} />
+            )}
           </Link>
 
           <button
