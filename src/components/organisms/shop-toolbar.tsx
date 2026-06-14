@@ -78,19 +78,25 @@ export function ShopToolbar({
     <div className="flex flex-col gap-3">
       {/* Count + sort row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-lumen-ink/60">
+        <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
           Showing{" "}
-          <span className="font-medium text-lumen-ink">{filteredCount}</span>
+          <span className="font-medium" style={{ color: "var(--lm-text)" }}>
+            {filteredCount}
+          </span>
           {filteredCount !== totalCount && (
             <>
               {" "}
               of{" "}
-              <span className="font-medium text-lumen-ink">{totalCount}</span>
+              <span className="font-medium" style={{ color: "var(--lm-text)" }}>
+                {totalCount}
+              </span>
             </>
           )}{" "}
           {totalCount === 1 ? "frame" : "frames"}
           {isPending && (
-            <span className="ml-2 text-lumen-ink/30 text-xs">Updating…</span>
+            <span className="ml-2 text-xs" style={{ color: "var(--lm-faint)" }}>
+              Updating…
+            </span>
           )}
         </p>
 
@@ -106,14 +112,20 @@ export function ShopToolbar({
             <span
               key={chip.label}
               role="listitem"
-              className="flex items-center gap-1.5 rounded-full border border-lumen-ink/15 bg-white px-3 py-1 text-xs text-lumen-ink"
+              className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs"
+              style={{
+                border: "1px solid var(--lm-hair)",
+                background: "var(--lm-surface)",
+                color: "var(--lm-text)",
+              }}
             >
               {chip.label}
               <button
                 type="button"
                 onClick={chip.onRemove}
                 aria-label={`Remove filter: ${chip.label}`}
-                className="flex h-4 w-4 items-center justify-center rounded-full text-lumen-ink/40 transition-colors hover:bg-lumen-ink/10 hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+                className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+                style={{ color: "var(--lm-faint)" }}
               >
                 <Icon name="x" size={10} />
               </button>

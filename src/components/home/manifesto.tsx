@@ -1,45 +1,41 @@
 /**
- * Manifesto — a sparse, wide-margin brand statement on the darkest surface.
+ * Manifesto — a sparse, wide-margin brand statement on a contrast surface.
  * Lines reveal in sequence as the block scrolls in (data-stagger → CSS). One
- * terracotta hairline is the only ornament. Reads as editorial, not marketing.
+ * terracotta hairline is the only ornament. Editorial, not marketing.
  */
 export function Manifesto() {
   return (
     <section
-      className="relative px-6 py-32 sm:py-44"
-      style={{ background: "var(--pv-deep)" }}
+      className="relative px-6 py-28 sm:py-40"
+      style={{ background: "var(--lm-deep)" }}
     >
       <div className="mx-auto max-w-4xl">
         <div
           className="h-px w-16"
-          style={{ background: "var(--pv-warm)" }}
+          style={{ background: "var(--lm-warm)" }}
           aria-hidden="true"
         />
-        <p className="pv-label mt-6" data-animate>
+        <p className="lm-label mt-6" data-animate>
           Why Lumen
         </p>
 
         <div data-stagger className="mt-10">
           <p
-            className="pv-display"
-            style={{
-              fontSize: "clamp(1.8rem, 5vw, 3.4rem)",
-              lineHeight: 1.12,
-              color: "var(--pv-text)",
-            }}
+            className="lm-display"
+            style={{ fontSize: "clamp(1.8rem, 5vw, 3.4rem)", lineHeight: 1.12 }}
           >
             Most eyewear is sold to you from a shelf.
           </p>
           <p
-            className="pv-display mt-2"
+            className="lm-display mt-2"
             style={{
               fontSize: "clamp(1.8rem, 5vw, 3.4rem)",
               lineHeight: 1.12,
-              color: "var(--pv-muted)",
+              color: "var(--lm-muted)",
             }}
           >
             We build it{" "}
-            <em style={{ fontStyle: "italic", color: "var(--pv-warm)" }}>
+            <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
               around your eyes
             </em>{" "}
             — measured by an optometrist, cut for your prescription, finished in
@@ -50,7 +46,7 @@ export function Manifesto() {
         <div
           data-stagger
           className="mt-16 grid gap-10 sm:grid-cols-3"
-          style={{ color: "var(--pv-muted)" }}
+          style={{ color: "var(--lm-muted)" }}
         >
           {[
             {
@@ -69,7 +65,7 @@ export function Manifesto() {
             <div key={item.k}>
               <h3
                 className="text-base font-semibold"
-                style={{ color: "var(--pv-text)" }}
+                style={{ color: "var(--lm-text)" }}
               >
                 {item.k}
               </h3>

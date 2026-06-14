@@ -30,31 +30,32 @@ export function EmptyState({
     <div
       className={`flex flex-col items-center justify-center gap-4 px-6 py-12 text-center ${className}`}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-lumen-ink/5 text-lumen-ink/30">
+      <div
+        className="flex h-14 w-14 items-center justify-center rounded-full"
+        style={{ background: "var(--lm-tint)", color: "var(--lm-faint)" }}
+      >
         <Icon name={icon} size={24} strokeWidth={1} />
       </div>
       <div className="space-y-1.5">
-        <h2 className="font-display text-2xl text-lumen-ink">{title}</h2>
+        <h2 className="lm-display text-2xl" style={{ color: "var(--lm-text)" }}>
+          {title}
+        </h2>
         {description && (
-          <p className="mx-auto max-w-sm text-sm leading-relaxed text-lumen-ink/50">
+          <p
+            className="mx-auto max-w-sm text-sm leading-relaxed"
+            style={{ color: "var(--lm-muted)" }}
+          >
             {description}
           </p>
         )}
       </div>
 
       {cta ? (
-        <Link
-          href={cta.href}
-          className="mt-1 inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-        >
+        <Link href={cta.href} className="lm-pill mt-1">
           {cta.label}
         </Link>
       ) : action ? (
-        <button
-          type="button"
-          onClick={action.onClick}
-          className="mt-1 inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-        >
+        <button type="button" onClick={action.onClick} className="lm-pill mt-1">
           {action.label}
         </button>
       ) : null}

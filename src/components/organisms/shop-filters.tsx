@@ -15,7 +15,10 @@ type ShopFiltersProps = {
 export function ShopFilters({ params, facets }: ShopFiltersProps) {
   return (
     <aside className="hidden w-[220px] shrink-0 lg:block">
-      <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-lumen-ink/40">
+      <p
+        className="mb-4 text-xs font-semibold uppercase tracking-widest"
+        style={{ color: "var(--lm-faint)" }}
+      >
         Filter
       </p>
       <FilterPanel params={params} facets={facets} />

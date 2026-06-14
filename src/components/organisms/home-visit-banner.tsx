@@ -28,23 +28,28 @@ export function HomeVisitBanner({ clinicSlug, whatsapp, phone }: HomeVisitBanner
   return (
     <section
       aria-labelledby="home-visit-heading"
-      className="relative overflow-hidden rounded-3xl bg-lumen-ink px-6 py-10 text-white sm:px-10 lg:grid lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-10 lg:p-14"
+      className="lm-grain relative overflow-hidden rounded-3xl px-6 py-10 sm:px-10 lg:grid lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-10 lg:p-14"
+      style={{ background: "var(--lm-deepest)", color: "var(--lm-text)" }}
     >
       <div className="relative z-10">
-        <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-lumen-cream/70">
-          <span className="h-1.5 w-1.5 rounded-full bg-lumen-cream/70" />
+        <p
+          className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest"
+          style={{ color: "var(--lm-faint)" }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--lm-faint)" }} />
           Home visit eye tests
         </p>
         <h2
           id="home-visit-heading"
-          className="mb-4 font-display text-4xl leading-[1.05] sm:text-5xl"
+          className="lm-display mb-4 leading-[1.05]"
+          style={{ fontSize: "clamp(2rem, 5vw, 3rem)" }}
         >
           Can&apos;t make it in?{" "}
-          <em className="italic text-lumen-cream/80">
+          <em className="italic" style={{ color: "var(--lm-muted)" }}>
             We&apos;ll come to you.
           </em>
         </h2>
-        <p className="mb-7 max-w-lg text-[15px] leading-relaxed text-white/70">
+        <p className="mb-7 max-w-lg text-[15px] leading-relaxed" style={{ color: "var(--lm-muted)" }}>
           Full clinical equipment, brought to your home or office. Perfect for
           elderly patients, busy professionals, and families with young
           children. We cover all of Accra and Kumasi.
@@ -53,7 +58,7 @@ export function HomeVisitBanner({ clinicSlug, whatsapp, phone }: HomeVisitBanner
           {clinicSlug && (
             <Link
               href={`/book?clinic=${clinicSlug}&service=home-visit`}
-              className="inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-blue/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
+              className="lm-pill"
             >
               Book a home visit
               <Icon name="arrow" size={14} />
@@ -64,17 +69,14 @@ export function HomeVisitBanner({ clinicSlug, whatsapp, phone }: HomeVisitBanner
               href={waMeUrl(whatsapp, "Hi! I'd like to book a home visit eye test.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-md border border-white/20 px-5 py-3 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
+              className="lm-ghost"
             >
               <Icon name="phone" size={14} />
               Chat on WhatsApp
             </a>
           )}
           {phone && (
-            <a
-              href={`tel:${phone}`}
-              className="inline-flex items-center gap-2 rounded-md border border-white/20 px-5 py-3 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-cream"
-            >
+            <a href={`tel:${phone}`} className="lm-ghost">
               <Icon name="phone" size={14} />
               Call to discuss
             </a>
@@ -83,16 +85,20 @@ export function HomeVisitBanner({ clinicSlug, whatsapp, phone }: HomeVisitBanner
       </div>
 
       <div className="relative z-10 mt-8 lg:mt-0">
-        <dl className="rounded-2xl border border-white/10 bg-white/4 p-6">
+        <dl
+          className="rounded-2xl p-6"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-tint)" }}
+        >
           {INFO_ROWS.map((row, i) => (
             <div
               key={row.label}
-              className={`flex items-baseline justify-between gap-4 py-3 text-[13.5px] ${
-                i < INFO_ROWS.length - 1 ? "border-b border-white/10" : ""
-              }`}
+              className="flex items-baseline justify-between gap-4 py-3 text-[13.5px]"
+              style={{
+                borderBottom: i < INFO_ROWS.length - 1 ? "1px solid var(--lm-hair)" : "none",
+              }}
             >
-              <dt className="text-white/50">{row.label}</dt>
-              <dd className="text-right font-medium text-white">
+              <dt style={{ color: "var(--lm-faint)" }}>{row.label}</dt>
+              <dd className="text-right font-medium" style={{ color: "var(--lm-text)" }}>
                 {row.value}
               </dd>
             </div>
@@ -103,7 +109,11 @@ export function HomeVisitBanner({ clinicSlug, whatsapp, phone }: HomeVisitBanner
       {/* Decorative glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-48 -top-48 h-[600px] w-[600px] bg-[radial-gradient(circle,rgba(15,76,129,0.4),transparent_60%)]"
+        className="pointer-events-none absolute -right-48 -top-48 h-[600px] w-[600px]"
+        style={{
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--lm-warm) 20%, transparent), transparent 60%)",
+        }}
       />
     </section>
   );

@@ -24,18 +24,20 @@ export default function CommerceError({
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-5 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-lumen-warm/10 text-lumen-warm">
+      <div
+        className="flex h-14 w-14 items-center justify-center rounded-full"
+        style={{
+          background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
+          color: "var(--lm-warm)",
+        }}
+      >
         <Icon name="x" size={24} strokeWidth={1.5} />
       </div>
-      <h1 className="font-display text-3xl text-lumen-ink">Something went wrong</h1>
-      <p className="text-sm text-lumen-ink/50">
+      <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>Something went wrong</h1>
+      <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
         We couldn&rsquo;t load your bag just now. Please try again.
       </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-1 inline-flex items-center gap-2 rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-      >
+      <button type="button" onClick={reset} className="lm-pill mt-1">
         Try again
       </button>
     </main>

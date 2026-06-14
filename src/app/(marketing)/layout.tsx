@@ -9,7 +9,9 @@ export default function MarketingLayout({
   return (
     <>
       <SiteHeader />
-      <main>{children}</main>
+      {/* Offset the fixed header (var(--nav-h)). The home page is NOT in this
+          group; its hero bleeds under the transparent header intentionally. */}
+      <main style={{ paddingTop: "var(--nav-h)" }}>{children}</main>
       <SiteFooter />
     </>
   );

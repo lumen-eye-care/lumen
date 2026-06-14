@@ -20,19 +20,20 @@ export default async function SignInPage({
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1 text-center">
-        <h1 className="font-display text-3xl text-lumen-ink">Welcome back</h1>
-        <p className="text-sm text-lumen-ink/70">
+        <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>Welcome back</h1>
+        <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
           Sign in to track orders and check out faster.
         </p>
       </header>
 
       <SignInForm redirect={next} linkError={linkError} />
 
-      <p className="text-center text-sm text-lumen-ink/70">
+      <p className="text-center text-sm" style={{ color: "var(--lm-muted)" }}>
         New to Lumen?{" "}
         <Link
           href={`/sign-up?redirect=${encodeURIComponent(next)}`}
-          className="text-lumen-blue underline-offset-2 hover:underline"
+          className="underline-offset-2 hover:underline"
+          style={{ color: "var(--lm-warm)" }}
         >
           Create an account
         </Link>

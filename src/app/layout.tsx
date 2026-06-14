@@ -7,6 +7,11 @@ import { CartProvider } from "@/components/cart/cart-provider";
 import { CartAuthSync } from "@/components/cart/cart-auth-sync";
 import { ToastProvider } from "@/components/atoms/toast";
 import { CartDrawer } from "@/components/organisms/cart-drawer";
+import {
+  ThemeProvider,
+  THEME_SCRIPT,
+} from "@/components/theme/theme-provider";
+import { ScrollReveal } from "@/components/theme/scroll-reveal";
 
 const display = Instrument_Serif({
   weight: "400",
@@ -50,15 +55,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-dvh bg-lumen-cream text-lumen-ink antialiased">
-        <CartProvider>
-          <CartAuthSync />
-          <ToastProvider>
-            {children}
-            <CartDrawer />
-          </ToastProvider>
-        </CartProvider>
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Resolve the theme before first paint — no flash of wrong palette. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
+      </head>
+      <body className="min-h-dvh antialiased">
+        <ThemeProvider>
+          <CartProvider>
+            <CartAuthSync />
+            <ToastProvider>
+              <ScrollReveal />
+              {children}
+              <CartDrawer />
+            </ToastProvider>
+          </CartProvider>
+        </ThemeProvider>
         {/* Core Web Vitals + page views only — no GA4 in v1 (Handoff §2). */}
         <Analytics />
         <SpeedInsights />

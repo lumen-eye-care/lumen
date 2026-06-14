@@ -10,9 +10,9 @@ import {
 import { requestAppointment, type BookFormState } from "./actions";
 
 const inputClass =
-  "w-full rounded-md border border-lumen-ink/15 bg-white px-3 py-2.5 text-sm text-lumen-ink placeholder:text-lumen-ink/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue";
+  "w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-raise)] px-3 py-2.5 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]";
 
-const errorClass = "mt-1 text-xs text-lumen-warm";
+const errorClass = "mt-1 text-xs text-[color:var(--lm-warm)]";
 
 type Clinic = { id: string; name: string };
 
@@ -37,14 +37,18 @@ export function BookForm({
 
   if (state.status === "success") {
     return (
-      <div className="rounded-xl border border-lumen-sage/30 bg-lumen-sage/8 px-6 py-8 text-center">
-        <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-lumen-sage/15 text-lumen-sage">
+      <div
+        className="lm-card px-6 py-8 text-center"
+        style={{ borderColor: "color-mix(in srgb, var(--lm-sage) 40%, transparent)" }}
+      >
+        <span
+          className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full"
+          style={{ background: "color-mix(in srgb, var(--lm-sage) 18%, transparent)", color: "var(--lm-sage)" }}
+        >
           <Icon name="check" size={20} />
         </span>
-        <h2 className="mb-2 font-display text-2xl text-lumen-ink">
-          Request received
-        </h2>
-        <p className="mx-auto max-w-sm text-sm text-lumen-ink/70">
+        <h2 className="lm-display mb-2 text-2xl">Request received</h2>
+        <p className="mx-auto max-w-sm text-sm" style={{ color: "var(--lm-muted)" }}>
           We&apos;ve sent a confirmation to your email. Our team will be in
           touch shortly to confirm your appointment.
         </p>
@@ -64,7 +68,7 @@ export function BookForm({
 
       {/* Service */}
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-lumen-ink">
+        <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">
           What can we help you with?
         </span>
         <select
@@ -90,7 +94,7 @@ export function BookForm({
       {/* Clinic selector — shown when more than one clinic is available */}
       {clinics.length > 1 && (
         <label className="block text-sm">
-          <span className="mb-1.5 block font-medium text-lumen-ink">Clinic</span>
+          <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">Clinic</span>
           <select
             value={selectedClinicId}
             onChange={(e) => setSelectedClinicId(e.target.value)}
@@ -116,7 +120,7 @@ export function BookForm({
 
       {/* Name */}
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-lumen-ink">
+        <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">
           Your name
         </span>
         <input
@@ -138,7 +142,7 @@ export function BookForm({
 
       {/* Phone */}
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-lumen-ink">
+        <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">
           Phone number
         </span>
         <input
@@ -152,7 +156,7 @@ export function BookForm({
           aria-invalid={!!fieldErrors.phone}
           aria-describedby={fieldErrors.phone ? "phone-error" : "phone-hint"}
         />
-        <p id="phone-hint" className="mt-1 text-xs text-lumen-ink/50">
+        <p id="phone-hint" className="mt-1 text-xs text-[color:var(--lm-faint)]">
           Ghana number. We&apos;ll call to confirm.
         </p>
         {fieldErrors.phone && (
@@ -164,7 +168,7 @@ export function BookForm({
 
       {/* Email */}
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-lumen-ink">
+        <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">
           Email address
         </span>
         <input
@@ -178,7 +182,7 @@ export function BookForm({
           aria-invalid={!!fieldErrors.email}
           aria-describedby={fieldErrors.email ? "email-error" : "email-hint"}
         />
-        <p id="email-hint" className="mt-1 text-xs text-lumen-ink/50">
+        <p id="email-hint" className="mt-1 text-xs text-[color:var(--lm-faint)]">
           For your confirmation email.
         </p>
         {fieldErrors.email && (
@@ -190,9 +194,9 @@ export function BookForm({
 
       {/* Preferred date (optional) */}
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-lumen-ink">
+        <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">
           Preferred date{" "}
-          <span className="font-normal text-lumen-ink/40">(optional)</span>
+          <span className="font-normal text-[color:var(--lm-faint)]">(optional)</span>
         </span>
         <input
           name="preferred_date"
@@ -212,9 +216,9 @@ export function BookForm({
 
       {/* Notes (optional) */}
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-lumen-ink">
+        <span className="mb-1.5 block font-medium text-[color:var(--lm-text)]">
           Anything else we should know?{" "}
-          <span className="font-normal text-lumen-ink/40">(optional)</span>
+          <span className="font-normal text-[color:var(--lm-faint)]">(optional)</span>
         </span>
         <textarea
           name="notes"
@@ -235,7 +239,11 @@ export function BookForm({
       {formError && (
         <p
           role="alert"
-          className="rounded-md bg-lumen-warm/10 px-3 py-2.5 text-sm text-lumen-warm"
+          className="rounded-md px-3 py-2.5 text-sm"
+          style={{
+            background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
+            color: "var(--lm-warm)",
+          }}
         >
           {formError}
         </p>
@@ -244,7 +252,7 @@ export function BookForm({
       <button
         type="submit"
         disabled={pending}
-        className="flex w-full items-center justify-center gap-2 rounded-md bg-lumen-blue px-5 py-3 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+        className="lm-pill w-full justify-center py-3 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Sending…" : "Request appointment"}
         {!pending && <Icon name="arrow" size={14} />}

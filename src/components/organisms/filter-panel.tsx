@@ -83,10 +83,14 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
         <button
           type="button"
           onClick={clearAll}
-          className="mb-4 flex w-full items-center justify-between rounded-md bg-lumen-ink/5 px-3 py-2 text-xs font-medium text-lumen-ink transition-colors hover:bg-lumen-ink/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+          className="mb-4 flex w-full items-center justify-between rounded-md px-3 py-2 text-xs font-medium transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+          style={{ background: "var(--lm-tint)", color: "var(--lm-text)" }}
         >
           Clear all filters
-          <span className="rounded-full bg-lumen-blue/15 px-1.5 py-0.5 text-[10px] font-semibold text-lumen-blue">
+          <span
+            className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+            style={{ background: "var(--lm-warm)", color: "#1a0f0a" }}
+          >
             {activeFilterCount}
           </span>
         </button>
@@ -100,18 +104,21 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
           return (
             <label
               key={shape}
-              className="flex cursor-pointer items-center justify-between gap-2 text-sm text-lumen-ink"
+              className="flex cursor-pointer items-center justify-between gap-2 text-sm"
+              style={{ color: "var(--lm-text)" }}
             >
               <span className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggleList(params.shapes, shape, "shapes")}
-                  className="h-4 w-4 rounded border-lumen-ink/20 text-lumen-blue accent-lumen-blue"
+                  className="h-4 w-4 rounded accent-[color:var(--lm-warm)]"
                 />
                 {SHAPE_LABELS[shape] ?? shape}
               </span>
-              <span className="text-xs text-lumen-ink/40">{count}</span>
+              <span className="text-xs" style={{ color: "var(--lm-faint)" }}>
+                {count}
+              </span>
             </label>
           );
         })}
@@ -125,18 +132,21 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
           return (
             <label
               key={gender}
-              className="flex cursor-pointer items-center justify-between gap-2 text-sm text-lumen-ink"
+              className="flex cursor-pointer items-center justify-between gap-2 text-sm"
+              style={{ color: "var(--lm-text)" }}
             >
               <span className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggleList(params.genders, gender, "genders")}
-                  className="h-4 w-4 rounded border-lumen-ink/20 accent-lumen-blue"
+                  className="h-4 w-4 rounded accent-[color:var(--lm-warm)]"
                 />
                 {GENDER_LABELS[gender] ?? gender}
               </span>
-              <span className="text-xs text-lumen-ink/40">{count}</span>
+              <span className="text-xs" style={{ color: "var(--lm-faint)" }}>
+                {count}
+              </span>
             </label>
           );
         })}
@@ -150,18 +160,21 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
           return (
             <label
               key={m.id}
-              className="flex cursor-pointer items-center justify-between gap-2 text-sm text-lumen-ink"
+              className="flex cursor-pointer items-center justify-between gap-2 text-sm"
+              style={{ color: "var(--lm-text)" }}
             >
               <span className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggleList(params.materials, m.id, "materials")}
-                  className="h-4 w-4 rounded border-lumen-ink/20 accent-lumen-blue"
+                  className="h-4 w-4 rounded accent-[color:var(--lm-warm)]"
                 />
                 {m.label}
               </span>
-              <span className="text-xs text-lumen-ink/40">{count}</span>
+              <span className="text-xs" style={{ color: "var(--lm-faint)" }}>
+                {count}
+              </span>
             </label>
           );
         })}
@@ -182,15 +195,18 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
                 onClick={() => toggleList(params.colours, c.name, "colours")}
                 disabled={count === 0}
                 className={[
-                  "h-7 w-7 rounded-full ring-offset-2 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue",
-                  active
-                    ? "ring-2 ring-lumen-blue"
-                    : "ring-1 ring-lumen-ink/15",
+                  "h-7 w-7 rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]",
                   count === 0
                     ? "opacity-25 cursor-not-allowed"
                     : "hover:scale-110 cursor-pointer",
                 ].join(" ")}
-                style={{ backgroundColor: c.hex }}
+                style={{
+                  backgroundColor: c.hex,
+                  outline: active
+                    ? "2px solid var(--lm-warm)"
+                    : "1px solid var(--lm-hair)",
+                  outlineOffset: "2px",
+                }}
               />
             );
           })}
@@ -209,9 +225,12 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
               const v = parseFloat(e.target.value);
               navigate({ minGhs: Number.isFinite(v) && v >= 0 ? v : null });
             }}
-            className="w-full rounded-md border border-lumen-ink/15 bg-transparent px-3 py-1.5 text-sm text-lumen-ink placeholder:text-lumen-ink/30 focus:border-lumen-blue focus:outline-none"
+            className="w-full rounded-md bg-transparent px-3 py-1.5 text-sm placeholder:text-[color:var(--lm-faint)] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[color:var(--lm-warm)]"
+            style={{ border: "1px solid var(--lm-hair)", color: "var(--lm-text)" }}
           />
-          <span className="shrink-0 text-xs text-lumen-ink/40">to</span>
+          <span className="shrink-0 text-xs" style={{ color: "var(--lm-faint)" }}>
+            to
+          </span>
           <input
             type="number"
             placeholder="Max"
@@ -221,7 +240,8 @@ export function FilterPanel({ params, facets }: FilterPanelProps) {
               const v = parseFloat(e.target.value);
               navigate({ maxGhs: Number.isFinite(v) && v > 0 ? v : null });
             }}
-            className="w-full rounded-md border border-lumen-ink/15 bg-transparent px-3 py-1.5 text-sm text-lumen-ink placeholder:text-lumen-ink/30 focus:border-lumen-blue focus:outline-none"
+            className="w-full rounded-md bg-transparent px-3 py-1.5 text-sm placeholder:text-[color:var(--lm-faint)] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[color:var(--lm-warm)]"
+            style={{ border: "1px solid var(--lm-hair)", color: "var(--lm-text)" }}
           />
         </div>
       </FilterGroup>

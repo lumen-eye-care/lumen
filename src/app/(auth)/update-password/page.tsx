@@ -11,10 +11,10 @@ export default function UpdatePasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1 text-center">
-        <h1 className="font-display text-3xl text-lumen-ink">
+        <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>
           Set a new password
         </h1>
-        <p className="text-sm text-lumen-ink/70">
+        <p className="text-sm" style={{ color: "var(--lm-muted)" }}>
           Choose a new password for your account.
         </p>
       </header>

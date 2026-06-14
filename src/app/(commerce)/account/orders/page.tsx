@@ -47,10 +47,11 @@ export default async function MyOrdersPage() {
   return (
     <div className="flex flex-col gap-8">
       <header className="flex items-center justify-between gap-4">
-        <h1 className="font-display text-3xl text-lumen-ink">My orders</h1>
+        <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>My orders</h1>
         <Link
           href="/account"
-          className="text-sm text-lumen-blue underline-offset-2 hover:underline"
+          className="text-sm underline-offset-2 hover:underline"
+          style={{ color: "var(--lm-warm)" }}
         >
           ← Account
         </Link>
@@ -71,23 +72,23 @@ export default async function MyOrdersPage() {
               <li key={o.id}>
                 <Link
                   href={`/account/orders/${o.id}`}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-lumen-ink/10 bg-white p-5 transition-colors hover:border-lumen-ink/25"
+                  className="lm-card flex items-center justify-between gap-4 p-5 transition-colors"
                 >
                   <div className="flex flex-col gap-1.5">
-                    <span className="font-medium text-lumen-ink">
+                    <span className="font-medium" style={{ color: "var(--lm-text)" }}>
                       {o.payment_reference ?? `Order ${o.id.slice(0, 8)}`}
                     </span>
-                    <span className="text-sm text-lumen-ink/55">
+                    <span className="text-sm" style={{ color: "var(--lm-muted)" }}>
                       {dateFmt.format(new Date(o.created_at))} ·{" "}
                       {itemCount} {itemCount === 1 ? "item" : "items"}
                     </span>
                     <OrderStatusPill status={o.status} />
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="font-medium text-lumen-ink">
+                    <span className="font-medium" style={{ color: "var(--lm-text)" }}>
                       {formatGhs(o.total_ghs)}
                     </span>
-                    <Icon name="chev" size={20} className="text-lumen-ink/40" />
+                    <Icon name="chev" size={20} style={{ color: "var(--lm-faint)" }} />
                   </div>
                 </Link>
               </li>

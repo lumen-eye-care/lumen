@@ -3,13 +3,13 @@
 /*
  * Lumen brand design tokens (mirror the prototype's styles.css).
  * Tailwind v4 is CSS-first: tokens declared in @theme generate utilities
- * (e.g. --color-lumen-blue -> bg-lumen-blue / text-lumen-blue, --radius-md -> rounded-md).
+ * (e.g. --color-lumen-blue -> bg-lumen-blue / text-lumen-blue).
  */
 @theme {
-  --color-lumen-ink: #0a1f35;
-  --color-lumen-blue: #0f4c81;
-  --color-lumen-sage: #3d6b5c;
-  --color-lumen-warm: #d97757;
+  --color-lumen-ink:   #0a1f35;
+  --color-lumen-blue:  #0f4c81;
+  --color-lumen-sage:  #3d6b5c;
+  --color-lumen-warm:  #d97757;
   --color-lumen-cream: #faf7f2;
 
   --radius-sm: 8px;
@@ -17,25 +17,363 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  /* Bound to the next/font CSS variables set on <html> in layout.tsx. */
   --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
-  --font-body: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-body:    var(--font-geist), ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
- * Bare aliases so CLAUDE.md's documented var(--lumen-ink) form keeps working
+ * Bare aliases so CLAUDE.md's documented var(--lumen-ink) form works
  * alongside the Tailwind --color-lumen-* namespace.
  */
 :root {
-  --lumen-ink: var(--color-lumen-ink);
-  --lumen-blue: var(--color-lumen-blue);
-  --lumen-sage: var(--color-lumen-sage);
-  --lumen-warm: var(--color-lumen-warm);
-  --lumen-cream: var(--color-lumen-cream);
+  --lumen-ink:   #0a1f35;
+  --lumen-blue:  #0f4c81;
+  --lumen-sage:  #3d6b5c;
+  --lumen-warm:  #d97757;
+  --lumen-cream: #faf7f2;
+
+  /* Nav height — drives the hero negative-margin trick on the home page. */
+  --nav-h: 72px;
+
+  /* ════════════════════════════════════════════════════════════════
+     LUMEN MODE — Light cinematic (default)
+     Warm off-white base with the same editorial depth, layered
+     surfaces, terracotta accent, and motion language as dark mode.
+     ════════════════════════════════════════════════════════════════ */
+  --lm-base:       #f5f0e8; /* page background */
+  --lm-surface:    #ede7dc; /* card / elevated surface */
+  --lm-deep:       #e5dfd4; /* section contrast background */
+  --lm-raise:      #fdfaf6; /* lightest surface (inputs, highlights) */
+  --lm-deepest:    #d8d1c4; /* maximum contrast surface */
+
+  --lm-text:       #0a1f35;
+  --lm-muted:      rgba(10, 31, 53, 0.58);
+  --lm-faint:      rgba(10, 31, 53, 0.34);
+  --lm-hair:       rgba(10, 31, 53, 0.09);
+  --lm-tint:       rgba(10, 31, 53, 0.04);
+
+  --lm-warm:       #d97757;
+  --lm-warm-soft:  #e0916f;
+  --lm-sage:       #3d6b5c;
+  --lm-blue:       #0f4c81;
+
+  /* Header glass + shadow */
+  --lm-base-glass: rgba(245, 240, 232, 0.9);
+  --lm-shadow:     rgba(10, 31, 53, 0.1);
+
+  /* Motion-reactive values (dialed down in light, up in dark) */
+  --lm-scan-opacity:  0.2;
+  --lm-glow-opacity:  0.24;
+  --lm-grain-opacity: 0.035;
+
+  /* Motion vocabulary */
+  --lm-ease:     cubic-bezier(0.22, 1, 0.36, 1);
+  --lm-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --lm-t-fast:   140ms;
+  --lm-t-base:   240ms;
+  --lm-t-slow:   400ms;
+  --lm-t-reveal: 920ms;
+
+  color-scheme: light;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   DARK MODE — Deep navy cinematic
+   ════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --lm-base:       #0a1f35;
+  --lm-surface:    #0e2942;
+  --lm-deep:       #071626;
+  --lm-raise:      #122438;
+  --lm-deepest:    #050f1b;
+
+  --lm-text:       #f2f2f0;
+  --lm-muted:      rgba(242, 242, 240, 0.62);
+  --lm-faint:      rgba(242, 242, 240, 0.38);
+  --lm-hair:       rgba(242, 242, 240, 0.1);
+  --lm-tint:       rgba(242, 242, 240, 0.04);
+
+  --lm-warm:       #d97757;
+  --lm-warm-soft:  #e0916f;
+  --lm-sage:       #3d6b5c;
+  --lm-blue:       #4a9de0; /* brighter blue reads on navy */
+
+  --lm-base-glass: rgba(10, 31, 53, 0.88);
+  --lm-shadow:     rgba(5, 15, 27, 0.55);
+
+  --lm-scan-opacity:  0.55;
+  --lm-glow-opacity:  0.42;
+  --lm-grain-opacity: 0.048;
+
+  color-scheme: dark;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BASE
+   ════════════════════════════════════════════════════════════════ */
 body {
-  background-color: var(--color-lumen-cream);
-  color: var(--color-lumen-ink);
+  background-color: var(--lm-base);
+  color: var(--lm-text);
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Theme transition — only the properties that visibly change, applied for
+   a short window when JS toggles data-theme (avoids transitioning on load). */
+body.lm-transitioning,
+body.lm-transitioning * {
+  transition:
+    background-color 280ms var(--lm-ease),
+    color 280ms var(--lm-ease),
+    border-color 280ms var(--lm-ease) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TYPOGRAPHY PRIMITIVES
+   ════════════════════════════════════════════════════════════════ */
+.lm-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lm-faint);
+}
+
+.lm-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.015em;
+  color: var(--lm-text);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SCROLL REVEAL — toggled by the ScrollReveal client component
+   (IntersectionObserver) via [data-revealed="true"]. Pure CSS.
+   ════════════════════════════════════════════════════════════════ */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity var(--lm-t-reveal) var(--lm-ease-out),
+    transform var(--lm-t-reveal) var(--lm-ease-out);
+  will-change: opacity, transform;
+}
+[data-animate][data-revealed="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-stagger] > * {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity var(--lm-t-reveal) var(--lm-ease-out),
+    transform var(--lm-t-reveal) var(--lm-ease-out);
+}
+[data-stagger][data-revealed="true"] > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-stagger][data-revealed="true"] > *:nth-child(2) { transition-delay: 0.07s; }
+[data-stagger][data-revealed="true"] > *:nth-child(3) { transition-delay: 0.14s; }
+[data-stagger][data-revealed="true"] > *:nth-child(4) { transition-delay: 0.21s; }
+[data-stagger][data-revealed="true"] > *:nth-child(5) { transition-delay: 0.28s; }
+[data-stagger][data-revealed="true"] > *:nth-child(6) { transition-delay: 0.35s; }
+
+/* ════════════════════════════════════════════════════════════════
+   ENTRANCE ANIMATIONS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Headline resolves from blur to sharp. */
+.lm-focus-in {
+  opacity: 0;
+  filter: blur(14px);
+  transform: translateY(14px);
+  animation: lmFocusIn 1.2s var(--lm-ease-out) forwards;
+}
+.lm-focus-in.d1 { animation-delay: 0.12s; }
+.lm-focus-in.d2 { animation-delay: 0.28s; }
+.lm-focus-in.d3 { animation-delay: 0.46s; }
+.lm-focus-in.d4 { animation-delay: 0.64s; }
+
+@keyframes lmFocusIn {
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+/* Frame image: confident rise + scale-settle (no blur). */
+.lm-rise {
+  opacity: 0;
+  transform: translateY(24px) scale(1.04);
+  animation: lmRise 1.1s var(--lm-ease-out) 0.22s forwards;
+}
+@keyframes lmRise {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   AMBIENT — floating + scan line + scroll cue
+   ════════════════════════════════════════════════════════════════ */
+.lm-float { animation: lmFloat 6s var(--lm-ease) infinite; }
+.lm-float.f2 { animation-delay: 1.5s; }
+.lm-float.f3 { animation-delay: 3s; }
+@keyframes lmFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+.lm-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lm-warm), transparent);
+  opacity: var(--lm-scan-opacity);
+  z-index: 1;
+  pointer-events: none;
+  animation: lmScan 4.4s ease-in-out infinite;
+}
+@keyframes lmScan {
+  0%, 100% { top: 8%;  opacity: 0; }
+  12%       { opacity: var(--lm-scan-opacity); }
+  50%       { top: 92%; opacity: calc(var(--lm-scan-opacity) * 1.35); }
+  88%       { opacity: var(--lm-scan-opacity); }
+}
+
+.lm-scrollcue { animation: lmBob 2.4s var(--lm-ease) infinite; }
+@keyframes lmBob {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50%       { transform: translateY(7px); opacity: 1; }
+}
+
+/* Film grain — fixed, ignorable texture over the cinematic surfaces.
+   Opacity adapts per theme via --lm-grain-opacity. */
+.lm-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--lm-grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ════════════════════════════════════════════════════════════════
+   GLOW
+   ════════════════════════════════════════════════════════════════ */
+.lm-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(72px);
+  opacity: var(--lm-glow-opacity);
+  background: radial-gradient(circle at center, var(--lm-warm) 0%, transparent 68%);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INTERACTIVE COMPONENTS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Primary CTA pill. */
+.lm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--lm-warm);
+  color: #1a0f0a;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform var(--lm-t-base) var(--lm-ease),
+    box-shadow var(--lm-t-base) var(--lm-ease),
+    background var(--lm-t-base) var(--lm-ease);
+}
+.lm-pill:hover {
+  transform: translateY(-2px);
+  background: var(--lm-warm-soft);
+  box-shadow: 0 14px 32px rgba(217, 119, 87, 0.3);
+}
+.lm-pill:focus-visible {
+  outline: 2px solid var(--lm-warm);
+  outline-offset: 3px;
+}
+
+/* Ghost / outline pill. */
+.lm-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--lm-hair);
+  color: var(--lm-text);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color var(--lm-t-base) var(--lm-ease),
+    background var(--lm-t-base) var(--lm-ease);
+}
+.lm-ghost:hover {
+  border-color: var(--lm-faint);
+  background: var(--lm-tint);
+}
+.lm-ghost:focus-visible {
+  outline: 2px solid var(--lm-warm);
+  outline-offset: 3px;
+}
+
+/* Surface card. */
+.lm-card {
+  background: linear-gradient(160deg, var(--lm-raise), var(--lm-surface));
+  border: 1px solid var(--lm-hair);
+  border-radius: 16px;
+  transition:
+    transform var(--lm-t-base) var(--lm-ease),
+    border-color var(--lm-t-base) var(--lm-ease),
+    box-shadow var(--lm-t-base) var(--lm-ease);
+}
+.lm-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(217, 119, 87, 0.3);
+  box-shadow: 0 20px 52px var(--lm-shadow);
+}
+
+/* Nav link. */
+.lm-nav-link {
+  color: var(--lm-muted);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color var(--lm-t-fast) var(--lm-ease);
+}
+.lm-nav-link:hover { color: var(--lm-text); }
+
+/* ════════════════════════════════════════════════════════════════
+   REDUCED MOTION — full static fallback, content stays readable
+   ════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .lm-focus-in,
+  .lm-rise {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    animation: none;
+  }
+  .lm-float,
+  .lm-scrollcue { animation: none; }
+  .lm-scan { display: none; }
+  [data-animate],
+  [data-stagger] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  body.lm-transitioning,
+  body.lm-transitioning * { transition: none !important; }
 }

@@ -17,7 +17,9 @@ export default function CartPage() {
   return (
     <>
       <SiteHeader />
-      <CartView />
+      <div style={{ paddingTop: "var(--nav-h)" }}>
+        <CartView />
+      </div>
       <SiteFooter />
     </>
   );

@@ -46,9 +46,18 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
     <div className="grid gap-12 lg:grid-cols-2">
       {/* Gallery */}
       <div className="flex flex-col gap-4">
-        <div className="relative flex items-center justify-center rounded-2xl bg-[#F6F2EB] px-10 py-12">
+        <div
+          className="relative flex items-center justify-center rounded-2xl px-10 py-12"
+          style={{ background: "var(--lm-deep)" }}
+        >
           {frame.badge && (
-            <span className="absolute left-4 top-4 rounded-full bg-lumen-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-lumen-blue">
+            <span
+              className="absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider"
+              style={{
+                background: "color-mix(in srgb, var(--lm-blue) 12%, transparent)",
+                color: "var(--lm-blue)",
+              }}
+            >
               {BADGE_LABEL[frame.badge] ?? frame.badge}
             </span>
           )}
@@ -65,7 +74,7 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
           ) : (
             <FrameSVG
               shape={frame.shape}
-              color={color?.hex ?? "#1E3148"}
+              color={color?.hex ?? "var(--lm-text)"}
               className="w-full max-w-sm"
             />
           )}
@@ -81,11 +90,14 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
                 onClick={() => setColorIndex(i)}
                 aria-label={`View ${c.name}`}
                 aria-pressed={i === colorIndex}
-                className={`flex h-16 w-16 items-center justify-center rounded-lg bg-[#F6F2EB] ring-1 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue ${
-                  i === colorIndex
-                    ? "ring-2 ring-lumen-blue"
-                    : "ring-lumen-ink/10 hover:ring-lumen-ink/30"
-                }`}
+                className="flex h-16 w-16 items-center justify-center rounded-lg transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+                style={{
+                  background: "var(--lm-deep)",
+                  boxShadow:
+                    i === colorIndex
+                      ? "0 0 0 2px var(--lm-warm)"
+                      : "0 0 0 1px var(--lm-hair)",
+                }}
               >
                 <FrameSVG shape={frame.shape} color={c.hex} className="w-[78%]" />
               </button>
@@ -97,15 +109,21 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
       {/* Info + buy */}
       <div className="flex flex-col gap-5">
         <div>
-          <h1 className="font-display text-4xl text-lumen-ink">{frame.name}</h1>
-          {meta && <p className="mt-1 text-sm text-lumen-ink/50">{meta}</p>}
+          <h1 className="lm-display text-4xl" style={{ color: "var(--lm-text)" }}>
+            {frame.name}
+          </h1>
+          {meta && (
+            <p className="mt-1 text-sm" style={{ color: "var(--lm-faint)" }}>
+              {meta}
+            </p>
+          )}
         </div>
 
         <div>
-          <p className="text-3xl font-medium text-lumen-ink">
+          <p className="text-3xl font-medium" style={{ color: "var(--lm-warm)" }}>
             {formatGhs(frame.price_ghs)}
           </p>
-          <p className="mt-0.5 text-xs text-lumen-ink/50">
+          <p className="mt-0.5 text-xs" style={{ color: "var(--lm-faint)" }}>
             Frame only · Lenses added at checkout
           </p>
         </div>
@@ -113,8 +131,14 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
         {/* Colour selector */}
         {frame.colors.length > 0 && (
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-lumen-ink/50">
-              Colour{color ? <span className="text-lumen-ink/70"> · {color.name}</span> : null}
+            <p
+              className="mb-2 text-xs font-medium uppercase tracking-wider"
+              style={{ color: "var(--lm-faint)" }}
+            >
+              Colour
+              {color ? (
+                <span style={{ color: "var(--lm-muted)" }}> · {color.name}</span>
+              ) : null}
             </p>
             <div className="flex flex-wrap gap-2">
               {frame.colors.map((c, i) => (
@@ -125,12 +149,14 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
                   onClick={() => setColorIndex(i)}
                   aria-label={c.name}
                   aria-pressed={i === colorIndex}
-                  className={`flex h-9 w-9 items-center justify-center rounded-full ring-offset-2 transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue ${
-                    i === colorIndex
-                      ? "ring-2 ring-lumen-blue"
-                      : "ring-1 ring-lumen-ink/15 hover:ring-2 hover:ring-lumen-blue"
-                  }`}
-                  style={{ backgroundColor: c.hex }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+                  style={{
+                    backgroundColor: c.hex,
+                    boxShadow:
+                      i === colorIndex
+                        ? "0 0 0 2px var(--lm-warm), 0 0 0 4px var(--lm-base)"
+                        : "0 0 0 1px var(--lm-hair)",
+                  }}
                 />
               ))}
             </div>
@@ -141,18 +167,18 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
         <div className="flex items-center gap-2 text-sm">
           {frame.stock > 5 ? (
             <>
-              <span className="h-2 w-2 rounded-full bg-lumen-sage" />
-              <span className="text-lumen-sage">In stock</span>
+              <span className="h-2 w-2 rounded-full" style={{ background: "var(--lm-sage)" }} />
+              <span style={{ color: "var(--lm-sage)" }}>In stock</span>
             </>
           ) : frame.stock > 0 ? (
             <>
-              <span className="h-2 w-2 rounded-full bg-lumen-warm" />
-              <span className="text-lumen-warm">Only {frame.stock} left</span>
+              <span className="h-2 w-2 rounded-full" style={{ background: "var(--lm-warm)" }} />
+              <span style={{ color: "var(--lm-warm)" }}>Only {frame.stock} left</span>
             </>
           ) : (
             <>
-              <span className="h-2 w-2 rounded-full bg-lumen-ink/30" />
-              <span className="text-lumen-ink/50">Out of stock</span>
+              <span className="h-2 w-2 rounded-full" style={{ background: "var(--lm-faint)" }} />
+              <span style={{ color: "var(--lm-faint)" }}>Out of stock</span>
             </>
           )}
         </div>
@@ -162,7 +188,7 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
           type="button"
           onClick={handleAddToBag}
           disabled={outOfStock}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-lumen-blue px-5 py-3.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue disabled:cursor-not-allowed disabled:opacity-50"
+          className="lm-pill w-full justify-center py-3.5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {outOfStock ? (
             "Out of stock"
@@ -174,18 +200,22 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
         </button>
 
         {/* Lens builder — deferred to US-P2-02 */}
-        <div className="rounded-xl border border-lumen-ink/8 bg-lumen-ink/[0.03] px-5 py-4">
-          <p className="text-sm font-medium text-lumen-ink">
+        <div
+          className="rounded-xl px-5 py-4"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-tint)" }}
+        >
+          <p className="text-sm font-medium" style={{ color: "var(--lm-text)" }}>
             Full lens builder coming soon
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-lumen-ink/50">
+          <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--lm-muted)" }}>
             Choose your lens type, prescription, and add-ons at checkout. Have a
             question? WhatsApp us at{" "}
             <a
               href="https://wa.me/233245628432"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-lumen-blue underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+              style={{ color: "var(--lm-warm)" }}
             >
               +233 24 562 8432
             </a>
@@ -194,7 +224,7 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
         </div>
 
         {frame.description && (
-          <p className="text-sm leading-relaxed text-lumen-ink/70">
+          <p className="text-sm leading-relaxed" style={{ color: "var(--lm-muted)" }}>
             {frame.description}
           </p>
         )}

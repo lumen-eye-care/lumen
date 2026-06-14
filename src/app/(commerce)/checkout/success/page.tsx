@@ -67,9 +67,21 @@ export default async function CheckoutSuccessPage({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <div className="rounded-2xl border border-lumen-ink/8 bg-white p-8 text-center">
-          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-lumen-sage/15 text-lumen-sage">
+      <main
+        className="mx-auto max-w-2xl px-6 pb-16"
+        style={{ paddingTop: "calc(var(--nav-h) + 2.5rem)" }}
+      >
+        <div
+          className="rounded-2xl p-8 text-center"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+        >
+          <div
+            className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full"
+            style={{
+              background: "color-mix(in srgb, var(--lm-sage) 15%, transparent)",
+              color: "var(--lm-sage)",
+            }}
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path
                 d="M20 6 9 17l-5-5"
@@ -80,52 +92,63 @@ export default async function CheckoutSuccessPage({
               />
             </svg>
           </div>
-          <h1 className="font-display text-3xl text-lumen-ink">{copy.title}</h1>
-          <p className="mx-auto mt-2 max-w-md text-sm text-lumen-ink/60">{copy.body}</p>
+          <h1 className="lm-display text-3xl" style={{ color: "var(--lm-text)" }}>
+            {copy.title}
+          </h1>
+          <p className="mx-auto mt-2 max-w-md text-sm" style={{ color: "var(--lm-muted)" }}>
+            {copy.body}
+          </p>
           {order.payment_reference && (
-            <p className="mt-3 text-xs text-lumen-ink/45">
+            <p className="mt-3 text-xs" style={{ color: "var(--lm-faint)" }}>
               Order reference: <span className="font-medium">{order.payment_reference}</span>
             </p>
           )}
         </div>
 
-        <div className="mt-6 rounded-xl border border-lumen-ink/8 bg-white p-5">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-lumen-ink/60">
+        <div
+          className="mt-6 rounded-xl p-5"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+        >
+          <h2
+            className="mb-4 text-sm font-semibold uppercase tracking-wide"
+            style={{ color: "var(--lm-faint)" }}
+          >
             Summary
           </h2>
           <ul className="space-y-3">
             {items.map((it, idx) => (
               <li key={idx} className="flex justify-between gap-3 text-sm">
-                <span className="text-lumen-ink/80">
+                <span style={{ color: "var(--lm-muted)" }}>
                   {frameName(it.frames)}
                   {it.color_selected && ` · ${it.color_selected}`}
-                  {it.quantity > 1 && <span className="text-lumen-ink/50"> × {it.quantity}</span>}
+                  {it.quantity > 1 && (
+                    <span style={{ color: "var(--lm-faint)" }}> × {it.quantity}</span>
+                  )}
                 </span>
-                <span className="shrink-0 text-lumen-ink">
+                <span className="shrink-0" style={{ color: "var(--lm-text)" }}>
                   {formatGhs(it.price_ghs * it.quantity)}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex items-center justify-between border-t border-lumen-ink/8 pt-4">
-            <span className="text-sm text-lumen-ink/60">Total</span>
-            <span className="text-lg font-medium text-lumen-ink">
+          <div
+            className="mt-4 flex items-center justify-between border-t pt-4"
+            style={{ borderColor: "var(--lm-hair)" }}
+          >
+            <span className="text-sm" style={{ color: "var(--lm-muted)" }}>
+              Total
+            </span>
+            <span className="text-lg font-medium" style={{ color: "var(--lm-text)" }}>
               {formatGhs(order.total_ghs)}
             </span>
           </div>
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/account/orders"
-            className="rounded-md bg-lumen-blue px-5 py-2.5 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-ink"
-          >
+          <Link href="/account/orders" className="lm-pill">
             View my orders
           </Link>
-          <Link
-            href="/shop"
-            className="rounded-md border border-lumen-ink/15 px-5 py-2.5 text-sm font-medium text-lumen-ink transition-colors hover:border-lumen-ink/40"
-          >
+          <Link href="/shop" className="lm-ghost">
             Continue shopping
           </Link>
         </div>

@@ -61,35 +61,49 @@ export default async function BookPage({
       : "Request an appointment";
 
   return (
-    <div className="min-h-screen bg-lumen-cream">
+    <div className="min-h-screen">
       {/* Hero */}
-      <section className="border-b border-lumen-ink/8 px-6 pb-8 pt-8">
-        <div className="mx-auto max-w-[1280px]">
+      <section
+        className="lm-grain relative overflow-hidden border-b px-6 pb-10 pt-12"
+        style={{
+          borderColor: "var(--lm-hair)",
+          background:
+            "radial-gradient(120% 140% at 80% 0%, var(--lm-raise) 0%, var(--lm-base) 55%)",
+        }}
+      >
+        <div className="relative z-10 mx-auto max-w-[1280px]">
           <nav
-            className="mb-5 flex items-center gap-1.5 text-xs text-lumen-ink/40"
+            className="mb-5 flex items-center gap-1.5 text-xs"
+            style={{ color: "var(--lm-faint)" }}
             aria-label="Breadcrumb"
           >
             <Link
               href="/"
-              className="hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
             >
               Home
             </Link>
             <Icon name="chev" size={10} className="-rotate-90" />
             <Link
               href="/clinics"
-              className="hover:text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              className="transition-colors hover:text-[color:var(--lm-text)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
             >
               Clinics
             </Link>
             <Icon name="chev" size={10} className="-rotate-90" />
-            <span className="text-lumen-ink/70">Book</span>
+            <span style={{ color: "var(--lm-muted)" }}>Book</span>
           </nav>
 
-          <h1 className="font-display text-4xl text-lumen-ink sm:text-5xl">
+          <h1
+            className="lm-display"
+            style={{ fontSize: "clamp(2.4rem, 6vw, 4rem)" }}
+          >
             {heading}
           </h1>
-          <p className="mt-3 max-w-lg text-sm leading-relaxed text-lumen-ink/60">
+          <p
+            className="mt-3 max-w-lg text-sm leading-relaxed"
+            style={{ color: "var(--lm-muted)" }}
+          >
             Fill in the form and our team will confirm your slot — usually
             within one business day.
           </p>

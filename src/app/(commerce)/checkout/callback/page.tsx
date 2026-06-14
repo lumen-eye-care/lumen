@@ -28,7 +28,9 @@ export default async function CheckoutCallbackPage({
   return (
     <>
       <SiteHeader />
-      <CallbackView reference={reference} />
+      <div style={{ paddingTop: "var(--nav-h)" }}>
+        <CallbackView reference={reference} />
+      </div>
       <SiteFooter />
     </>
   );
