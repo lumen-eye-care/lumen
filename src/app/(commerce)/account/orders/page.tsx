@@ -27,12 +27,14 @@ type OrderRow = {
 };
 
 /**
- * US-P0-08 — a signed-in customer's order history. The read goes through the
- * RLS client (`createClient`); `orders read own` (auth.uid() = user_id) scopes it
- * to this user, so we never pass a user_id filter and never touch the secret key.
+ * US-P0-08 — a signed-in customer's order history. Reads via the RLS client
+ * (`createClient`), never the secret key. The explicit `.eq("user_id", ...)` is
+ * required for correctness, not just RLS: the `orders admin all` policy grants an
+ * admin read on EVERY order, so without the filter an admin would see all
+ * customers' orders here in their own account (they see those in /admin instead).
  */
 export default async function MyOrdersPage() {
-  await requireUser();
+  const user = await requireUser();
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -40,6 +42,7 @@ export default async function MyOrdersPage() {
     .select(
       "id, payment_reference, status, total_ghs, payment_method, created_at, order_items(count)",
     )
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   const orders = (data ?? []) as unknown as OrderRow[];

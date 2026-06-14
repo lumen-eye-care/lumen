@@ -33,17 +33,19 @@ const METHOD_LABEL: Record<string, string> = {
 };
 
 /**
- * US-P0-08 — customer order detail. RLS (`orders read own`) means a non-owner's
- * id returns no row → notFound(); the same path covers a genuinely missing id, so
- * we never disclose another customer's order even exists. Delivery snapshot is
- * read from the order's own columns (no users join — customers see their own).
+ * US-P0-08 — customer order detail. Scoped to the owner explicitly: an admin's
+ * `orders admin all` policy can read any order, so we filter on `user_id` too —
+ * in their own account an admin sees only their own orders (others live in
+ * /admin). A non-owner / missing id returns no row → notFound(), so we never
+ * disclose that another customer's order exists. Delivery snapshot is read from
+ * the order's own columns (no users join).
  */
 export default async function MyOrderDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -53,6 +55,7 @@ export default async function MyOrderDetailPage({
       "id, payment_reference, status, total_ghs, payment_method, delivery_type, delivery_name, delivery_phone, delivery_city, delivery_address, delivery_landmark, created_at, order_items(id, quantity, price_ghs, color_selected, frames(name, slug))",
     )
     .eq("id", id)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   if (!order) notFound();
