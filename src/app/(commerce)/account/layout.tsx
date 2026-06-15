@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/organisms/site-header";
 import { SiteFooter } from "@/components/organisms/site-footer";
 import { requireUser } from "@/server/auth-guards";
 import { getAccountProfile, getActiveOrders } from "@/server/account";
+import { prescriptionUploadEnabled } from "@/server/prescriptions";
 import { AccountSidebar } from "@/components/account/account-sidebar";
 import { Icon } from "@/components/atoms/icon";
 
@@ -51,6 +52,7 @@ export default async function AccountLayout({
             name={profile.name ?? ""}
             email={profile.email}
             activeOrders={active.count}
+            prescriptionsEnabled={prescriptionUploadEnabled()}
           />
           <div className="min-w-0 flex-1 pt-2 md:pt-0">{children}</div>
         </div>

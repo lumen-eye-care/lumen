@@ -28,9 +28,16 @@ type AccountSidebarProps = {
   name: string;
   email: string;
   activeOrders: number;
+  /** US-P1-03 flag: when on, Prescriptions becomes a live link, not "Soon". */
+  prescriptionsEnabled?: boolean;
 };
 
-export function AccountSidebar({ name, email, activeOrders }: AccountSidebarProps) {
+export function AccountSidebar({
+  name,
+  email,
+  activeOrders,
+  prescriptionsEnabled = false,
+}: AccountSidebarProps) {
   const pathname = usePathname();
 
   const items: NavItem[] = [
@@ -42,7 +49,9 @@ export function AccountSidebar({ name, email, activeOrders }: AccountSidebarProp
       badge: activeOrders > 0 ? activeOrders : undefined,
     },
     { label: "Appointments", icon: "calendar", soon: true },
-    { label: "Prescriptions", icon: "eye", soon: true },
+    prescriptionsEnabled
+      ? { href: "/account/prescriptions", label: "Prescriptions", icon: "eye" }
+      : { label: "Prescriptions", icon: "eye", soon: true },
     { label: "Saved frames", icon: "heart", soon: true },
     { label: "Addresses", icon: "pin", soon: true },
     { label: "Payment methods", icon: "phone", soon: true },
