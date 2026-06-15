@@ -5,6 +5,10 @@ import {
   getActiveOrders,
   getNextAppointment,
 } from "@/server/account";
+import {
+  getOwnPrescriptionsSummary,
+  prescriptionUploadEnabled,
+} from "@/server/prescriptions";
 import { SERVICE_LABELS, type AppointmentService } from "@/lib/appointment-schemas";
 import { Icon, type IconName } from "@/components/atoms/icon";
 import { OrderTracker } from "@/components/account/order-tracker";
@@ -41,10 +45,12 @@ function serviceLabel(service: string): string {
  * that exists in v1; Prescriptions is a "Soon" preview until US-P1-03.
  */
 export default async function AccountDashboardPage() {
-  const [profile, active, nextAppt] = await Promise.all([
+  const rxEnabled = prescriptionUploadEnabled();
+  const [profile, active, nextAppt, rx] = await Promise.all([
     getAccountProfile(),
     getActiveOrders(),
     getNextAppointment(),
+    rxEnabled ? getOwnPrescriptionsSummary() : Promise.resolve(null),
   ]);
 
   const firstName = profile.name?.split(" ")[0] ?? null;
@@ -100,24 +106,41 @@ export default async function AccountDashboardPage() {
           </span>
         </Link>
 
-        {/* Prescriptions — preview until US-P1-03 */}
-        <div className="lm-card flex flex-col gap-1 p-5" aria-disabled="true">
-          <span className="lm-label inline-flex items-center gap-2">
-            Prescriptions
-            <span
-              className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-              style={{ background: "var(--lm-tint)", color: "var(--lm-faint)" }}
-            >
-              Soon
+        {/* Prescriptions — live count when the flag is on (US-P1-03), else a
+            "Soon" preview. We show a COUNT, not Rx values: v1 is upload-only. */}
+        {rxEnabled && rx ? (
+          <Link href="/account/prescriptions" className="lm-card flex flex-col gap-1 p-5">
+            <span className="lm-label">Prescriptions</span>
+            <span className="lm-display text-4xl" style={{ color: "var(--lm-text)" }}>
+              {rx.total}
             </span>
-          </span>
-          <span className="lm-display text-[1.6rem] leading-tight" style={{ color: "var(--lm-muted)" }}>
-            Coming soon
-          </span>
-          <span className="text-xs" style={{ color: "var(--lm-muted)" }}>
-            Upload your Rx after an eye test
-          </span>
-        </div>
+            <span className="text-xs" style={{ color: "var(--lm-muted)" }}>
+              {rx.total === 0
+                ? "Upload your Rx"
+                : rx.pending > 0
+                  ? `${rx.pending} awaiting review`
+                  : `${rx.verified} verified`}
+            </span>
+          </Link>
+        ) : (
+          <div className="lm-card flex flex-col gap-1 p-5" aria-disabled="true">
+            <span className="lm-label inline-flex items-center gap-2">
+              Prescriptions
+              <span
+                className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                style={{ background: "var(--lm-tint)", color: "var(--lm-faint)" }}
+              >
+                Soon
+              </span>
+            </span>
+            <span className="lm-display text-[1.6rem] leading-tight" style={{ color: "var(--lm-muted)" }}>
+              Coming soon
+            </span>
+            <span className="text-xs" style={{ color: "var(--lm-muted)" }}>
+              Upload your Rx after an eye test
+            </span>
+          </div>
+        )}
       </section>
 
       {/* ── Live order tracker ────────────────────────────────────────────── */}

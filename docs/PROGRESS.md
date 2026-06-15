@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-06-15 — US-P1-03 prescription upload (flag-gated, build-complete)
+
+**Status: code-complete behind `LUMEN_PRESCRIPTION_UPLOAD_ENABLED` (default off).** Customers can upload an existing Rx (photo/PDF) to their account; staff verify it manually. Upload-only — no OCR, no structured Rx fields, no lens pricing (those stay US-P2-02). Built on existing infra (private `prescriptions` bucket + `prescription_access_log` + the flag).
+
+**`BLOCKED:` production rollout** — flipping the flag in prod processes health data and is gated on Charity's **DPC registration** + a **named lens-fulfilment partner** (compliance, not code). Stays off in prod until both clear.
+
+**What landed (migration `20260615000001_prescriptions.sql`):**
+- **`prescriptions` table** — RLS on, `set_updated_at` trigger, `consent_at` NOT NULL (no row without consent), status `pending|verified|rejected`. Policies: owner read, owner insert (`with check … and consent_at is not null`), admin-all; **no owner UPDATE** (status is admin-only — no self-verify). FK `prescription_access_log.prescription_id → prescriptions` added (was loose). `src/db/types.ts` hand-updated (worktree not linked).
+- **Schema** `src/lib/prescription-schemas.ts` (+18 tests) — file mime/size guard (5 MB, tighter than the 10 MB bucket), `validatePrescriptionFile`, optional practitioner/issued-on (no future)/notes, `consent: literal(true)`, `isStaleIssueDate` (>12 mo → UI warns, never blocks).
+- **Server** `src/server/prescriptions.ts` (`server-only`) — `createPrescription` (RLS-client upload to `<user_id>/<uuid>.<ext>` → metadata insert → **secret-key** audit `upload`; rolls back orphaned object on insert failure), `listOwnPrescriptions` (explicit owner `.eq`), `getPrescriptionSignedUrl` (RLS read → secret-key 1-hour signed URL → audit `read`), admin `listPrescriptions`/`getPrescription`/`setPrescriptionStatus`. Flag + env guarded.
+- **Customer UI** `account/prescriptions/` — flag-gated (`notFound()` when off); consent checkbox **gates** the file input + submit (server re-checks); list with status pill + "View" + honest empty state → `/book`. "View"/admin "Open file" open the signed URL in a **new tab** via a shared client `OpenFileButton` (`components/prescriptions/`) that calls a URL-returning server action + `window.open(_blank, noopener)` — the page stays put; URL still server-minted + audit-logged. Sidebar Prescriptions tab flips from "Soon" to a live link when the flag is on (`account/layout.tsx` reads the flag); the **account dashboard Prescriptions tile** likewise flips from the "Soon" placeholder to a live **count** tile (total + "N awaiting review"/"N verified", links to the page) via `getOwnPrescriptionsSummary` — a count, not Rx values (v1 is upload-only).
+- **Admin UI** `admin/prescriptions/` — queue + detail (open file via logged 1-hour URL, verify/reject with a customer-visible note). `requireAdmin()` in every page/action. Nav item added; admin `StatusBadge` gained verified/rejected tones.
+
+**Verified (2026-06-15):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **220/220 tests** ✓ (+18) · `pnpm build` ✓ (new routes `/account/prescriptions`, `/admin/prescriptions`, `/admin/prescriptions/[id]`).
+
+**Migration `db push`ed to Lumen-staging (2026-06-15)** + `src/db/types.ts` regenerated from the live schema (typecheck still green → hand-written types matched). **Live security model verified against staging** with two real test users (throwaway script, cleaned up): owner insert needs consent (no-consent → `42501`); can't insert a row for another user (`42501`); owner uploads only into own `<user_id>/` folder; another user sees **0** of A's rows and **cannot** upload into A's folder (`new row violates row-level security policy`); **owner cannot self-verify** status (stays `pending`); service-key mints a working 1-hour signed URL; audit-log write via service key; admin sets `verified`. Flag-on routing also confirmed live (both routes 200 vs 404 when off).
+
+**Full browser click-through done (2026-06-15)** against staging via the seed customer (`koko.etornam@gmail.com`) + seed admin: consent gate disables file/submit until ticked → enabled on tick; customer upload of a PDF → success card + listed "Awaiting review"; row landed under `<user_id>/` with practitioner/notes/`consent_at` saved; **"View" minted a signed URL and wrote a `read` audit row** (upload+read both logged); admin queue showed the row (customer join working) → detail (file size/notes/DPA banner) → **Mark verified with a review note persisted** (`status=verified`, note saved). Test data cleaned up afterwards (0 rows left).
+
+**Next steps:** (1) Resume the deferred **Paystack webhook E2E** (orders still stuck `pending`). (2) US-P1-05 order tracking / customer Appointments tab.
+
+---
+
 ## 2026-06-14 — US-P1-06 account dashboard → sidebar portal · header signed-in avatar · orders owner-scoping fix · US-P1-03 story
 
 **Status: US-P1-06 shipped.** `/account` went from a minimal index to the full sidebar portal from `docs/design/account.jsx`, themed into `--lm-*`. PR #31.

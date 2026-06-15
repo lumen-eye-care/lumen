@@ -199,6 +199,9 @@ export function StatusBadge({ status }: { status: string }) {
     // frames
     active: "bg-lumen-sage/15 text-lumen-sage",
     archived: "bg-lumen-ink/8 text-lumen-ink/60",
+    // prescriptions
+    verified: "bg-lumen-sage/15 text-lumen-sage",
+    rejected: "bg-lumen-warm/15 text-lumen-warm",
   };
   const cls = tone[status] ?? "bg-lumen-ink/8 text-lumen-ink/70";
   return (

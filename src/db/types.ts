@@ -497,6 +497,72 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prescription_access_log_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          consent_at: string
+          created_at: string
+          file_path: string
+          id: string
+          issued_on: string | null
+          mime_type: string
+          notes: string | null
+          original_name: string | null
+          practitioner_name: string | null
+          review_notes: string | null
+          size_bytes: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consent_at: string
+          created_at?: string
+          file_path: string
+          id?: string
+          issued_on?: string | null
+          mime_type: string
+          notes?: string | null
+          original_name?: string | null
+          practitioner_name?: string | null
+          review_notes?: string | null
+          size_bytes: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consent_at?: string
+          created_at?: string
+          file_path?: string
+          id?: string
+          issued_on?: string | null
+          mime_type?: string
+          notes?: string | null
+          original_name?: string | null
+          practitioner_name?: string | null
+          review_notes?: string | null
+          size_bytes?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users: {
