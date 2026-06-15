@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-06-14 — US-P1-06 account dashboard → sidebar portal · header signed-in avatar · orders owner-scoping fix · US-P1-03 story
+
+**Status: US-P1-06 shipped.** `/account` went from a minimal index to the full sidebar portal from `docs/design/account.jsx`, themed into `--lm-*`. PR #31.
+
+**What landed (no migration, no new deps):**
+- **Portal layout** `account/layout.tsx` + `components/account/account-sidebar.tsx` — user card + tabbed nav (active highlight, live **Orders badge**). Built tabs link (Dashboard/Orders/Settings); not-yet-built tabs (Appointments, Prescriptions, Saved frames, Addresses, Payment methods) render disabled **"Soon"** (no broken links — prior audit rule). Responsive: vertical rail / mobile horizontal scroll strip.
+- **Dashboard** `account/page.tsx` — welcome + 3 stat tiles (Active orders, Next appointment from real `appointments`, Prescriptions "Soon" preview), **live-order tracker** (`components/account/order-tracker.tsx` over pure `src/lib/order-tracker.ts`, +8 tests — real statuses only: placed→confirmed→shipped→delivered, no fictional "lenses cut"), quick actions. Clinics/book cinematic tier.
+- **Settings tab** `account/settings/page.tsx` — editable name/phone (`src/lib/account-schemas.ts` +5 tests, reuses `phoneSchema`/E.164 via `updateProfile` action), read-only email, change-password link, sign out. Notifications noted "coming soon" (no fake toggles; no SMS in v1).
+- **Header signed-in avatar** `site-header.tsx` — initials avatar when signed in vs guest icon, via the `CartAuthSync` browser-auth pattern (env-guarded, read-only); shared `src/lib/initials.ts` (also used by the sidebar card).
+- **Data layer** `src/server/account.ts` — `getAccountProfile`/`getActiveOrders`/`getNextAppointment`, all **owner-scoped explicitly**.
+- **US-P1-03 story** `docs/stories/US-P1-03-prescription-upload.md` — spec for next session (infra exists: private bucket + access-log table + flag). Build can proceed; **prod flag-flip still gated on Charity's DPC registration** (health data).
+
+**Bug fixed (correctness/privacy):** the `orders`/`users` tables carry an `admin all` RLS policy, so reads relying on RLS alone surfaced **every customer's orders/profile** to an admin on their *own* account pages (and broke `maybeSingle()`). All account reads + `/account/orders` list + `[id]` detail now filter `user_id`/`id` explicitly. RLS still enforces; admins see all only in `/admin`. (Memory: `rls-admin-all-policy-needs-explicit-owner-filter`.)
+
+**Verified (2026-06-14):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **202/202 tests** ✓ (+13) · `pnpm build` ✓. Preview-verified signed in vs staging: portal in light/dark + mobile; profile save persists with `0XX→+233` normalization; header avatar shows site-wide; orders correctly owner-scoped (admin sees own 2, not all).
+
+**Open caveats:**
+- **Paystack webhook not wired to any running env** → all initiated payments stay `pending` ("Awaiting payment"); nothing flips to `paid`/"Confirmed" until the dashboard webhook points at `…/api/paystack/webhook` with a mode-matched secret key. Prod endpoint `https://www.lumeneye.org/api/paystack/webhook` verified live + signature-gated (401 on bad sig). Test-mode E2E needs a tunnel to a `sk_test` env.
+- Blocked account tabs (Prescriptions/Saved/Addresses/Payments) are "Soon" placeholders; Appointments customer view also deferred.
+
+**Next steps:** (1) Wire Paystack webhook per env + run a payment E2E. (2) US-P1-03 prescription upload (story ready). (3) US-P1-05 order tracking deepening (tracker foundation now exists) · customer Appointments tab (data exists from US-P1-01).
+
+---
+
 ## 2026-06-14 — Redesign completion pass: full per-page dark-mode conversion · real lens quiz (US-P1-02) · header overflow fix
 
 **Status: dark mode now complete across every customer-facing surface.** Closes the "still light theme persists at some places" gap from the Phase 1+2 entry below — all remaining `lumen-*` hardcoded tokens outside `/admin` are converted to `--lm-*` semantic vars, so light↔dark is correct site-wide (admin intentionally excluded).
