@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-06-15 — US-P1-05 order tracking (customer timeline + admin courier/tracking + delivered)
+
+**Status: build-complete.** The customer order-detail page now shows the delivery timeline, and admins can record shipment info + mark an order delivered — which is what lets the tracker reach its final stage. Order-tracking only; the customer Appointments tab is **deferred** (not bundled). No carrier-API integration — Ghana dispatch is Yango/Bolt/manual, so the tracking number is informational, admin-entered.
+
+**What landed (migration `20260615000002_order_tracking.sql`):**
+- **Migration** — two nullable columns on `public.orders`: `courier`, `tracking_number`. Idempotent (`add column if not exists`). RLS unchanged (`orders select own` + `orders admin all` cover the new columns); the append-only status guard (`20260609000001_checkout.sql`) already permits the forward `shipped → delivered` move, so no trigger change. `src/db/types.ts` hand-updated (worktree not Supabase-linked).
+- **Schema** `src/lib/frame-schemas.ts` (+4 tests) — widened `markShippedSchema` with optional trimmed `courier` (≤60) + `tracking_number` (≤120) (empty string allowed → stored `null`); new `markDeliveredSchema` (`orderId` only); exported `COURIERS` (Yango/Bolt/Speedaf/DHL/Other) for the UI `<select>` — free-text, not hard-enum'd, so "Other"/manual dispatch stays valid.
+- **Admin actions** `src/app/admin/orders/actions.ts` — `markShipped` now persists `courier`/`tracking_number` and includes them in the best-effort shipped email; new **`markDelivered`** flips status to `delivered` (best-effort delivered email, non-fatal). Both revalidate the admin **and** customer order paths.
+- **Admin UI** — courier `<Select>` + tracking `<Field>` on `mark-shipped.tsx`; new `mark-delivered.tsx` (single button, `useActionState`); detail page (`admin/orders/[id]`) renders `MarkShipped` for fulfillable statuses, `MarkDelivered` when `shipped`, and shows courier/tracking in the Payment & delivery panel.
+- **Customer detail (core deliverable)** `app/(commerce)/account/orders/[id]/page.tsx` — reuses the existing `OrderTracker` (over pure `src/lib/order-tracker.ts`) in a Tracking card, gated to live statuses + `delivered` (skips failed/refunded via `isLiveOrder`); shipped state shows courier + tracking number with honest copy (no fake carrier link / no fabricated ETA).
+
+**Verified (2026-06-15):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **224/224 tests** ✓ (+4) · `pnpm build` ✓ (admin + account order routes). Tests run under **Node 22** (vitest 4 needs ≥20.12/22); fresh pnpm worktree installs don't symlink the rolldown native binding into `node_modules/@rolldown/` — link `@rolldown/binding-darwin-arm64` from the `.pnpm` store to unblock vitest.
+
+**Open caveats:**
+- **Migration not yet `db push`ed** to Lumen-staging (worktree unlinked) → regen/confirm `src/db/types.ts` after pushing.
+- **Live end-to-end deferred:** the Paystack webhook still isn't wired to a running env, so real orders sit at `pending`. To exercise the timeline, statuses must be advanced via the admin actions (or a manual staging update), not a live payment.
+- Emails (shipped/delivered) no-op until the Resend domain is verified — built non-fatal.
+
+**Next steps:** (1) `db push` the migration + regen types, then a seeded admin→customer click-through. (2) Resume the deferred **Paystack webhook E2E** (orders stuck `pending`). (3) Customer **Appointments tab** (data exists from US-P1-01).
+
+---
+
 ## 2026-06-15 — US-P1-03 prescription upload (flag-gated, build-complete)
 
 **Status: code-complete behind `LUMEN_PRESCRIPTION_UPLOAD_ENABLED` (default off).** Customers can upload an existing Rx (photo/PDF) to their account; staff verify it manually. Upload-only — no OCR, no structured Rx fields, no lens pricing (those stay US-P2-02). Built on existing infra (private `prescriptions` bucket + `prescription_access_log` + the flag).

@@ -398,6 +398,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          courier: string | null
           created_at: string
           currency: string
           delivery_address: string | null
@@ -413,10 +414,12 @@ export type Database = {
           payment_reference: string | null
           status: string
           total_ghs: number
+          tracking_number: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          courier?: string | null
           created_at?: string
           currency?: string
           delivery_address?: string | null
@@ -432,10 +435,12 @@ export type Database = {
           payment_reference?: string | null
           status?: string
           total_ghs: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          courier?: string | null
           created_at?: string
           currency?: string
           delivery_address?: string | null
@@ -451,6 +456,7 @@ export type Database = {
           payment_reference?: string | null
           status?: string
           total_ghs?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }

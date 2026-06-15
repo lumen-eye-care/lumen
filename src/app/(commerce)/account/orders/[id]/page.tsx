@@ -5,6 +5,8 @@ import { requireUser } from "@/server/auth-guards";
 import { createClient } from "@/server/supabase";
 import { formatGhs } from "@/lib/format-money";
 import { OrderStatusPill } from "@/components/molecules/order-status-pill";
+import { OrderTracker } from "@/components/account/order-tracker";
+import { isLiveOrder } from "@/lib/order-tracker";
 
 export const metadata: Metadata = {
   title: "Order details",
@@ -52,7 +54,7 @@ export default async function MyOrderDetailPage({
   const { data: order } = await supabase
     .from("orders")
     .select(
-      "id, payment_reference, status, total_ghs, payment_method, delivery_type, delivery_name, delivery_phone, delivery_city, delivery_address, delivery_landmark, created_at, order_items(id, quantity, price_ghs, color_selected, frames(name, slug))",
+      "id, payment_reference, status, total_ghs, payment_method, delivery_type, delivery_name, delivery_phone, delivery_city, delivery_address, delivery_landmark, courier, tracking_number, created_at, order_items(id, quantity, price_ghs, color_selected, frames(name, slug))",
     )
     .eq("id", id)
     .eq("user_id", user.id)
@@ -62,6 +64,9 @@ export default async function MyOrderDetailPage({
 
   const items = (order.order_items ?? []) as unknown as Item[];
   const ref = order.payment_reference ?? `Order ${order.id.slice(0, 8)}`;
+  // Show the timeline for in-flight orders + delivered (completed timeline);
+  // skip failed/timed-out/refunded, where a delivery timeline is meaningless.
+  const showTracker = isLiveOrder(order.status) || order.status === "delivered";
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,6 +86,36 @@ export default async function MyOrderDetailPage({
           ← All orders
         </Link>
       </header>
+
+      {showTracker && (
+        <section
+          className="rounded-xl p-5"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+        >
+          <h2
+            className="mb-4 text-xs font-semibold uppercase tracking-wide"
+            style={{ color: "var(--lm-faint)" }}
+          >
+            Tracking
+          </h2>
+          <OrderTracker status={order.status} />
+          {order.status === "shipped" && (
+            <p className="mt-4 text-sm" style={{ color: "var(--lm-muted)" }}>
+              {order.courier
+                ? `On its way with ${order.courier}.`
+                : "On its way."}
+              {order.tracking_number && (
+                <>
+                  {" "}Tracking:{" "}
+                  <span className="break-all" style={{ color: "var(--lm-text)" }}>
+                    {order.tracking_number}
+                  </span>
+                </>
+              )}
+            </p>
+          )}
+        </section>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <section

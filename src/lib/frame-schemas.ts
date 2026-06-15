@@ -75,6 +75,22 @@ export const frameSchema = z.object({
 
 export type FrameInput = z.infer<typeof frameSchema>;
 
+// Suggested couriers for the admin ship form. Not a hard enum — the schema below
+// accepts any trimmed string (incl. "Other" / manual dispatch); this list only
+// populates the <select> for convenience.
+export const COURIERS = ["Yango", "Bolt", "Speedaf", "DHL", "Other"] as const;
+
 export const markShippedSchema = z.object({
+  orderId: z.string().uuid("Invalid order id."),
+  courier: z.string().trim().max(60, "Courier name is too long.").optional().or(z.literal("")),
+  tracking_number: z
+    .string()
+    .trim()
+    .max(120, "Tracking number is too long.")
+    .optional()
+    .or(z.literal("")),
+});
+
+export const markDeliveredSchema = z.object({
   orderId: z.string().uuid("Invalid order id."),
 });

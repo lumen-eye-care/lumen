@@ -5,6 +5,7 @@ import { createClient } from "@/server/supabase";
 import { formatGhs } from "@/lib/format-money";
 import { PageHeader, Table, Th, Td, StatusBadge } from "../../_components/admin-ui";
 import { MarkShipped } from "../mark-shipped";
+import { MarkDelivered } from "../mark-delivered";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function AdminOrderDetailPage({
   const { data: order } = await supabase
     .from("orders")
     .select(
-      "id, payment_reference, status, total_ghs, e_levy_amount, payment_method, delivery_type, created_at, users(name, email, phone), order_items(id, quantity, price_ghs, color_selected, frames(name, slug))",
+      "id, payment_reference, status, total_ghs, e_levy_amount, payment_method, delivery_type, courier, tracking_number, created_at, users(name, email, phone), order_items(id, quantity, price_ghs, color_selected, frames(name, slug))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -105,10 +106,12 @@ export default async function AdminOrderDetailPage({
             <div className="mt-4">
               {FULFILLABLE.has(order.status) ? (
                 <MarkShipped orderId={order.id} />
+              ) : order.status === "shipped" ? (
+                <MarkDelivered orderId={order.id} />
               ) : (
                 <p className="text-xs text-lumen-ink/55">
-                  {order.status === "shipped" || order.status === "delivered"
-                    ? "Already fulfilled."
+                  {order.status === "delivered"
+                    ? "Delivered."
                     : "Not ready to ship — awaiting payment."}
                 </p>
               )}
@@ -143,6 +146,18 @@ export default async function AdminOrderDetailPage({
                 <dt className="text-lumen-ink/60">Delivery</dt>
                 <dd className="capitalize">{order.delivery_type ?? "—"}</dd>
               </div>
+              {order.courier && (
+                <div className="flex justify-between">
+                  <dt className="text-lumen-ink/60">Courier</dt>
+                  <dd>{order.courier}</dd>
+                </div>
+              )}
+              {order.tracking_number && (
+                <div className="flex justify-between gap-3">
+                  <dt className="shrink-0 text-lumen-ink/60">Tracking</dt>
+                  <dd className="min-w-0 break-all text-right">{order.tracking_number}</dd>
+                </div>
+              )}
             </dl>
           </section>
         </aside>

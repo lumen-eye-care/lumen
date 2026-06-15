@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/atoms/button";
-import { Alert } from "../_components/admin-ui";
+import { Alert, Field, Select } from "../_components/admin-ui";
+import { COURIERS } from "@/lib/frame-schemas";
 import { markShipped, type MarkShippedState } from "./actions";
 
 const initial: MarkShippedState = {};
@@ -20,9 +21,23 @@ export function MarkShipped({ orderId }: { orderId: string }) {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-2">
+    <form action={formAction} className="flex flex-col gap-3">
       <input type="hidden" name="orderId" value={orderId} />
       {state.error && <Alert kind="error">{state.error}</Alert>}
+      <Select label="Courier" name="courier" defaultValue="">
+        <option value="">Not specified</option>
+        {COURIERS.map((c) => (
+          <option key={c} value={c}>
+            {c}
+          </option>
+        ))}
+      </Select>
+      <Field
+        label="Tracking number"
+        name="tracking_number"
+        placeholder="Optional"
+        maxLength={120}
+      />
       <div>
         <Button type="submit" disabled={pending}>
           {pending ? "Marking…" : "Mark as shipped"}

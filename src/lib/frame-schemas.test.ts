@@ -83,4 +83,45 @@ describe("markShippedSchema", () => {
   it("rejects a non-uuid", () => {
     expect(markShippedSchema.safeParse({ orderId: "nope" }).success).toBe(false);
   });
+
+  const orderId = "11111111-1111-4111-8111-111111111111";
+
+  it("accepts optional courier + tracking number", () => {
+    const parsed = markShippedSchema.safeParse({
+      orderId,
+      courier: "Yango",
+      tracking_number: "YGO-12345",
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.courier).toBe("Yango");
+      expect(parsed.data.tracking_number).toBe("YGO-12345");
+    }
+  });
+
+  it("allows omitted / empty shipment fields", () => {
+    expect(markShippedSchema.safeParse({ orderId }).success).toBe(true);
+    expect(
+      markShippedSchema.safeParse({ orderId, courier: "", tracking_number: "" }).success,
+    ).toBe(true);
+  });
+
+  it("trims shipment fields", () => {
+    const parsed = markShippedSchema.safeParse({
+      orderId,
+      courier: "  Bolt  ",
+      tracking_number: "  ABC-9  ",
+    });
+    expect(parsed.success && parsed.data.courier).toBe("Bolt");
+    expect(parsed.success && parsed.data.tracking_number).toBe("ABC-9");
+  });
+
+  it("rejects an over-long courier or tracking number", () => {
+    expect(
+      markShippedSchema.safeParse({ orderId, courier: "x".repeat(61) }).success,
+    ).toBe(false);
+    expect(
+      markShippedSchema.safeParse({ orderId, tracking_number: "x".repeat(121) }).success,
+    ).toBe(false);
+  });
 });
