@@ -5,8 +5,8 @@
       "name": "lumen-preview",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
-      "port": 3100,
-      "autoPort": true
+      "port": 3000,
+      "autoPort": false
     }
   ]
 }
