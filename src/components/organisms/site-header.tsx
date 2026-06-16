@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogoMark } from "@/components/atoms/logo-mark";
+import { LogoLockup } from "@/components/atoms/logo-lockup";
 import { Icon } from "@/components/atoms/icon";
 import { useCart } from "@/components/cart/cart-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -94,12 +94,11 @@ export function SiteHeader() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--lm-warm)]"
+          className="flex items-center transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--lm-warm)]"
           style={{ color: "var(--lm-text)" }}
           aria-label="Lumen Eye Care — home"
         >
-          <LogoMark size={28} color="currentColor" />
-          <span className="lm-display text-xl">Lumen</span>
+          <LogoLockup size={22} gap={3} color="currentColor" />
         </Link>
 
         {/* Desktop nav */}
