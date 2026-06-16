@@ -17,12 +17,15 @@
 
 **Verified (2026-06-15):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **224/224 tests** ✓ (+4) · `pnpm build` ✓ (admin + account order routes). Tests run under **Node 22** (vitest 4 needs ≥20.12/22); fresh pnpm worktree installs don't symlink the rolldown native binding into `node_modules/@rolldown/` — link `@rolldown/binding-darwin-arm64` from the `.pnpm` store to unblock vitest.
 
+**Migration applied to Lumen-staging (2026-06-15)** — both columns live as nullable text (applied via the Supabase Management API query endpoint; worktree still unlinked, `src/db/types.ts` hand-aligned and typecheck-confirmed against the live shape).
+
+**Full browser click-through done (2026-06-15, against staging via the seed admin):** created a paid test order owned by the admin → **Mark as shipped** with courier "Yango" + a tracking number → persisted (shown in the admin Payment & delivery panel) → **Mark as delivered** → status flipped. Customer `/account/orders/[id]` then showed the **4-stage timeline landing on Delivered**; a second shipped-only order confirmed the customer shipped-state copy renders **"On its way with Yango. Tracking: …"**. Both test orders cleaned up afterwards (0 rows left).
+
 **Open caveats:**
-- **Migration not yet `db push`ed** to Lumen-staging (worktree unlinked) → regen/confirm `src/db/types.ts` after pushing.
-- **Live end-to-end deferred:** the Paystack webhook still isn't wired to a running env, so real orders sit at `pending`. To exercise the timeline, statuses must be advanced via the admin actions (or a manual staging update), not a live payment.
+- **Live payment E2E still deferred:** the Paystack webhook isn't wired to a running env, so real orders sit at `pending`. The timeline was exercised by advancing status via the admin actions (and direct staging inserts for the shipped-copy check), not a live payment.
 - Emails (shipped/delivered) no-op until the Resend domain is verified — built non-fatal.
 
-**Next steps:** (1) `db push` the migration + regen types, then a seeded admin→customer click-through. (2) Resume the deferred **Paystack webhook E2E** (orders stuck `pending`). (3) Customer **Appointments tab** (data exists from US-P1-01).
+**Next steps:** (1) Resume the deferred **Paystack webhook E2E** (orders stuck `pending`). (2) Customer **Appointments tab** (data exists from US-P1-01).
 
 ---
 
