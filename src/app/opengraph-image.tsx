@@ -2,9 +2,10 @@ import { ImageResponse } from "next/og";
 
 /**
  * Default Open Graph / link-preview card (1200×630) for every route that
- * doesn't supply its own image — brand cream/ink with the eye logomark
- * (same paths as src/components/atoms/logo-mark.tsx, inlined because
- * Satori renders raw SVG, not React client components).
+ * doesn't supply its own image — brand cream/ink with the glasses-frame
+ * logomark (same paths as src/components/atoms/logo-mark.tsx, inlined
+ * because Satori renders raw SVG, not React client components). This is
+ * the stacked "B" lockup: mark above the letterspaced LUMEN wordmark.
  */
 export const alt = "Lumen Eye Care — premium eyewear, designed in Ghana";
 export const size = { width: 1200, height: 630 };
@@ -26,30 +27,32 @@ export default function OpengraphImage() {
         }}
       >
         <svg
-          width={140}
-          height={140}
-          viewBox="0 0 40 40"
+          width={336}
+          height={184}
+          viewBox="0 0 62 34"
           fill="none"
+          stroke="#0F4C81"
+          strokeWidth={3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <circle cx="20" cy="20" r="18.5" stroke="#0F4C81" strokeWidth="1.5" />
-          <path
-            d="M6 20 Q20 8 34 20 Q20 32 6 20Z"
-            stroke="#0F4C81"
-            strokeWidth="1.5"
-            fill="none"
-          />
-          <circle cx="20" cy="20" r="4.5" fill="#0F4C81" />
-          <circle cx="21.5" cy="18.5" r="1.4" fill="#fff" />
+          <circle cx="14" cy="18" r="11" />
+          <circle cx="48" cy="18" r="11" />
+          <path d="M25 16 Q31 12 37 16" />
+          <path d="M6 11 L1.5 8" />
+          <path d="M56 11 L60.5 8" />
         </svg>
         <div
           style={{
-            marginTop: 36,
-            fontSize: 96,
-            fontWeight: 600,
-            letterSpacing: -2,
+            marginTop: 40,
+            fontSize: 92,
+            fontWeight: 500,
+            letterSpacing: 38,
+            // trailing letter-spacing pushes the word right; nudge it back.
+            textIndent: 38,
           }}
         >
-          Lumen
+          LUMEN
         </div>
         <div
           style={{

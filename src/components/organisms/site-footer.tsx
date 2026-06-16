@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import { LogoMark } from "@/components/atoms/logo-mark";
+import { LogoLockup } from "@/components/atoms/logo-lockup";
 import { getClinicFooterData } from "@/server/clinics";
 
 export async function SiteFooter() {
@@ -33,14 +33,8 @@ export async function SiteFooter() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-5 lg:gap-10">
           {/* Brand col */}
           <div className="col-span-2 lg:col-span-1">
-            <div className="mb-4 flex items-center gap-2">
-              <LogoMark size={26} color="currentColor" />
-              <span
-                className="lm-display text-lg"
-                style={{ color: "var(--lm-text)" }}
-              >
-                Lumen
-              </span>
+            <div className="mb-4 flex" style={{ color: "var(--lm-text)" }}>
+              <LogoLockup size={30} gap={5} color="currentColor" />
             </div>
             <p
               className="mb-6 text-sm leading-relaxed"
