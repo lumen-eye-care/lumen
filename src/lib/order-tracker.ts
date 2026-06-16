@@ -1,24 +1,20 @@
 /**
  * Customer-facing order tracker (US-P1-05 / dashboard). Maps the raw DB
- * `orders.status` to a 4-stage delivery timeline. Deliberately omits any
+ * `orders.status` to a 3-stage delivery timeline. Deliberately omits any
  * lens-fulfilment stage ("lenses cut") — that depends on the lens partner and
- * isn't modelled yet; this timeline only reflects statuses we actually set.
+ * isn't modelled yet — and the in-transit "shipped" stage (a shipped order sits
+ * at "confirmed"; its courier/tracking detail surfaces separately on the order
+ * page). This timeline only reflects statuses we actually set.
  *
  * Pure + unit-tested; the presentational tracker consumes the result.
  */
 
-export const TRACKER_STAGES = [
-  "placed",
-  "confirmed",
-  "shipped",
-  "delivered",
-] as const;
+export const TRACKER_STAGES = ["placed", "confirmed", "delivered"] as const;
 export type TrackerStage = (typeof TRACKER_STAGES)[number];
 
 export const TRACKER_STAGE_LABEL: Record<TrackerStage, string> = {
   placed: "Order placed",
   confirmed: "Confirmed",
-  shipped: "On its way",
   delivered: "Delivered",
 };
 
@@ -46,11 +42,12 @@ function stageIndex(status: string): number {
       return 0; // placed
     case "paid":
     case "cod_collected":
-      return 1; // confirmed
     case "shipped":
-      return 2; // on its way
+      // No dedicated in-transit stage — a shipped order still reads as
+      // "confirmed" on the timeline; courier/tracking shows separately.
+      return 1; // confirmed
     case "delivered":
-      return 3; // delivered
+      return 2; // delivered
     default:
       // failed / refunded / unknown — show only the first stage as reached.
       return 0;
@@ -66,7 +63,7 @@ export type TrackerStep = {
   current: boolean;
 };
 
-/** Build the 4-step timeline for an order status. */
+/** Build the 3-step timeline for an order status. */
 export function buildTracker(status: string): TrackerStep[] {
   const idx = stageIndex(status);
   return TRACKER_STAGES.map((stage, i) => ({
