@@ -176,7 +176,7 @@ export function Td({
   return (
     <td
       colSpan={colSpan}
-      className={`border-b border-lumen-ink/5 px-4 py-3 align-middle ${className}`}
+      className={`border-b border-lumen-ink/5 px-4 py-3 align-middle text-lumen-ink/60 ${className}`}
     >
       {children}
     </td>
