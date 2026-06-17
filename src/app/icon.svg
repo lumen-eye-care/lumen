@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Lumen favicon: the glasses logomark (no wordmark), on a navy tile so the
+       thin frame stays legible at 16px on both light and dark browser chrome. -->
+  <rect width="64" height="64" rx="14" fill="#0A1F35"/>
+  <g transform="translate(6.8 17) scale(0.82)" fill="none" stroke="#FAF7F2"
+     stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="14" cy="18" r="11"/>
+    <circle cx="48" cy="18" r="11"/>
+    <path d="M25 16 Q31 12 37 16"/>
+    <path d="M6 11 L1.5 8"/>
+    <path d="M56 11 L60.5 8"/>
+  </g>
+</svg>
