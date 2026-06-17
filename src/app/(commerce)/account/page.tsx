@@ -90,7 +90,7 @@ export default async function AccountDashboardPage() {
         </Link>
 
         {/* Next appointment */}
-        <Link href={nextAppt ? "/account/orders" : "/book"} className="lm-card flex flex-col gap-1 p-5">
+        <Link href={nextAppt ? "/account/appointments" : "/book"} className="lm-card flex flex-col gap-1 p-5">
           <span className="lm-label">Next appointment</span>
           <span className="lm-display text-[1.6rem] leading-tight" style={{ color: "var(--lm-text)" }}>
             {nextAppt?.preferred_date

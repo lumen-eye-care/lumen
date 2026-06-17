@@ -5,6 +5,8 @@ import { requireUser } from "@/server/auth-guards";
 import { createClient } from "@/server/supabase";
 import { formatGhs } from "@/lib/format-money";
 import { OrderStatusPill } from "@/components/molecules/order-status-pill";
+import { OrderTracker } from "@/components/account/order-tracker";
+import { isLiveOrder } from "@/lib/order-tracker";
 
 export const metadata: Metadata = {
   title: "Order details",
@@ -81,6 +83,21 @@ export default async function MyOrderDetailPage({
           ← All orders
         </Link>
       </header>
+
+      {isLiveOrder(order.status) && (
+        <section
+          className="rounded-xl p-5"
+          style={{ border: "1px solid var(--lm-hair)", background: "var(--lm-raise)" }}
+        >
+          <h2
+            className="mb-4 text-xs font-semibold uppercase tracking-wide"
+            style={{ color: "var(--lm-faint)" }}
+          >
+            Progress
+          </h2>
+          <OrderTracker status={order.status} />
+        </section>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <section
