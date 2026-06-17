@@ -348,6 +348,84 @@ export type Database = {
           },
         ]
       }
+      lens_addons: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          included: boolean
+          is_active: boolean
+          name: string
+          price_ghs: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          included?: boolean
+          is_active?: boolean
+          name: string
+          price_ghs?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          included?: boolean
+          is_active?: boolean
+          name?: string
+          price_ghs?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lens_types: {
+        Row: {
+          badge: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price_ghs: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_ghs?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_ghs?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           color_selected: string | null
@@ -355,6 +433,7 @@ export type Database = {
           frame_id: string | null
           id: string
           lens_config: Json | null
+          lens_price_ghs: number
           order_id: string
           price_ghs: number
           quantity: number
@@ -365,6 +444,7 @@ export type Database = {
           frame_id?: string | null
           id?: string
           lens_config?: Json | null
+          lens_price_ghs?: number
           order_id: string
           price_ghs: number
           quantity?: number
@@ -375,6 +455,7 @@ export type Database = {
           frame_id?: string | null
           id?: string
           lens_config?: Json | null
+          lens_price_ghs?: number
           order_id?: string
           price_ghs?: number
           quantity?: number
@@ -398,6 +479,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          courier: string | null
           created_at: string
           currency: string
           delivery_address: string | null
@@ -413,10 +495,12 @@ export type Database = {
           payment_reference: string | null
           status: string
           total_ghs: number
+          tracking_number: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          courier?: string | null
           created_at?: string
           currency?: string
           delivery_address?: string | null
@@ -432,10 +516,12 @@ export type Database = {
           payment_reference?: string | null
           status?: string
           total_ghs: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          courier?: string | null
           created_at?: string
           currency?: string
           delivery_address?: string | null
@@ -451,6 +537,7 @@ export type Database = {
           payment_reference?: string | null
           status?: string
           total_ghs?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -510,15 +597,17 @@ export type Database = {
         Row: {
           consent_at: string
           created_at: string
-          file_path: string
+          file_path: string | null
           id: string
           issued_on: string | null
-          mime_type: string
+          mime_type: string | null
           notes: string | null
           original_name: string | null
           practitioner_name: string | null
           review_notes: string | null
-          size_bytes: number
+          rx_values: Json | null
+          size_bytes: number | null
+          source: string
           status: string
           updated_at: string
           user_id: string
@@ -526,15 +615,17 @@ export type Database = {
         Insert: {
           consent_at: string
           created_at?: string
-          file_path: string
+          file_path?: string | null
           id?: string
           issued_on?: string | null
-          mime_type: string
+          mime_type?: string | null
           notes?: string | null
           original_name?: string | null
           practitioner_name?: string | null
           review_notes?: string | null
-          size_bytes: number
+          rx_values?: Json | null
+          size_bytes?: number | null
+          source?: string
           status?: string
           updated_at?: string
           user_id: string
@@ -542,15 +633,17 @@ export type Database = {
         Update: {
           consent_at?: string
           created_at?: string
-          file_path?: string
+          file_path?: string | null
           id?: string
           issued_on?: string | null
-          mime_type?: string
+          mime_type?: string | null
           notes?: string | null
           original_name?: string | null
           practitioner_name?: string | null
           review_notes?: string | null
-          size_bytes?: number
+          rx_values?: Json | null
+          size_bytes?: number | null
+          source?: string
           status?: string
           updated_at?: string
           user_id?: string

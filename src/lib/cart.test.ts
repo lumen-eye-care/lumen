@@ -1,18 +1,24 @@
 import { describe, it, expect } from "vitest";
 import {
   EMPTY_CART,
+  FRAME_ONLY_LENS,
   lineKey,
+  lensConfigKey,
+  cartItemKey,
   frameToCartItem,
+  buildLensCartItem,
   addItem,
   changeQty,
   removeItem,
   clearCart,
   selectCount,
   selectSubtotalPesewa,
+  lineUnitPricePesewa,
   parseStoredCart,
   decideCartOnAuth,
   CART_STORAGE_KEY,
   type CartItem,
+  type CartLens,
   type CartState,
 } from "@/lib/cart";
 import type { ShopFrame } from "@/server/frames";
@@ -72,9 +78,16 @@ describe("frameToCartItem", () => {
 // ─── lineKey ──────────────────────────────────────────────────────────────────
 
 describe("lineKey", () => {
-  it("is stable per frame+colour and distinct across colours", () => {
-    expect(lineKey("f1", "Midnight")).toBe("f1::Midnight");
-    expect(lineKey("f1", "Midnight")).not.toBe(lineKey("f1", "Tortoise"));
+  it("is stable per frame+colour+lens and distinct across colours", () => {
+    expect(lineKey("f1", "Midnight", "frame-only")).toBe("f1::Midnight::frame-only");
+    expect(lineKey("f1", "Midnight", "frame-only")).not.toBe(
+      lineKey("f1", "Tortoise", "frame-only"),
+    );
+  });
+
+  it("frame-only items hash to a 'frame-only' lens key", () => {
+    expect(cartItemKey(midnight)).toBe("f1::Midnight::frame-only");
+    expect(lensConfigKey(FRAME_ONLY_LENS)).toBe("frame-only");
   });
 });
 
@@ -116,7 +129,7 @@ describe("addItem", () => {
 // ─── changeQty ────────────────────────────────────────────────────────────────
 
 describe("changeQty", () => {
-  const key = lineKey("f1", "Midnight");
+  const key = cartItemKey(midnight);
 
   it("increments up to stock and no further", () => {
     let state = addItem(EMPTY_CART, midnight); // qty 1
@@ -144,7 +157,7 @@ describe("removeItem / clearCart", () => {
   it("removes a specific line", () => {
     let state = addItem(EMPTY_CART, midnight);
     state = addItem(state, tortoise);
-    state = removeItem(state, lineKey("f1", "Midnight"));
+    state = removeItem(state, cartItemKey(midnight));
     expect(state.items).toHaveLength(1);
     expect(state.items[0].colorName).toBe("Tortoise");
   });
@@ -206,7 +219,73 @@ describe("parseStoredCart", () => {
   });
 
   it("exposes a versioned storage key", () => {
-    expect(CART_STORAGE_KEY).toBe("lumen.cart.v1");
+    expect(CART_STORAGE_KEY).toBe("lumen.cart.v2");
+  });
+
+  it("defaults a missing lens to frame-only on load (forward-compat)", () => {
+    const noLens = { ...midnight } as Record<string, unknown>;
+    delete noLens.lens;
+    const restored = parseStoredCart(JSON.stringify({ items: [noLens] }));
+    expect(restored.items[0].lens).toEqual(FRAME_ONLY_LENS);
+  });
+});
+
+// ─── lens builds ──────────────────────────────────────────────────────────────
+
+describe("lens builds", () => {
+  const varifocal: CartLens = {
+    lensTypeSlug: "varifocal",
+    lensTypeName: "Varifocal",
+    lensUnitPricePesewa: 48000,
+    addonSlugs: ["antireflective", "transition"],
+    addonNames: ["Anti-reflective coating", "Transitions®"],
+    rxMethod: "later",
+    prescriptionId: null,
+  };
+
+  it("buildLensCartItem attaches the lens and prices the line incl. lens", () => {
+    const item = buildLensCartItem(frame, 0, varifocal)!;
+    expect(item.lens.lensTypeSlug).toBe("varifocal");
+    expect(lineUnitPricePesewa(item)).toBe(58000 + 48000);
+  });
+
+  it("same frame+colour with different lens builds are separate lines", () => {
+    const frameOnly = frameToCartItem(frame, 0)!;
+    const withLens = buildLensCartItem(frame, 0, varifocal)!;
+    let state = addItem(EMPTY_CART, frameOnly);
+    state = addItem(state, withLens);
+    expect(state.items).toHaveLength(2);
+  });
+
+  it("identical lens builds merge into one line", () => {
+    const a = buildLensCartItem(frame, 0, varifocal)!;
+    const b = buildLensCartItem(frame, 0, varifocal)!;
+    let state = addItem(EMPTY_CART, a);
+    state = addItem(state, b);
+    expect(state.items).toHaveLength(1);
+    expect(state.items[0].qty).toBe(2);
+  });
+
+  it("subtotal includes the lens surcharge", () => {
+    const item = buildLensCartItem(frame, 0, varifocal)!; // 58000 + 48000
+    const state = addItem(EMPTY_CART, item);
+    expect(selectSubtotalPesewa(state)).toBe(106000);
+  });
+
+  it("a different prescriptionId splits the line", () => {
+    const a = buildLensCartItem(frame, 0, {
+      ...varifocal,
+      rxMethod: "onfile",
+      prescriptionId: "rx-1",
+    })!;
+    const b = buildLensCartItem(frame, 0, {
+      ...varifocal,
+      rxMethod: "onfile",
+      prescriptionId: "rx-2",
+    })!;
+    let state = addItem(EMPTY_CART, a);
+    state = addItem(state, b);
+    expect(state.items).toHaveLength(2);
   });
 });
 

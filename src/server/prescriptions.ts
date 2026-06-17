@@ -174,6 +174,46 @@ export async function listOwnPrescriptions(): Promise<PrescriptionRow[]> {
   return (data ?? []) as PrescriptionRow[];
 }
 
+/** Minimal on-file prescription for the PDP lens builder (no Rx values). */
+export type BuilderPrescription = {
+  id: string;
+  status: string;
+  createdAt: string;
+  practitionerName: string | null;
+};
+
+/**
+ * On-file prescriptions selectable in the lens builder. Unlike listOwnPrescriptions
+ * this is called from a PUBLIC page (the PDP), so it must NOT redirect anonymous
+ * visitors — it returns [] when signed out (getUser, not requireUser). Excludes
+ * rejected rows. Flag/env guarded.
+ */
+export async function listBuilderPrescriptions(): Promise<BuilderPrescription[]> {
+  if (!prescriptionUploadEnabled() || !hasSupabaseEnv()) return [];
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("prescriptions")
+    .select("id, status, created_at, practitioner_name")
+    .eq("user_id", user.id)
+    .neq("status", "rejected")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("[prescriptions] listBuilderPrescriptions error", error.message);
+    return [];
+  }
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    status: r.status,
+    createdAt: r.created_at,
+    practitionerName: r.practitioner_name,
+  }));
+}
+
 export type PrescriptionsSummary = {
   total: number;
   pending: number;

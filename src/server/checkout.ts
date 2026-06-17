@@ -7,9 +7,11 @@ import type { CartLineInput, DeliveryInput, PaymentMethod } from "@/lib/checkout
 import {
   priceLines,
   type PriceableFrame,
+  type LensCatalogue,
   type RepriceOk,
   type RepriceResult,
 } from "@/lib/checkout-pricing";
+import type { Json } from "@/db/types";
 
 // Re-export the pure helpers so server callers (e.g. the webhook) have one import.
 export { priceLines, isPaidChargeValid } from "@/lib/checkout-pricing";
@@ -64,7 +66,57 @@ export async function repriceCart(lines: CartLineInput[]): Promise<RepriceResult
       : [],
   }));
 
-  return priceLines(lines, frames);
+  // Lens catalogue — active options only; RLS public-read.
+  const [lensTypesRes, addonsRes] = await Promise.all([
+    supabase.from("lens_types").select("slug, name, price_ghs").eq("is_active", true),
+    supabase.from("lens_addons").select("slug, name, price_ghs").eq("is_active", true),
+  ]);
+  if (lensTypesRes.error || addonsRes.error) {
+    console.error(
+      "[checkout] repriceCart lens catalogue error",
+      lensTypesRes.error?.message ?? addonsRes.error?.message,
+    );
+    return { ok: false, error: "Could not price your bag. Please try again." };
+  }
+  const catalogue: LensCatalogue = {
+    lensTypes: lensTypesRes.data ?? [],
+    addons: addonsRes.data ?? [],
+  };
+
+  // Verify any attached prescription belongs to this user and isn't rejected
+  // (explicit owner filter — the admin-all RLS policy would otherwise leak rows).
+  const rxIds = [
+    ...new Set(
+      lines.flatMap((l) => (l.lens?.prescriptionId ? [l.lens.prescriptionId] : [])),
+    ),
+  ];
+  if (rxIds.length > 0) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: "Please sign in to check out." };
+
+    const { data: rxRows, error: rxError } = await supabase
+      .from("prescriptions")
+      .select("id, status")
+      .eq("user_id", user.id)
+      .in("id", rxIds);
+    if (rxError) {
+      console.error("[checkout] repriceCart prescription check error", rxError.message);
+      return { ok: false, error: "Could not verify your prescription. Please try again." };
+    }
+    const usable = new Set(
+      (rxRows ?? []).filter((r) => r.status !== "rejected").map((r) => r.id),
+    );
+    if (rxIds.some((id) => !usable.has(id))) {
+      return {
+        ok: false,
+        error: "A prescription on your order is no longer available. Please re-select it.",
+      };
+    }
+  }
+
+  return priceLines(lines, frames, catalogue);
 }
 
 /** Paystack reference: unique, prefixed, underscore-safe. */
@@ -137,7 +189,9 @@ export async function createPendingOrder(params: {
     order_id: order.id,
     frame_id: l.frameId,
     color_selected: l.colorName,
-    price_ghs: l.unitPricePesewa,
+    price_ghs: l.unitPricePesewa, // frame unit price
+    lens_price_ghs: l.lensUnitPricePesewa, // lens surcharge per unit (type + add-ons)
+    lens_config: (l.lensConfig as Json) ?? null, // human-readable breakdown for display
     quantity: l.qty,
   }));
 
