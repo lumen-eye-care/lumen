@@ -9,6 +9,7 @@ interface AppointmentReceivedEmailProps {
   clinicName: string;
   preferredDate: string | null;
   whatsAppUrl: string;
+  siteUrl: string;
 }
 
 export function AppointmentReceivedEmail({
@@ -17,6 +18,7 @@ export function AppointmentReceivedEmail({
   clinicName,
   preferredDate,
   whatsAppUrl,
+  siteUrl,
 }: AppointmentReceivedEmailProps) {
   return (
     <LumenEmailLayout
@@ -62,7 +64,7 @@ export function AppointmentReceivedEmail({
 
       <Text style={emailStyles.muted}>
         You can manage your appointments in your{" "}
-        <Link href="https://www.lumeneye.org/account/appointments" style={{ color: "#0F4C81" }}>
+        <Link href={`${siteUrl}/account/appointments`} style={{ color: "#0F4C81" }}>
           Lumen account
         </Link>
         .

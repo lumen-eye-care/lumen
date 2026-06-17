@@ -56,6 +56,7 @@ export async function GET(
           clinicName={SAMPLE.clinicName}
           preferredDate={SAMPLE.preferredDate}
           whatsAppUrl={`https://wa.me/233245628432?text=Hi+Lumen`}
+          siteUrl={SITE}
         />
       );
       break;
@@ -111,6 +112,7 @@ export async function GET(
           name={SAMPLE.name}
           reviewNotes={SAMPLE.reviewNotes}
           shopUrl={`${SITE}/shop`}
+          siteUrl={SITE}
         />
       );
       break;
@@ -120,6 +122,7 @@ export async function GET(
           name={SAMPLE.name}
           reviewNotes="The image was too blurry to read the prescription values clearly. Please upload a clearer photo or scan."
           bookUrl={`${SITE}/book`}
+          siteUrl={SITE}
         />
       );
       break;

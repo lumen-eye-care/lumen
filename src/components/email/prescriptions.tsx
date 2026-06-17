@@ -7,12 +7,14 @@ interface PrescriptionVerifiedEmailProps {
   name: string | null;
   reviewNotes: string | null;
   shopUrl: string;
+  siteUrl: string;
 }
 
 export function PrescriptionVerifiedEmail({
   name,
   reviewNotes,
   shopUrl,
+  siteUrl,
 }: PrescriptionVerifiedEmailProps) {
   const greeting = name ? `Hi ${name}` : "Hi there";
 
@@ -48,7 +50,7 @@ export function PrescriptionVerifiedEmail({
 
       <Text style={emailStyles.muted}>
         Questions about your prescription or our lenses? Reply to this email or{" "}
-        <Link href="https://www.lumeneye.org/book" style={{ color: "#0F4C81" }}>
+        <Link href={`${siteUrl}/book`} style={{ color: "#0F4C81" }}>
           book an eye test
         </Link>{" "}
         at one of our clinics.
@@ -63,12 +65,14 @@ interface PrescriptionRejectedEmailProps {
   name: string | null;
   reviewNotes: string | null;
   bookUrl: string;
+  siteUrl: string;
 }
 
 export function PrescriptionRejectedEmail({
   name,
   reviewNotes,
   bookUrl,
+  siteUrl,
 }: PrescriptionRejectedEmailProps) {
   const greeting = name ? `Hi ${name}` : "Hi there";
 
@@ -106,7 +110,7 @@ export function PrescriptionRejectedEmail({
 
       <Text style={emailStyles.muted}>
         You can also upload a new prescription from your{" "}
-        <Link href="https://www.lumeneye.org/account/prescriptions" style={{ color: "#0F4C81" }}>
+        <Link href={`${siteUrl}/account/prescriptions`} style={{ color: "#0F4C81" }}>
           account page
         </Link>
         . Reply to this email if you have any questions.

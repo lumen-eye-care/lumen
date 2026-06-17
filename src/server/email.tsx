@@ -62,7 +62,7 @@ export async function renderAppointmentReceivedEmail(props: {
   preferredDate: string | null;
   whatsAppUrl: string;
 }) {
-  return both(<AppointmentReceivedEmail {...props} />);
+  return both(<AppointmentReceivedEmail {...props} siteUrl={SITE_URL} />);
 }
 
 export async function renderAppointmentAlertEmail(props: {
@@ -116,7 +116,11 @@ export async function renderPrescriptionVerifiedEmail(props: {
   reviewNotes: string | null;
 }) {
   return both(
-    <PrescriptionVerifiedEmail {...props} shopUrl={`${SITE_URL}/shop`} />,
+    <PrescriptionVerifiedEmail
+      {...props}
+      shopUrl={`${SITE_URL}/shop`}
+      siteUrl={SITE_URL}
+    />,
   );
 }
 
@@ -125,6 +129,10 @@ export async function renderPrescriptionRejectedEmail(props: {
   reviewNotes: string | null;
 }) {
   return both(
-    <PrescriptionRejectedEmail {...props} bookUrl={`${SITE_URL}/book`} />,
+    <PrescriptionRejectedEmail
+      {...props}
+      bookUrl={`${SITE_URL}/book`}
+      siteUrl={SITE_URL}
+    />,
   );
 }
