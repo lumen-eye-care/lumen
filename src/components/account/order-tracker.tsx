@@ -1,14 +1,19 @@
 import { buildTracker } from "@/lib/order-tracker";
 
 /**
- * Presentational 4-step delivery timeline for an order status. Pure render over
- * buildTracker() — done stages use the sage accent, the rest are hairline.
+ * Presentational delivery timeline for an order status. Pure render over
+ * buildTracker() — done stages use the sage accent, the rest are hairline. The
+ * column count tracks the number of modelled stages so it stays correct if the
+ * stage list changes (e.g. a future "delivered" stage).
  */
 export function OrderTracker({ status }: { status: string }) {
   const steps = buildTracker(status);
 
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+    >
       {steps.map((step) => (
         <div key={step.stage}>
           <div

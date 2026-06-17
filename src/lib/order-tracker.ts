@@ -1,25 +1,25 @@
 /**
  * Customer-facing order tracker (US-P1-05 / dashboard). Maps the raw DB
- * `orders.status` to a 4-stage delivery timeline. Deliberately omits any
- * lens-fulfilment stage ("lenses cut") — that depends on the lens partner and
- * isn't modelled yet; this timeline only reflects statuses we actually set.
+ * `orders.status` to a delivery timeline. Deliberately omits any lens-fulfilment
+ * stage ("lenses cut") — that depends on the lens partner and isn't modelled yet.
+ *
+ * Only models stages that something in the system can actually *set*: `placed`
+ * (order created), `confirmed` (Paystack webhook → paid / cod_collected), and
+ * `shipped` (admin "Mark as shipped"). A `delivered` stage was intentionally
+ * dropped: nothing sets `status='delivered'` in v1 (no admin action, no courier
+ * integration), so showing it would be fiction. Re-add it here when a real
+ * delivery-confirmation mechanism exists.
  *
  * Pure + unit-tested; the presentational tracker consumes the result.
  */
 
-export const TRACKER_STAGES = [
-  "placed",
-  "confirmed",
-  "shipped",
-  "delivered",
-] as const;
+export const TRACKER_STAGES = ["placed", "confirmed", "shipped"] as const;
 export type TrackerStage = (typeof TRACKER_STAGES)[number];
 
 export const TRACKER_STAGE_LABEL: Record<TrackerStage, string> = {
   placed: "Order placed",
   confirmed: "Confirmed",
   shipped: "On its way",
-  delivered: "Delivered",
 };
 
 /**
@@ -50,7 +50,9 @@ function stageIndex(status: string): number {
     case "shipped":
       return 2; // on its way
     case "delivered":
-      return 3; // delivered
+      // Not settable in v1, but stay defensive: cap at the last modelled stage
+      // rather than overflowing the timeline.
+      return 2;
     default:
       // failed / refunded / unknown — show only the first stage as reached.
       return 0;
@@ -66,7 +68,7 @@ export type TrackerStep = {
   current: boolean;
 };
 
-/** Build the 4-step timeline for an order status. */
+/** Build the timeline steps for an order status. */
 export function buildTracker(status: string): TrackerStep[] {
   const idx = stageIndex(status);
   return TRACKER_STAGES.map((stage, i) => ({

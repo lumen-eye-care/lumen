@@ -20,16 +20,17 @@ describe("isLiveOrder", () => {
 });
 
 describe("buildTracker", () => {
-  it("always returns the four stages in order", () => {
+  it("always returns the three modelled stages in order", () => {
     const steps = buildTracker("pending");
     expect(steps.map((s) => s.stage)).toEqual([...TRACKER_STAGES]);
+    expect(steps).toHaveLength(3);
   });
 
   it("marks only 'placed' as current for a pending order", () => {
     const steps = buildTracker("pending");
     expect(steps[0]).toMatchObject({ stage: "placed", done: true, current: true });
     expect(steps[1].done).toBe(false);
-    expect(steps[3].done).toBe(false);
+    expect(steps[2].done).toBe(false);
   });
 
   it("marks placed+confirmed done for a paid order, current at confirmed", () => {
@@ -43,15 +44,16 @@ describe("buildTracker", () => {
     expect(buildTracker("cod_collected")[1].current).toBe(true);
   });
 
-  it("advances to shipped", () => {
+  it("advances to shipped as the final stage", () => {
     const steps = buildTracker("shipped");
     expect(steps[2]).toMatchObject({ stage: "shipped", done: true, current: true });
-    expect(steps[3].done).toBe(false);
+    expect(steps.every((s) => s.done)).toBe(true);
   });
 
-  it("completes all stages when delivered", () => {
+  it("caps a (non-v1) delivered status at the last stage without overflowing", () => {
     const steps = buildTracker("delivered");
+    expect(steps).toHaveLength(3);
     expect(steps.every((s) => s.done)).toBe(true);
-    expect(steps[3].current).toBe(true);
+    expect(steps[2].current).toBe(true);
   });
 });

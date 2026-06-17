@@ -4,6 +4,53 @@
 
 ---
 
+## 2026-06-17 — US-P1-01 customer Appointments tab + US-P1-05 order tracking (build-complete)
+
+**Status: shipped on branch.** Customers can now see their appointment requests in-account with
+live status, the appointment notification loop is closed end-to-end, and the order tracker now
+renders on the order detail page (trimmed to honest stages). No migration, no new deps, no flag.
+
+**What landed:**
+- **Appointments tab** `account/appointments/` — `listOwnAppointments()` in `src/server/appointments.ts`
+  (RLS client + **explicit `.eq("user_id")`** owner filter, mirrors `listOwnPrescriptions`; the
+  `appointments admin all` policy would otherwise leak every row to an admin on their own page —
+  [[rls-admin-all-policy-needs-explicit-owner-filter]]). New page lists service/clinic/preferred
+  date/notes + an `AppointmentStatusPill` (`components/account/`, requested/confirmed/completed/
+  cancelled tones); honest empty state → `/book`. Sidebar tab flipped from "Soon" to a live link;
+  dashboard "next appointment" tile now links to the page.
+- **Notification loop closed** (clinic reps are NOT app users — they act from the notification):
+  the rep/ops booking email (`sendAppointmentEmails` `adminText`) now carries a **wa.me click-to-chat
+  + `tel:` link** built from the customer's E.164 phone (reuses `waMeUrl`); and admin status changes
+  (`admin/appointments/actions.ts`) now fire a new **`sendAppointmentStatusEmail`** to the customer
+  (per-status copy for confirmed/cancelled/completed) — best-effort, no-throw, never blocks the
+  status write. **Automated WhatsApp-to-rep via the Cloud API is deferred to a Phase 2 story**
+  (needs Charity's Meta Business onboarding, approved Utility templates, ~GHS 0.10/msg, CSP widen).
+- **Order tracker (US-P1-05)** — dropped the fictional `delivered` stage: only `placed`/`confirmed`/
+  `shipped` have real drivers (nothing sets `delivered` — no admin action, no courier integration in
+  v1). `src/lib/order-tracker.ts` reduced to 3 stages (defensive cap for stray `delivered`); tests
+  updated; `OrderTracker` grid made dynamic; tracker now rendered on `account/orders/[id]` (live
+  orders only), not just the dashboard.
+
+**Verified (2026-06-17):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **220/220 tests** ✓ · `pnpm build` ✓
+(new route `/account/appointments`). **Live against staging** (this fresh worktree had no `.env.local`
+— copied staging's from main, gitignored): seed customer → tab live, empty state, booked a test
+appointment → listed correctly (Eye test · East Legon · Fri 10 Jul · "Requested"); order detail
+showed the **3-stage tracker** (a Confirmed/paid order lights placed+confirmed, leaves shipped un-lit).
+**Owner-scoping confirmed:** seed admin's own `/account/appointments` showed only their own row and did
+**not** leak the customer's appointment. **Status-change path:** marking "confirmed" persisted; both
+`sendAppointmentStatusEmail` and the rep email ran and failed **non-fatally** on the absent
+`RESEND_API_KEY` (logged, didn't block) — exactly as designed.
+
+**Open caveats:** all appointment email is **inert until Resend's key + domain are live** (existing
+caveat) + `APPOINTMENTS_NOTIFY_EMAIL` must be set to the rep/Charity inbox for the booking alert. A
+labeled test appointment ("Verification test booking — please ignore", now `confirmed`) was left in
+staging (no in-app delete for appointments).
+
+**Next steps:** (1) Resume the deferred **Paystack webhook E2E** (orders still stuck `pending`;
+needs a tunnel to a `sk_test` env). (2) Phase 2 story: automated WhatsApp-to-rep (Cloud API).
+
+---
+
 ## 2026-06-15 — US-P1-03 prescription upload (flag-gated, build-complete)
 
 **Status: code-complete behind `LUMEN_PRESCRIPTION_UPLOAD_ENABLED` (default off).** Customers can upload an existing Rx (photo/PDF) to their account; staff verify it manually. Upload-only — no OCR, no structured Rx fields, no lens pricing (those stay US-P2-02). Built on existing infra (private `prescriptions` bucket + `prescription_access_log` + the flag).

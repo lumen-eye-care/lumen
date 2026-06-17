@@ -48,7 +48,7 @@ export function AccountSidebar({
       icon: "cart",
       badge: activeOrders > 0 ? activeOrders : undefined,
     },
-    { label: "Appointments", icon: "calendar", soon: true },
+    { href: "/account/appointments", label: "Appointments", icon: "calendar" },
     prescriptionsEnabled
       ? { href: "/account/prescriptions", label: "Prescriptions", icon: "eye" }
       : { label: "Prescriptions", icon: "eye", soon: true },
