@@ -3,6 +3,7 @@ import { createClient } from "@/server/supabase";
 import { requireUser } from "@/server/auth-guards";
 import { getResend } from "@/server/resend";
 import { waMeUrl } from "@/lib/wa-link";
+import { bookingWhatsAppUrl } from "@/lib/contact";
 import type {
   AppointmentInput,
   AppointmentService,
@@ -175,11 +176,23 @@ export async function sendAppointmentEmails(params: {
     ? `\nPreferred date: ${appointment.preferred_date}`
     : "";
 
+  // Free second entry point: a wa.me click-to-chat the customer can tap to open
+  // the 24-hour customer-service window (no per-message cost). The prefill carries
+  // the full booking summary, so it also reaches the rep's WhatsApp inbox with
+  // complete context. See docs/whatsapp-free-loop.md.
+  const customerWhatsApp = bookingWhatsAppUrl({
+    name: appointment.name,
+    serviceLabel,
+    clinicName: appointment.clinic_name,
+    preferredDate: appointment.preferred_date ?? null,
+  });
+
   const customerText =
     `Hi ${appointment.name},\n\n` +
     `We've received your appointment request at ${appointment.clinic_name}.\n` +
     `Service: ${serviceLabel}${dateLine}\n\n` +
     `Our team will be in touch shortly to confirm your appointment.\n\n` +
+    `Prefer WhatsApp? Message us for quicker updates: ${customerWhatsApp}\n\n` +
     `Thank you,\nThe Lumen Eye Care team`;
 
   // The clinic rep is NOT an app user — they act straight from this notification,

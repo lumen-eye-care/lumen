@@ -53,7 +53,12 @@ export default async function BookPage({
     clinics.find((c) => c.is_flagship) ??
     clinics[0];
 
-  const clinicOptions = clinics.map((c) => ({ id: c.id, name: c.name }));
+  const clinicOptions = clinics.map((c) => ({
+    id: c.id,
+    name: c.name,
+    // Prefer a dedicated WhatsApp number; fall back to the clinic's main phone.
+    whatsapp: c.whatsapp ?? c.phone,
+  }));
 
   const heading =
     defaultService === "home-visit"

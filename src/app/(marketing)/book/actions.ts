@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/server/supabase";
-import { appointmentSchema } from "@/lib/appointment-schemas";
+import { appointmentSchema, SERVICE_LABELS } from "@/lib/appointment-schemas";
 import {
   createAppointment,
   sendAppointmentEmails,
@@ -9,7 +9,18 @@ import {
 
 export type BookFormState =
   | { status: "idle" }
-  | { status: "success"; appointmentId: string }
+  | {
+      status: "success";
+      appointmentId: string;
+      // Booking summary for the success-screen WhatsApp prefill CTAs.
+      name: string;
+      clinicName: string;
+      serviceLabel: string;
+      preferredDate: string | null;
+      // Clinic's own WhatsApp/phone for the "Message [clinic] on WhatsApp" CTA.
+      // null when no clinic contact number is on record.
+      clinicWhatsApp: string | null;
+    }
   | { status: "error"; error: string; fieldErrors?: Record<string, string> };
 
 function str(formData: FormData, key: string): string {
@@ -31,6 +42,9 @@ export async function requestAppointment(
   _prev: BookFormState,
   formData: FormData,
 ): Promise<BookFormState> {
+  // Not part of the appointment schema — used only for the success-screen CTA.
+  const clinicWhatsApp = str(formData, "clinic_whatsapp") || null;
+
   const candidate = {
     clinic_id: str(formData, "clinic_id"),
     clinic_name: str(formData, "clinic_name"),
@@ -79,5 +93,13 @@ export async function requestAppointment(
     appointmentId: result.id,
   });
 
-  return { status: "success", appointmentId: result.id };
+  return {
+    status: "success",
+    appointmentId: result.id,
+    name: parsed.data.name,
+    clinicName: parsed.data.clinic_name,
+    serviceLabel: SERVICE_LABELS[parsed.data.service] ?? parsed.data.service,
+    preferredDate: parsed.data.preferred_date ?? null,
+    clinicWhatsApp,
+  };
 }

@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-06-17 — Zero-cost WhatsApp appointment loop (build-complete)
+
+**Status: shipped on branch.** WhatsApp is now the booking follow-up channel for customer
+and rep at **zero per-message cost** — no Meta Cloud API, no billable templates, no
+onboarding. Replaces the deferred "automated WhatsApp-to-rep (Cloud API)" Phase 2 idea with a
+**customer-initiated** design (the only billable piece was a business-initiated push). No
+migration, no new deps, no env vars, no CSP change. See `docs/whatsapp-free-loop.md`.
+
+**What landed:**
+- **`src/lib/contact.ts`** (new, +6 tests) — `LUMEN_WHATSAPP_E164` single source of truth
+  (was hardcoded `233245628432` in the PDP) + pure `buildBookingWhatsAppText`/
+  `bookingWhatsAppUrl` (full booking summary so the customer's chat doubles as the rep's
+  WhatsApp alert with context). PDP `frame-purchase-panel.tsx` now uses `waMeUrl(LUMEN_…)`.
+- **Booking success screen** `book-form.tsx` — "Message us on WhatsApp" `lm-ghost` CTA,
+  prefilled from booking context; `BookFormState.success` extended with name/clinic/service/
+  date. Copy now points to both email + WhatsApp.
+- **Confirmation email** `appointments.ts` — `customerText` gains a free `wa.me` line (second
+  entry point to open the 24h window). Rep email/`wa.me`+`tel:` links unchanged.
+- **Rep alerting stays free:** automated email per booking (already built) + WhatsApp via the
+  customer's tap. No automated business-initiated push. Cloud-API push recorded as an optional,
+  billable future upgrade behind the same seam; Telegram noted as a free-push alternative.
+
+**Open caveat:** depends on Charity running the **WhatsApp Business App** on the
+`LUMEN_WHATSAPP_E164` line so click-to-chats are answered; `APPOINTMENTS_NOTIFY_EMAIL` must be
+set for the rep email. WhatsApp links work the moment they're tapped (no inbox/key needed to send).
+
+**Next steps:** Cloud-API WhatsApp push remains optional, not blocking. Paystack webhook is live and resolved.
+
+---
+
 ## 2026-06-17 — US-P1-01 customer Appointments tab + US-P1-05 order tracking (build-complete)
 
 **Status: shipped on branch.** Customers can now see their appointment requests in-account with

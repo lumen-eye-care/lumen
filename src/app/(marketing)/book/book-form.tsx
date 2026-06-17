@@ -7,6 +7,8 @@ import {
   SERVICE_LABELS,
   type AppointmentService,
 } from "@/lib/appointment-schemas";
+import { bookingWhatsAppUrl } from "@/lib/contact";
+import { waMeUrl } from "@/lib/wa-link";
 import { requestAppointment, type BookFormState } from "./actions";
 
 const inputClass =
@@ -14,7 +16,7 @@ const inputClass =
 
 const errorClass = "mt-1 text-xs text-[color:var(--lm-warm)]";
 
-type Clinic = { id: string; name: string };
+type Clinic = { id: string; name: string; whatsapp: string | null };
 
 type BookFormProps = {
   clinics: Clinic[];
@@ -49,9 +51,39 @@ export function BookForm({
         </span>
         <h2 className="lm-display mb-2 text-2xl">Request received</h2>
         <p className="mx-auto max-w-sm text-sm" style={{ color: "var(--lm-muted)" }}>
-          We&apos;ve sent a confirmation to your email. Our team will be in
-          touch shortly to confirm your appointment.
+          We&apos;ve emailed your confirmation. Our team will be in touch
+          shortly — or message us on WhatsApp for quicker updates.
         </p>
+        <div className="mx-auto mt-5 flex flex-col items-center gap-3">
+          <a
+            href={bookingWhatsAppUrl({
+              name: state.name,
+              serviceLabel: state.serviceLabel,
+              clinicName: state.clinicName,
+              preferredDate: state.preferredDate,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="lm-ghost inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm"
+          >
+            <Icon name="phone" size={16} />
+            Message Lumen on WhatsApp
+          </a>
+          {state.clinicWhatsApp && (
+            <a
+              href={waMeUrl(
+                state.clinicWhatsApp,
+                `Hi ${state.clinicName}, I've just requested a ${state.serviceLabel.toLowerCase()} via Lumen Eye Care. My name is ${state.name}.`,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="lm-ghost inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm"
+            >
+              <Icon name="phone" size={16} />
+              Message {state.clinicName} directly
+            </a>
+          )}
+        </div>
       </div>
     );
   }
@@ -65,6 +97,7 @@ export function BookForm({
       {/* Hidden fields carry validated clinic data to the server action. */}
       <input type="hidden" name="clinic_id" value={selectedClinicId} />
       <input type="hidden" name="clinic_name" value={selectedClinic?.name ?? ""} />
+      <input type="hidden" name="clinic_whatsapp" value={selectedClinic?.whatsapp ?? ""} />
 
       {/* Service */}
       <label className="block text-sm">
