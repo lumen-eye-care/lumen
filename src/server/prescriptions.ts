@@ -1,6 +1,11 @@
 import "server-only";
 import { requireUser, requireAdmin } from "@/server/auth-guards";
 import { createClient } from "@/server/supabase";
+import { getResend } from "@/server/resend";
+import {
+  renderPrescriptionVerifiedEmail,
+  renderPrescriptionRejectedEmail,
+} from "@/server/email";
 import { getSupabaseAdmin } from "@/server/supabase-admin";
 import {
   PRESCRIPTION_MIME_EXT,
@@ -309,4 +314,52 @@ export async function setPrescriptionStatus(
     return { ok: false };
   }
   return { ok: true };
+}
+
+const PRESCRIPTIONS_FROM = "Lumen Eye Care <orders@lumeneye.org>";
+
+/**
+ * Best-effort customer email when an admin verifies or rejects a prescription.
+ * Never throws — a Resend failure must never block the status write.
+ * `null` statuses (pending) produce no email.
+ */
+export async function sendPrescriptionStatusEmail(params: {
+  customerEmail: string | null;
+  customerName: string | null;
+  status: PrescriptionStatus;
+  reviewNotes: string | null;
+}): Promise<void> {
+  const { customerEmail, customerName, status, reviewNotes } = params;
+  if (!customerEmail || (status !== "verified" && status !== "rejected")) return;
+
+  try {
+    let subject: string;
+    let body: { html: string; text: string };
+
+    if (status === "verified") {
+      subject = "Your prescription has been verified";
+      body = await renderPrescriptionVerifiedEmail({
+        name: customerName,
+        reviewNotes,
+      });
+    } else {
+      subject = "About your Lumen prescription upload";
+      body = await renderPrescriptionRejectedEmail({
+        name: customerName,
+        reviewNotes,
+      });
+    }
+
+    await getResend().emails.send({
+      from: PRESCRIPTIONS_FROM,
+      to: customerEmail,
+      subject,
+      html: body.html,
+      text: body.text,
+    });
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Prescription status email failed (non-fatal)", err);
+    }
+  }
 }

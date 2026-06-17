@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-06-17 — Branded HTML email templates for all transactional emails (build-complete)
+
+**Status: PR #40 open, ready to merge.** All 10 transactional emails now send branded HTML (Lumen cream/navy design, Instrument Serif wordmark, lumen-blue CTA buttons) instead of plain text. Two emails that didn't exist at all — prescription verified and prescription rejected — are now added. A dev-only preview route lets any developer visually confirm every template without sending real mail.
+
+**What landed (`feat/html-email-templates`, deps `@react-email/components@^1.0.12` + `@react-email/render@^2.0.9`):**
+- **`src/components/email/layout.tsx`** — shared `LumenEmailLayout` (cream bg, Instrument Serif wordmark, lumen-blue top rule, white card, footer with site + book links).
+- **`src/components/email/orders.tsx`** — `OrderConfirmedEmail` (card/MoMo + COD copy variants), `OrderShippedEmail`.
+- **`src/components/email/appointments.tsx`** — `AppointmentReceivedEmail` (customer), `AppointmentAlertEmail` (rep — customer details + WhatsApp + Call + admin link), `AppointmentConfirmedEmail`, `AppointmentCancelledEmail`, `AppointmentCompletedEmail`.
+- **`src/components/email/prescriptions.tsx`** — `PrescriptionVerifiedEmail` + `PrescriptionRejectedEmail` (both new — previously zero email on prescription status change).
+- **`src/server/email.tsx`** — server-only `.tsx` render helpers using `@react-email/render` v2 API (`render()` → HTML, `toPlainText(html)` → plain-text fallback). All body links thread `SITE_URL` (env-driven); footer links intentionally hardcoded to production.
+- **`src/app/admin/prescriptions/actions.ts`** — `reviewPrescription` now calls `sendPrescriptionStatusEmail` after a successful status write (best-effort, non-fatal).
+- **`src/app/preview/email/`** — dev-only preview: index at `/preview/email` lists all 10 templates; `/preview/email/[name]` returns each as `text/html` with realistic sample data. Returns 404 in production.
+
+**Verified (2026-06-17):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **224/224 tests** ✓ · `pnpm build` ✓. All 10 templates visually confirmed in the preview route — design, copy, and links all correct (links audited via DOM inspection: all body links env-driven, footer links intentionally hardcoded to `lumeneye.org`).
+
+**Open action items before / after merge:**
+- **Set `APPOINTMENTS_NOTIFY_EMAIL`** in Vercel → rep booking alert is inert without it (Charity never gets email notifications for new bookings).
+- **Set `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`** in Vercel → rate limiter is fully built but no-ops without these (create free Redis DB at upstash.com, ~2 min).
+- **Inbox smoke test**: trigger a COD order, a booking, and an admin status change after deploy → confirm HTML mail lands in Resend dashboard logs.
+
+**Next steps:** P2 stories — US-P2-03 Journal is the most self-contained (schema + seed data already in place from the `20260608000002_content_catalogue.sql` migration).
+
+---
+
 ## 2026-06-17 — Zero-cost WhatsApp appointment loop (build-complete)
 
 **Status: shipped on branch.** WhatsApp is now the booking follow-up channel for customer

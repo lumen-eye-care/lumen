@@ -2,7 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { createClient } from "@/server/supabase";
 import { getResend } from "@/server/resend";
-import { formatGhs } from "@/lib/format-money";
+import { renderOrderConfirmedEmail } from "@/server/email";
 import type { CartLineInput, DeliveryInput, PaymentMethod } from "@/lib/checkout-schemas";
 import {
   priceLines,
@@ -164,17 +164,13 @@ export async function sendOrderConfirmationEmail(params: {
   const { to, name, reference, totalPesewa, method } = params;
   const isCod = method === "cod";
   try {
+    const body = await renderOrderConfirmedEmail({ name, reference, totalPesewa, method });
     await getResend().emails.send({
       from: ORDERS_FROM,
       to,
-      subject: `We've received your Lumen order ${reference}`,
-      text:
-        `Hi ${name ?? "there"},\n\n` +
-        `Thank you for your order (${reference}, ${formatGhs(totalPesewa)}).\n\n` +
-        (isCod
-          ? `You've chosen to pay on delivery. We'll be in touch to arrange delivery and collect payment.\n\n`
-          : `Your payment is confirmed and we're preparing your frames.\n\n`) +
-        `You can track your order in your account.\n\nThank you,\nThe Lumen team`,
+      subject: `${isCod ? "Order received" : "Order confirmed"} — ${reference}`,
+      html: body.html,
+      text: body.text,
     });
   } catch (err) {
     if (process.env.NODE_ENV !== "production") {
