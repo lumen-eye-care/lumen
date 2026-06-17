@@ -13,6 +13,8 @@ import Image from "next/image";
 import { FrameSVG } from "@/components/atoms/frame-svg";
 import { Icon } from "@/components/atoms/icon";
 import { formatGhs } from "@/lib/format-money";
+import { LUMEN_WHATSAPP_E164 } from "@/lib/contact";
+import { waMeUrl } from "@/lib/wa-link";
 import { frameToCartItem, type CartItem } from "@/lib/cart";
 import type { ShopFrame } from "@/server/frames";
 import { useCart } from "@/components/cart/cart-provider";
@@ -211,7 +213,7 @@ export function FramePurchasePanel({ frame }: { frame: ShopFrame }) {
             Choose your lens type, prescription, and add-ons at checkout. Have a
             question? WhatsApp us at{" "}
             <a
-              href="https://wa.me/233245628432"
+              href={waMeUrl(LUMEN_WHATSAPP_E164)}
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
