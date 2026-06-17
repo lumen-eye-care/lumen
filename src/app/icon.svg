@@ -1,8 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <!-- Lumen favicon: the glasses logomark (no wordmark), on a navy tile so the
-       thin frame stays legible at 16px on both light and dark browser chrome. -->
-  <rect width="64" height="64" rx="14" fill="#0A1F35"/>
-  <g transform="translate(6.8 17) scale(0.82)" fill="none" stroke="#FAF7F2"
+  <!-- Lumen favicon: the glasses logomark (no wordmark), transparent background.
+       With no tile, the thin stroke has to read on both light and dark browser
+       chrome, so it adapts via prefers-color-scheme: brand blue on light UI,
+       cream on dark UI. Mark scaled up to fill the square now that the tile's
+       padding is gone. -->
+  <style>
+    :root { --mark: #0F4C81; }
+    @media (prefers-color-scheme: dark) {
+      :root { --mark: #FAF7F2; }
+    }
+  </style>
+  <g transform="translate(2.5 15) scale(0.95)" fill="none" stroke="var(--mark)"
      stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="14" cy="18" r="11"/>
     <circle cx="48" cy="18" r="11"/>
