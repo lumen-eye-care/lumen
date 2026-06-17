@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/server/auth-guards";
 import { createClient } from "@/server/supabase";
 import { getResend } from "@/server/resend";
-import { formatGhs } from "@/lib/format-money";
+import { renderOrderShippedEmail } from "@/server/email";
 import { markShippedSchema } from "@/lib/frame-schemas";
 
 /**
@@ -58,14 +58,17 @@ export async function markShipped(
   if (customer?.email) {
     try {
       const ref = order.payment_reference ?? order.id.slice(0, 8);
+      const body = await renderOrderShippedEmail({
+        name: customer.name ?? null,
+        reference: ref,
+        totalPesewa: order.total_ghs,
+      });
       await getResend().emails.send({
         from: ORDERS_FROM,
         to: customer.email,
         subject: `Your Lumen order ${ref} has shipped`,
-        text:
-          `Hi ${customer.name ?? "there"},\n\n` +
-          `Good news — your Lumen order (${ref}, ${formatGhs(order.total_ghs)}) is on its way.\n\n` +
-          `We'll be in touch with delivery details.\n\nThank you,\nThe Lumen team`,
+        html: body.html,
+        text: body.text,
       });
     } catch (err) {
       if (process.env.NODE_ENV !== "production") {

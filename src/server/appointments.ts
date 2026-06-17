@@ -2,6 +2,13 @@ import "server-only";
 import { createClient } from "@/server/supabase";
 import { requireUser } from "@/server/auth-guards";
 import { getResend } from "@/server/resend";
+import {
+  renderAppointmentReceivedEmail,
+  renderAppointmentAlertEmail,
+  renderAppointmentConfirmedEmail,
+  renderAppointmentCancelledEmail,
+  renderAppointmentCompletedEmail,
+} from "@/server/email";
 import { waMeUrl } from "@/lib/wa-link";
 import { bookingWhatsAppUrl } from "@/lib/contact";
 import type {
@@ -172,14 +179,11 @@ export async function sendAppointmentEmails(params: {
 }): Promise<void> {
   const { appointment } = params;
   const serviceLabel = SERVICE_LABELS[appointment.service] ?? appointment.service;
-  const dateLine = appointment.preferred_date
-    ? `\nPreferred date: ${appointment.preferred_date}`
-    : "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lumeneye.org";
 
-  // Free second entry point: a wa.me click-to-chat the customer can tap to open
-  // the 24-hour customer-service window (no per-message cost). The prefill carries
-  // the full booking summary, so it also reaches the rep's WhatsApp inbox with
-  // complete context. See docs/whatsapp-free-loop.md.
+  // Free second entry point: wa.me prefilled with booking summary so the
+  // customer's tap also reaches the rep's WhatsApp with context.
+  // See docs/whatsapp-free-loop.md.
   const customerWhatsApp = bookingWhatsAppUrl({
     name: appointment.name,
     serviceLabel,
@@ -187,55 +191,58 @@ export async function sendAppointmentEmails(params: {
     preferredDate: appointment.preferred_date ?? null,
   });
 
-  const customerText =
-    `Hi ${appointment.name},\n\n` +
-    `We've received your appointment request at ${appointment.clinic_name}.\n` +
-    `Service: ${serviceLabel}${dateLine}\n\n` +
-    `Our team will be in touch shortly to confirm your appointment.\n\n` +
-    `Prefer WhatsApp? Message us for quicker updates: ${customerWhatsApp}\n\n` +
-    `Thank you,\nThe Lumen Eye Care team`;
-
-  // The clinic rep is NOT an app user — they act straight from this notification,
-  // so include one-tap contact links built from the customer's (E.164) phone:
-  // a wa.me click-to-chat and a tel: dial link. (v1 stand-in for automated
-  // WhatsApp; the Cloud-API push is a deferred Phase 2 story.)
+  // The clinic rep is NOT an app user — they act from this notification email.
+  // Include one-tap WhatsApp + tel: links built from the customer's E.164 phone.
   const chatLink = waMeUrl(
     appointment.phone,
     `Hi ${appointment.name}, this is ${appointment.clinic_name} about your ${serviceLabel.toLowerCase()} request with Lumen Eye Care.`,
   );
   const callLink = `tel:${appointment.phone.replace(/[^\d+]/g, "")}`;
-
-  const adminText =
-    `New appointment request\n\n` +
-    `Name: ${appointment.name}\n` +
-    `Phone: ${appointment.phone}\n` +
-    `Email: ${appointment.email}\n` +
-    `Clinic: ${appointment.clinic_name}\n` +
-    `Service: ${serviceLabel}${dateLine}\n` +
-    (appointment.notes ? `\nNotes: ${appointment.notes}\n` : "") +
-    `\nReply on WhatsApp: ${chatLink}\n` +
-    `Call: ${callLink}\n` +
-    `\nManage: ${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/admin/appointments`;
-
   const notifyEmail = process.env.APPOINTMENTS_NOTIFY_EMAIL;
 
   try {
     const resend = getResend();
+    const [customerBody, alertBody] = await Promise.all([
+      renderAppointmentReceivedEmail({
+        name: appointment.name,
+        serviceLabel,
+        clinicName: appointment.clinic_name,
+        preferredDate: appointment.preferred_date ?? null,
+        whatsAppUrl: customerWhatsApp,
+      }),
+      notifyEmail
+        ? renderAppointmentAlertEmail({
+            customerName: appointment.name,
+            customerPhone: appointment.phone,
+            customerEmail: appointment.email,
+            serviceLabel,
+            clinicName: appointment.clinic_name,
+            preferredDate: appointment.preferred_date ?? null,
+            notes: appointment.notes ?? null,
+            whatsAppChatLink: chatLink,
+            callLink,
+            adminUrl: `${siteUrl}/admin/appointments`,
+          })
+        : null,
+    ]);
+
     const sends: Promise<unknown>[] = [
       resend.emails.send({
         from: APPOINTMENTS_FROM,
         to: appointment.email,
         subject: `Your appointment request — ${appointment.clinic_name}`,
-        text: customerText,
+        html: customerBody.html,
+        text: customerBody.text,
       }),
     ];
-    if (notifyEmail) {
+    if (notifyEmail && alertBody) {
       sends.push(
         resend.emails.send({
           from: APPOINTMENTS_FROM,
           to: notifyEmail,
           subject: `[Lumen] New appointment request — ${appointment.name}`,
-          text: adminText,
+          html: alertBody.html,
+          text: alertBody.text,
         }),
       );
     }
@@ -247,51 +254,9 @@ export async function sendAppointmentEmails(params: {
   }
 }
 
-/** Per-status customer copy for a status change. `null` = no email for that status. */
-function statusEmailBody(
-  appt: Pick<AppointmentRow, "name" | "clinic_name" | "service" | "preferred_date">,
-  status: AppointmentStatus,
-): { subject: string; text: string } | null {
-  const serviceLabel =
-    SERVICE_LABELS[appt.service as AppointmentService] ?? appt.service;
-  const dateLine = appt.preferred_date ? ` on ${appt.preferred_date}` : "";
-  const sign = `\n\nThank you,\nThe Lumen Eye Care team`;
-
-  switch (status) {
-    case "confirmed":
-      return {
-        subject: `Your appointment is confirmed — ${appt.clinic_name}`,
-        text:
-          `Hi ${appt.name},\n\n` +
-          `Good news — your ${serviceLabel.toLowerCase()} at ${appt.clinic_name}${dateLine} is confirmed.\n` +
-          `If you need to change anything, just reply to this email or contact the clinic.${sign}`,
-      };
-    case "cancelled":
-      return {
-        subject: `Your appointment was cancelled — ${appt.clinic_name}`,
-        text:
-          `Hi ${appt.name},\n\n` +
-          `Your ${serviceLabel.toLowerCase()} request at ${appt.clinic_name} has been cancelled.\n` +
-          `If this wasn't expected, you can book again any time: ${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/book${sign}`,
-      };
-    case "completed":
-      return {
-        subject: `Thanks for visiting — ${appt.clinic_name}`,
-        text:
-          `Hi ${appt.name},\n\n` +
-          `Thank you for your ${serviceLabel.toLowerCase()} at ${appt.clinic_name}. We hope it went well.\n` +
-          `Ready for frames? Browse the collection: ${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/shop${sign}`,
-      };
-    case "requested":
-      // No email when an admin moves something back to "requested".
-      return null;
-  }
-}
-
 /**
  * Best-effort customer email when an admin changes an appointment's status
- * (confirmed/cancelled/completed). Mirrors sendAppointmentEmails: never throws,
- * no-ops cleanly while RESEND_API_KEY is unset — so a Resend failure can never
+ * (confirmed/cancelled/completed). Never throws — a Resend failure must never
  * block the status write in the admin action.
  */
 export async function sendAppointmentStatusEmail(params: {
@@ -301,15 +266,46 @@ export async function sendAppointmentStatusEmail(params: {
   >;
   status: AppointmentStatus;
 }): Promise<void> {
-  const body = statusEmailBody(params.appointment, params.status);
-  if (!body) return;
+  const { appointment, status } = params;
+  if (status === "requested") return; // no email when reverted to requested
+
+  const serviceLabel =
+    SERVICE_LABELS[appointment.service as AppointmentService] ?? appointment.service;
 
   try {
-    const resend = getResend();
-    await resend.emails.send({
+    let subject: string;
+    let body: { html: string; text: string };
+
+    if (status === "confirmed") {
+      subject = `Your appointment is confirmed — ${appointment.clinic_name}`;
+      body = await renderAppointmentConfirmedEmail({
+        name: appointment.name,
+        serviceLabel,
+        clinicName: appointment.clinic_name,
+        preferredDate: appointment.preferred_date,
+      });
+    } else if (status === "cancelled") {
+      subject = `Your appointment was cancelled — ${appointment.clinic_name}`;
+      body = await renderAppointmentCancelledEmail({
+        name: appointment.name,
+        serviceLabel,
+        clinicName: appointment.clinic_name,
+      });
+    } else {
+      // completed
+      subject = `Thanks for visiting — ${appointment.clinic_name}`;
+      body = await renderAppointmentCompletedEmail({
+        name: appointment.name,
+        serviceLabel,
+        clinicName: appointment.clinic_name,
+      });
+    }
+
+    await getResend().emails.send({
       from: APPOINTMENTS_FROM,
-      to: params.appointment.email,
-      subject: body.subject,
+      to: appointment.email,
+      subject,
+      html: body.html,
       text: body.text,
     });
   } catch (err) {

@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/server/auth-guards";
 import {
+  getPrescription,
   getPrescriptionSignedUrl,
   setPrescriptionStatus,
+  sendPrescriptionStatusEmail,
 } from "@/server/prescriptions";
 import { PRESCRIPTION_STATUSES } from "@/lib/prescription-schemas";
 
@@ -25,11 +27,25 @@ export async function reviewPrescription(formData: FormData): Promise<void> {
     return;
   }
 
-  await setPrescriptionStatus(
+  // Fetch customer info before status write so we have email + name for the notification.
+  const prescription = await getPrescription(id);
+
+  const result = await setPrescriptionStatus(
     id,
     status as (typeof PRESCRIPTION_STATUSES)[number],
     note || null,
   );
+
+  // Best-effort email — only fires on success, never blocks the action.
+  if (result.ok && prescription) {
+    await sendPrescriptionStatusEmail({
+      customerEmail: prescription.customer_email,
+      customerName: prescription.customer_name,
+      status: status as (typeof PRESCRIPTION_STATUSES)[number],
+      reviewNotes: note || null,
+    });
+  }
+
   revalidatePath("/admin/prescriptions");
   revalidatePath(`/admin/prescriptions/${id}`);
 }
