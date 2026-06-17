@@ -94,7 +94,7 @@ export function CartView() {
           </span>
         </div>
         <p className="mt-1 text-xs" style={{ color: "var(--lm-faint)" }}>
-          Lenses, delivery &amp; any extras are calculated at checkout.
+          Lenses are included above. Delivery is calculated at checkout.
         </p>
 
         <Link href="/checkout" className="lm-pill mt-4 w-full justify-center">

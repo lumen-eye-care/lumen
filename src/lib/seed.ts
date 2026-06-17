@@ -83,6 +83,95 @@ const frameCategories: TablesInsert<"frame_categories">[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// 1b. Lens builder catalogue  (docs/design/frame-detail.jsx:48-62 — the lensOptions
+// and addonOptions arrays). Global catalogue (one menu for all frames). Prices
+// converted GHS → integer pesewa (×100). US-P2-02.
+// ---------------------------------------------------------------------------
+const lensTypes: TablesInsert<"lens_types">[] = [
+  {
+    slug: "single",
+    name: "Single vision",
+    description: "For distance OR reading. Most common.",
+    price_ghs: 0,
+    badge: "Most popular",
+    sort_order: 0,
+  },
+  {
+    slug: "varifocal",
+    name: "Varifocal",
+    description: "Distance, intermediate and reading in one.",
+    price_ghs: 48000,
+    sort_order: 1,
+  },
+  {
+    slug: "reader",
+    name: "Reading",
+    description: "For close-up work and screens.",
+    price_ghs: 0,
+    sort_order: 2,
+  },
+  {
+    slug: "blue",
+    name: "Blue-light filter",
+    description: "If you're on screens 6+ hours a day.",
+    price_ghs: 12000,
+    badge: "Recommended",
+    sort_order: 3,
+  },
+];
+
+const lensAddons: TablesInsert<"lens_addons">[] = [
+  {
+    slug: "antireflective",
+    name: "Anti-reflective coating",
+    description: "Reduces glare on screens and at night.",
+    price_ghs: 0,
+    included: true,
+    sort_order: 0,
+  },
+  {
+    slug: "scratch",
+    name: "Scratch-resistant coating",
+    description: "Tougher lens for everyday wear.",
+    price_ghs: 0,
+    included: true,
+    sort_order: 1,
+  },
+  {
+    slug: "uv",
+    name: "UV400 protection",
+    description: "Full UV-A and UV-B protection.",
+    price_ghs: 0,
+    included: true,
+    sort_order: 2,
+  },
+  {
+    slug: "transition",
+    name: "Transitions® light-reactive",
+    description: "Tints in sunlight, clear indoors.",
+    price_ghs: 32000,
+    included: false,
+    sort_order: 3,
+  },
+  {
+    slug: "thin",
+    name: "Thin & lightweight 1.67",
+    description: "Best for stronger prescriptions.",
+    price_ghs: 22000,
+    included: false,
+    sort_order: 4,
+  },
+  {
+    slug: "tint",
+    name: "Custom tint (sun)",
+    description: "Grey, brown, or rose gradient.",
+    price_ghs: 18000,
+    included: false,
+    sort_order: 5,
+  },
+];
+
+// ---------------------------------------------------------------------------
 // 2. Clinics  (docs/design/clinics.jsx:5-51 — the hardcoded clinics array)
 // opening_hours: {mon:{open,close,closed},...}
 // Coordinates are approximate centroids.
@@ -199,6 +288,19 @@ async function main(): Promise<void> {
     .select("id, slug");
   if (catErr) throw new Error(`frame_categories: ${catErr.message}`);
   const catIds = Object.fromEntries((catData ?? []).map((r) => [r.slug, r.id]));
+
+  // 1b. Lens builder catalogue — global; no FK to frames (US-P2-02).
+  console.log("  › lens_types");
+  const { error: lensTypeErr } = await db
+    .from("lens_types")
+    .upsert(lensTypes, { onConflict: "slug" });
+  if (lensTypeErr) throw new Error(`lens_types: ${lensTypeErr.message}`);
+
+  console.log("  › lens_addons");
+  const { error: lensAddonErr } = await db
+    .from("lens_addons")
+    .upsert(lensAddons, { onConflict: "slug" });
+  if (lensAddonErr) throw new Error(`lens_addons: ${lensAddonErr.message}`);
 
   // 2. Frames  (docs/design/shared.jsx:93-102 — FRAMES array)
   // Prices converted: GHS 1 = 100 pesewa (integer pesewa in price_ghs).

@@ -1,22 +1,29 @@
 /**
- * Pure cart logic for the storefront bag (US-P0-03).
+ * Pure cart logic for the storefront bag (US-P0-03, extended for US-P2-02 lenses).
  *
- * Frame-only for v1: lens type / add-ons / prescription are deferred to
- * US-P2-02 (Lens Builder). The cart lives entirely client-side in localStorage;
- * it carries no PII.
+ * A line can carry a lens build (type + add-ons + a prescription reference). The
+ * cart lives entirely client-side in localStorage; the only mildly-sensitive thing
+ * it holds is a prescriptionId (an opaque uuid, no Rx values) when the customer
+ * reuses/creates a prescription — never the prescription contents themselves.
  *
- * NOTE (checkout, later story): prices here are a client-side snapshot for
- * display only. At checkout the server MUST re-derive every line price from the
- * DB by frameId — never trust unitPricePesewa coming back from the browser.
+ * NOTE (checkout): every price here — frame AND lens — is a client-side snapshot
+ * for display only. At checkout the server MUST re-derive each price from the DB by
+ * frameId + lens slugs — never trust unitPricePesewa / lensUnitPricePesewa from the
+ * browser (see src/server/checkout.ts repriceCart).
  *
  * Money is integer pesewa throughout (1 GHS = 100 pesewa), matching
  * ShopFrame.price_ghs; format with formatGhs() at the display edge only.
  */
 
 import type { ShopFrame } from "@/server/frames";
+import type { RxMethod, LensSelectionInput } from "@/lib/checkout-schemas";
 
-/** Versioned localStorage key — bump the suffix if the item shape changes. */
-export const CART_STORAGE_KEY = "lumen.cart.v1";
+/**
+ * Versioned localStorage key — bumped v1→v2 for the lens fields. Old v1 bags live
+ * under the previous key and are simply never read (dropped), which is the desired
+ * behaviour: a pre-lens bag shouldn't silently become a frame-only lens build.
+ */
+export const CART_STORAGE_KEY = "lumen.cart.v2";
 
 /**
  * localStorage key recording which auth user "owns" the persisted bag. The bag
@@ -25,7 +32,35 @@ export const CART_STORAGE_KEY = "lumen.cart.v1";
  */
 export const CART_OWNER_KEY = "lumen.cart.owner";
 
-/** A single bag line. Keyed by frame + colour (a colour swap is a new line). */
+/**
+ * The lens build attached to a line. A frame-only line has lensTypeSlug = null and
+ * lensUnitPricePesewa = 0. lensUnitPricePesewa is a display snapshot (re-priced at
+ * checkout). prescriptionId is an opaque reference, set only via the Rx step.
+ */
+export type CartLens = {
+  lensTypeSlug: string | null;
+  lensTypeName: string | null;
+  lensUnitPricePesewa: number;
+  addonSlugs: string[];
+  addonNames: string[];
+  rxMethod: RxMethod | null;
+  prescriptionId: string | null;
+};
+
+export const FRAME_ONLY_LENS: CartLens = {
+  lensTypeSlug: null,
+  lensTypeName: null,
+  lensUnitPricePesewa: 0,
+  addonSlugs: [],
+  addonNames: [],
+  rxMethod: null,
+  prescriptionId: null,
+};
+
+/**
+ * A single bag line. Keyed by frame + colour + lens build, so the same frame in the
+ * same colour with two different lens builds are two distinct lines.
+ */
 export type CartItem = {
   frameId: string;
   slug: string;
@@ -38,6 +73,7 @@ export type CartItem = {
   /** Stock snapshot at add-time; qty is clamped to this. */
   stock: number;
   qty: number;
+  lens: CartLens;
 };
 
 export type CartState = {
@@ -46,23 +82,47 @@ export type CartState = {
 
 export const EMPTY_CART: CartState = { items: [] };
 
-/** Stable line identity: two adds of the same frame+colour merge into one. */
-export function lineKey(frameId: string, colorName: string): string {
-  return `${frameId}::${colorName}`;
+/**
+ * Deterministic fingerprint of a lens build, so two identical builds merge and any
+ * difference (type, add-ons, Rx method, prescription) splits into its own line.
+ * Add-ons are sorted so order doesn't matter.
+ */
+export function lensConfigKey(lens: CartLens): string {
+  if (!lens.lensTypeSlug) return "frame-only";
+  const addons = [...lens.addonSlugs].sort().join(",");
+  return [lens.lensTypeSlug, addons, lens.rxMethod ?? "", lens.prescriptionId ?? ""].join("|");
+}
+
+/** Stable line identity: same frame + colour + lens build merges into one. */
+export function lineKey(frameId: string, colorName: string, lensKey: string): string {
+  return `${frameId}::${colorName}::${lensKey}`;
 }
 
 export function cartItemKey(item: CartItem): string {
-  return lineKey(item.frameId, item.colorName);
+  return lineKey(item.frameId, item.colorName, lensConfigKey(item.lens));
 }
 
 /**
- * Build a CartItem from a frame + a chosen colour index.
- * Returns null when the colour index is out of range or the frame is unsellable
- * (no stock) — callers should guard the add button on stock anyway.
+ * Build a frame-only CartItem from a frame + a chosen colour index.
+ * Returns null when the colour index is out of range.
  */
 export function frameToCartItem(
   frame: ShopFrame,
   colorIndex: number,
+  qty = 1,
+): CartItem | null {
+  return buildLensCartItem(frame, colorIndex, FRAME_ONLY_LENS, qty);
+}
+
+/**
+ * Build a CartItem from a frame + colour index + a chosen lens build. The lens
+ * prices are display snapshots; checkout re-prices from the DB.
+ * Returns null when the colour index is out of range.
+ */
+export function buildLensCartItem(
+  frame: ShopFrame,
+  colorIndex: number,
+  lens: CartLens,
   qty = 1,
 ): CartItem | null {
   const color = frame.colors[colorIndex];
@@ -78,6 +138,7 @@ export function frameToCartItem(
     unitPricePesewa: frame.price_ghs,
     stock: frame.stock,
     qty: Math.max(1, qty),
+    lens,
   };
 }
 
@@ -172,9 +233,28 @@ export function selectCount(state: CartState): number {
   return state.items.reduce((sum, i) => sum + i.qty, 0);
 }
 
-/** Subtotal in pesewa. */
+/** Per-unit price of a line: frame + lens surcharge. */
+export function lineUnitPricePesewa(item: CartItem): number {
+  return item.unitPricePesewa + item.lens.lensUnitPricePesewa;
+}
+
+/**
+ * Map a line's lens build to the checkout wire shape (slugs only, no prices).
+ * Returns undefined for a frame-only line, so the payload omits `lens` entirely.
+ */
+export function cartLensToInput(lens: CartLens): LensSelectionInput | undefined {
+  if (!lens.lensTypeSlug) return undefined;
+  return {
+    lensTypeSlug: lens.lensTypeSlug,
+    addonSlugs: lens.addonSlugs,
+    rxMethod: lens.rxMethod ?? undefined,
+    prescriptionId: lens.prescriptionId ?? undefined,
+  };
+}
+
+/** Subtotal in pesewa — frame + lens across every line. */
 export function selectSubtotalPesewa(state: CartState): number {
-  return state.items.reduce((sum, i) => sum + i.unitPricePesewa * i.qty, 0);
+  return state.items.reduce((sum, i) => sum + lineUnitPricePesewa(i) * i.qty, 0);
 }
 
 // ─── Persistence helpers (used by the provider; pure + guarded) ───────────────
@@ -231,5 +311,33 @@ function sanitizeItem(entry: unknown): CartItem | null {
     unitPricePesewa: e.unitPricePesewa,
     stock: e.stock,
     qty: clampQty(e.qty, e.stock),
+    lens: sanitizeLens(e.lens),
   };
+}
+
+/** Narrow an unknown persisted lens payload; anything off → frame-only. */
+function sanitizeLens(entry: unknown): CartLens {
+  if (entry === null || typeof entry !== "object") return FRAME_ONLY_LENS;
+  const e = entry as Record<string, unknown>;
+  if (typeof e.lensTypeSlug !== "string") return FRAME_ONLY_LENS;
+  const addonSlugs = Array.isArray(e.addonSlugs)
+    ? e.addonSlugs.filter((s): s is string => typeof s === "string")
+    : [];
+  const addonNames = Array.isArray(e.addonNames)
+    ? e.addonNames.filter((s): s is string => typeof s === "string")
+    : [];
+  return {
+    lensTypeSlug: e.lensTypeSlug,
+    lensTypeName: typeof e.lensTypeName === "string" ? e.lensTypeName : null,
+    lensUnitPricePesewa: typeof e.lensUnitPricePesewa === "number" ? e.lensUnitPricePesewa : 0,
+    addonSlugs,
+    addonNames,
+    rxMethod: isRxMethod(e.rxMethod) ? e.rxMethod : null,
+    prescriptionId: typeof e.prescriptionId === "string" ? e.prescriptionId : null,
+  };
+}
+
+const RX_METHOD_VALUES: readonly RxMethod[] = ["later", "onfile", "upload", "manual"];
+function isRxMethod(v: unknown): v is RxMethod {
+  return typeof v === "string" && (RX_METHOD_VALUES as readonly string[]).includes(v);
 }

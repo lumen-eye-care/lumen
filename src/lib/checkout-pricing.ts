@@ -6,15 +6,34 @@
 
 import type { CartLineInput } from "@/lib/checkout-schemas";
 
+/** A priced add-on, captured for the order's lens_config breakdown. */
+export type PricedAddon = { slug: string; name: string; pricePesewa: number };
+
+/**
+ * The resolved lens build for a line — written verbatim into order_items.lens_config
+ * (jsonb) for display/audit. The numeric surcharge is also carried on the line as
+ * lensUnitPricePesewa and persisted to order_items.lens_price_ghs.
+ */
+export type LensConfig = {
+  lensTypeSlug: string;
+  lensTypeName: string;
+  lensTypePricePesewa: number;
+  addons: PricedAddon[];
+  rxMethod: string | null;
+  prescriptionId: string | null;
+};
+
 /** A DB-priced line — the only prices we ever charge against. */
 export type PricedLine = {
   frameId: string;
   name: string;
   slug: string;
   colorName: string;
-  unitPricePesewa: number;
+  unitPricePesewa: number; // frame unit price only
+  lensUnitPricePesewa: number; // lens surcharge per unit (type + add-ons); 0 if frame-only
+  lensConfig: LensConfig | null;
   qty: number;
-  lineTotalPesewa: number;
+  lineTotalPesewa: number; // (frame + lens) × qty
 };
 
 export type RepriceOk = { ok: true; lines: PricedLine[]; totalPesewa: number };
@@ -31,13 +50,72 @@ export type PriceableFrame = {
   colors: { name: string }[];
 };
 
+/** Lens catalogue entries (subset of lens_types / lens_addons rows). */
+export type PriceableLensType = { slug: string; name: string; price_ghs: number };
+export type PriceableAddon = { slug: string; name: string; price_ghs: number };
+export type LensCatalogue = {
+  lensTypes: PriceableLensType[];
+  addons: PriceableAddon[];
+};
+
+const EMPTY_CATALOGUE: LensCatalogue = { lensTypes: [], addons: [] };
+
 /**
- * Given requested lines and the authoritative frames, derive every price from the
- * frame, validating existence, colour, and stock. Never reads a client price.
+ * Price the lens build on a line against the authoritative catalogue. Returns the
+ * per-unit surcharge + the resolved config, or an error string if any requested
+ * slug is unknown/inactive (stale cart or tamper). A line with no lens build
+ * resolves to { lensUnitPricePesewa: 0, lensConfig: null }.
+ */
+function priceLens(
+  lens: CartLineInput["lens"],
+  catalogue: LensCatalogue,
+): { ok: true; lensUnitPricePesewa: number; lensConfig: LensConfig | null } | { ok: false; error: string } {
+  // No lens build (frame-only line) — nothing to price.
+  if (!lens || !lens.lensTypeSlug) {
+    return { ok: true, lensUnitPricePesewa: 0, lensConfig: null };
+  }
+
+  const lensType = catalogue.lensTypes.find((t) => t.slug === lens.lensTypeSlug);
+  if (!lensType) {
+    return { ok: false, error: "A lens option in your bag is no longer available." };
+  }
+
+  const addons: PricedAddon[] = [];
+  for (const slug of lens.addonSlugs ?? []) {
+    const addon = catalogue.addons.find((a) => a.slug === slug);
+    if (!addon) {
+      return { ok: false, error: "A lens add-on in your bag is no longer available." };
+    }
+    addons.push({ slug: addon.slug, name: addon.name, pricePesewa: addon.price_ghs });
+  }
+
+  const lensUnitPricePesewa =
+    lensType.price_ghs + addons.reduce((sum, a) => sum + a.pricePesewa, 0);
+
+  return {
+    ok: true,
+    lensUnitPricePesewa,
+    lensConfig: {
+      lensTypeSlug: lensType.slug,
+      lensTypeName: lensType.name,
+      lensTypePricePesewa: lensType.price_ghs,
+      addons,
+      rxMethod: lens.rxMethod ?? null,
+      prescriptionId: lens.prescriptionId ?? null,
+    },
+  };
+}
+
+/**
+ * Given requested lines and the authoritative frames + lens catalogue, derive every
+ * price from the DB, validating existence, colour, stock, and lens slugs. Never reads
+ * a client price. The lens catalogue defaults to empty so frame-only callers (and the
+ * existing tests) can omit it.
  */
 export function priceLines(
   lines: CartLineInput[],
   frames: PriceableFrame[],
+  catalogue: LensCatalogue = EMPTY_CATALOGUE,
 ): RepriceResult {
   const byId = new Map(frames.map((f) => [f.id, f]));
   const priced: PricedLine[] = [];
@@ -60,6 +138,9 @@ export function priceLines(
       };
     }
 
+    const lens = priceLens(line.lens, catalogue);
+    if (!lens.ok) return { ok: false, error: lens.error };
+
     const unitPricePesewa = frame.price_ghs;
     priced.push({
       frameId: frame.id,
@@ -67,8 +148,10 @@ export function priceLines(
       slug: frame.slug,
       colorName: color.name,
       unitPricePesewa,
+      lensUnitPricePesewa: lens.lensUnitPricePesewa,
+      lensConfig: lens.lensConfig,
       qty: line.qty,
-      lineTotalPesewa: unitPricePesewa * line.qty,
+      lineTotalPesewa: (unitPricePesewa + lens.lensUnitPricePesewa) * line.qty,
     });
   }
 

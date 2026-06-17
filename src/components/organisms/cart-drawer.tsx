@@ -140,7 +140,7 @@ export function CartDrawer() {
                 </span>
               </div>
               <p className="mb-3 text-xs" style={{ color: "var(--lm-faint)" }}>
-                Lenses, delivery &amp; any extras are calculated at checkout.
+                Lenses are included above. Delivery is calculated at checkout.
               </p>
 
               <Link href="/checkout" onClick={close} className="lm-pill w-full justify-center">

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FrameSVG } from "@/components/atoms/frame-svg";
 import { Icon } from "@/components/atoms/icon";
 import { formatGhs } from "@/lib/format-money";
-import { cartItemKey, type CartItem } from "@/lib/cart";
+import { cartItemKey, lineUnitPricePesewa, type CartItem } from "@/lib/cart";
 import { useCart } from "@/components/cart/cart-provider";
 
 /**
@@ -63,6 +63,13 @@ export function CartLineItem({
               />
               {item.colorName}
             </p>
+            {item.lens.lensTypeName && (
+              <p className="mt-0.5 text-xs" style={{ color: "var(--lm-faint)" }}>
+                {item.lens.lensTypeName}
+                {item.lens.addonNames.length > 0 &&
+                  ` · ${item.lens.addonNames.join(" · ")}`}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -111,7 +118,7 @@ export function CartLineItem({
           </div>
 
           <span className="text-sm font-medium" style={{ color: "var(--lm-text)" }}>
-            {formatGhs(item.unitPricePesewa * item.qty)}
+            {formatGhs(lineUnitPricePesewa(item) * item.qty)}
           </span>
         </div>
       </div>

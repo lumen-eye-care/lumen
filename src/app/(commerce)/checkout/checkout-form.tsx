@@ -6,6 +6,7 @@ import { useCart } from "@/components/cart/cart-provider";
 import { EmptyState } from "@/components/atoms/empty-state";
 import { formatGhs } from "@/lib/format-money";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/checkout-schemas";
+import { cartItemKey, cartLensToInput, lineUnitPricePesewa } from "@/lib/cart";
 import { placeCodOrder } from "./actions";
 
 const METHOD_LABELS: Record<PaymentMethod, { title: string; hint: string }> = {
@@ -31,7 +32,13 @@ export function CheckoutForm() {
   const [error, setError] = useState<string | null>(null);
 
   const lines = useMemo(
-    () => items.map((i) => ({ frameId: i.frameId, colorName: i.colorName, qty: i.qty })),
+    () =>
+      items.map((i) => ({
+        frameId: i.frameId,
+        colorName: i.colorName,
+        qty: i.qty,
+        lens: cartLensToInput(i.lens),
+      })),
     [items],
   );
 
@@ -239,7 +246,7 @@ export function CheckoutForm() {
             <ul className="space-y-3">
               {items.map((i) => (
                 <li
-                  key={`${i.frameId}::${i.colorName}`}
+                  key={cartItemKey(i)}
                   className="flex justify-between gap-3 text-sm"
                 >
                   <span style={{ color: "var(--lm-muted)" }}>
@@ -247,9 +254,16 @@ export function CheckoutForm() {
                     {i.qty > 1 && (
                       <span style={{ color: "var(--lm-faint)" }}> × {i.qty}</span>
                     )}
+                    {i.lens.lensTypeName && (
+                      <span className="block" style={{ color: "var(--lm-faint)" }}>
+                        {i.lens.lensTypeName}
+                        {i.lens.addonNames.length > 0 &&
+                          ` · ${i.lens.addonNames.join(" · ")}`}
+                      </span>
+                    )}
                   </span>
                   <span className="shrink-0" style={{ color: "var(--lm-text)" }}>
-                    {formatGhs(i.unitPricePesewa * i.qty)}
+                    {formatGhs(lineUnitPricePesewa(i) * i.qty)}
                   </span>
                 </li>
               ))}
