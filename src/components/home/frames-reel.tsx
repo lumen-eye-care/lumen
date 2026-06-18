@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useRef, useCallback } from "react";
 import { FrameSVG } from "@/components/atoms/frame-svg";
 import { Icon } from "@/components/atoms/icon";
 import { formatGhs } from "@/lib/format-money";
@@ -68,11 +71,36 @@ export function FramesReel({ frames }: { frames: ShopFrame[] }) {
 }
 
 function FrameCardDark({ frame }: { frame: ShopFrame }) {
+  const ref = useRef<HTMLAnchorElement>(null);
   const photo = frame.photo_urls[0];
+
+  const onMove = useCallback((e: React.MouseEvent) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transition = "transform 0.08s ease-out, box-shadow 0.08s ease-out";
+    el.style.transform = `perspective(700px) rotateY(${x * 12}deg) rotateX(${-y * 8}deg) translateY(-4px)`;
+    el.style.boxShadow = `${-x * 12}px ${-y * 8 + 20}px 48px var(--lm-shadow), 0 0 32px color-mix(in srgb, var(--lm-warm) 10%, transparent)`;
+  }, []);
+
+  const onLeave = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = "transform 0.45s ease-out, box-shadow 0.45s ease-out";
+    el.style.transform = "";
+    el.style.boxShadow = "";
+  }, []);
+
   return (
     <Link
+      ref={ref}
       href={`/shop/${frame.slug}`}
       className="lm-card group block overflow-hidden p-6"
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
     >
       <div className="relative flex aspect-[4/3] items-center justify-center">
         {photo ? (

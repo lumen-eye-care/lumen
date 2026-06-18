@@ -31,7 +31,7 @@ export function ClinicsCta({ clinics }: { clinics: Clinic[] }) {
       style={{ background: "var(--lm-deepest)", scrollMarginTop: "var(--nav-h)" }}
     >
       <div
-        className="lm-glow"
+        className="lm-glow lm-glow-pulse"
         aria-hidden="true"
         style={{
           width: 640,

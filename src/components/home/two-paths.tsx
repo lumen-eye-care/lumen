@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRef, useCallback } from "react";
 import { Icon } from "@/components/atoms/icon";
 
 /**
@@ -114,8 +117,24 @@ function PathCard({
   cta: string;
   icon: "eye" | "glasses";
 }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  const onMove = useCallback((e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--shine-x", `${((e.clientX - r.left) / r.width) * 100}%`);
+    el.style.setProperty("--shine-y", `${((e.clientY - r.top) / r.height) * 100}%`);
+  }, []);
+
   return (
-    <Link href={href} className="lm-card group flex flex-col p-8 sm:p-10">
+    <Link
+      ref={ref}
+      href={href}
+      className="lm-card group relative flex flex-col p-8 sm:p-10"
+      onMouseMove={onMove}
+    >
+      <span aria-hidden="true" className="lm-card-shine" />
       <div
         className="flex h-12 w-12 items-center justify-center rounded-full"
         style={{ background: "var(--lm-tint)", color: "var(--lm-warm)" }}

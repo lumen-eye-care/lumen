@@ -44,7 +44,7 @@ export function LensQuizCta() {
           </div>
 
           {/* Editorial lens-trait list — static, honest, no fake quiz state */}
-          <ul className="grid gap-3">
+          <ul className="grid gap-3" data-stagger>
             {[
               {
                 k: "Single vision",
