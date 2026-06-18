@@ -428,14 +428,17 @@ body.lm-transitioning * {
    Extra stops in the fine-blur zone (below 4px) where the eye is most sensitive. */
 .lm-headline-focus {
   display: inline-block; /* keeps blur contained; no effect on layout */
-  animation: lmHeadlineFocus 2.2s var(--lm-ease-out) 0.4s both;
+  animation: lmHeadlineFocus 2.8s linear 0.4s both;
 }
 @keyframes lmHeadlineFocus {
-  0%   { filter: blur(18px); opacity: 0.35; }
-  30%  { filter: blur(10px); opacity: 0.7;  }
+  0%   { filter: blur(20px); opacity: 0.2;  }
+  18%  { filter: blur(14px); opacity: 0.5;  }
+  38%  { filter: blur(8px);  opacity: 0.85; }
   55%  { filter: blur(4px);  opacity: 1;    }
-  75%  { filter: blur(1.5px); opacity: 1;   }
-  100% { filter: blur(0);    opacity: 1;    }
+  67%  { filter: blur(2px);  opacity: 1;    }
+  78%  { filter: blur(0.8px); opacity: 1;   }
+  89%  { filter: blur(0.2px); opacity: 1;   }
+  100% { filter: blur(0);     opacity: 1;   }
 }
 
 /* ambient light pools — slow autonomous drift (composes with cursor-lean
