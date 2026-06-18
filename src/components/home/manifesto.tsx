@@ -10,14 +10,14 @@ export function Manifesto() {
       style={{ background: "var(--lm-deep)" }}
     >
       <div className="mx-auto max-w-4xl">
-        <div
-          className="h-px w-16"
-          style={{ background: "var(--lm-warm)" }}
-          aria-hidden="true"
-        />
-        <p className="lm-label mt-6" data-animate>
-          Why Lumen
-        </p>
+        <div data-animate>
+          <div
+            className="lm-hairline h-px w-16"
+            style={{ background: "var(--lm-warm)" }}
+            aria-hidden="true"
+          />
+          <p className="lm-label mt-6">Why Lumen</p>
+        </div>
 
         <div data-stagger className="mt-10">
           <p
