@@ -383,10 +383,14 @@ body.lm-transitioning * {
     border-color var(--lm-t-base) var(--lm-ease),
     box-shadow var(--lm-t-base) var(--lm-ease);
 }
-.lm-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(217, 119, 87, 0.3);
-  box-shadow: 0 20px 52px var(--lm-shadow);
+/* Card lift + shine: pointer devices only — touch screens have no hover and
+   the transform causes jank on tap. */
+@media (hover: hover) and (pointer: fine) {
+  .lm-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(217, 119, 87, 0.3);
+    box-shadow: 0 20px 52px var(--lm-shadow);
+  }
 }
 
 /* Nav link. */
@@ -489,8 +493,10 @@ body.lm-transitioning * {
     transparent 60%
   );
 }
-.lm-card:hover .lm-card-shine {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .lm-card:hover .lm-card-shine {
+    opacity: 1;
+  }
 }
 
 /* Closing-section glow orb: slow radial pulse.

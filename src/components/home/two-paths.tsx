@@ -120,6 +120,7 @@ function PathCard({
   const ref = useRef<HTMLAnchorElement>(null);
 
   const onMove = useCallback((e: React.MouseEvent) => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
