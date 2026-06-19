@@ -31,7 +31,7 @@ export default async function SignUpPage({
         <Link
           href={`/sign-in?redirect=${encodeURIComponent(next)}`}
           className="underline-offset-2 hover:underline"
-          style={{ color: "var(--lm-warm)" }}
+          style={{ color: "var(--lm-warm-text)" }}
         >
           Sign in
         </Link>

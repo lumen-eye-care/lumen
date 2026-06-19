@@ -30,7 +30,7 @@ export function TextField({ label, name, error, ...props }: TextFieldProps) {
         {...props}
       />
       {error ? (
-        <span id={errorId} className="text-xs" style={{ color: "var(--lm-warm)" }}>
+        <span id={errorId} className="text-xs" style={{ color: "var(--lm-warm-text)" }}>
           {error}
         </span>
       ) : null}
@@ -54,12 +54,12 @@ export function Alert({
           ? {
               borderColor: "color-mix(in srgb, var(--lm-warm) 30%, transparent)",
               background: "color-mix(in srgb, var(--lm-warm) 10%, transparent)",
-              color: "var(--lm-warm)",
+              color: "var(--lm-warm-text)",
             }
           : {
               borderColor: "color-mix(in srgb, var(--lm-sage) 30%, transparent)",
               background: "color-mix(in srgb, var(--lm-sage) 10%, transparent)",
-              color: "var(--lm-sage)",
+              color: "var(--lm-sage-text)",
             }
       }
     >

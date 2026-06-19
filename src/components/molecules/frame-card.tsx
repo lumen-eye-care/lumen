@@ -80,7 +80,7 @@ export function FrameCard({ frame, priority = false }: FrameCardProps) {
             </p>
           )}
         </div>
-        <p className="text-sm font-semibold" style={{ color: "var(--lm-warm)" }}>
+        <p className="text-sm font-semibold" style={{ color: "var(--lm-warm-text)" }}>
           <span
             className="text-xs font-normal"
             style={{ color: "var(--lm-faint)" }}

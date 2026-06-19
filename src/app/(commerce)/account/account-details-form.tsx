@@ -9,7 +9,7 @@ import { updateProfile } from "./actions";
 const inputClass =
   "w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-raise)] px-3 py-2.5 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]";
 
-const errorClass = "mt-1 text-xs text-[color:var(--lm-warm)]";
+const errorClass = "mt-1 text-xs text-[color:var(--lm-warm-text)]";
 
 type AccountDetailsFormProps = {
   email: string;
@@ -107,7 +107,7 @@ export function AccountDetailsForm({
           className="rounded-md px-3 py-2.5 text-sm"
           style={{
             background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
-            color: "var(--lm-warm)",
+            color: "var(--lm-warm-text)",
           }}
         >
           {state.error}
@@ -120,7 +120,7 @@ export function AccountDetailsForm({
           className="rounded-md px-3 py-2.5 text-sm"
           style={{
             background: "color-mix(in srgb, var(--lm-sage) 14%, transparent)",
-            color: "var(--lm-sage)",
+            color: "var(--lm-sage-text)",
           }}
         >
           {state.success}

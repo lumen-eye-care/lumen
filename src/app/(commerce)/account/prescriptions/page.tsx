@@ -74,7 +74,7 @@ export default async function PrescriptionsPage() {
                       <PrescriptionStatusPill status={p.status} />
                     </div>
                     {p.status === "rejected" && p.review_notes && (
-                      <p className="mt-1 text-sm" style={{ color: "var(--lm-warm)" }}>
+                      <p className="mt-1 text-sm" style={{ color: "var(--lm-warm-text)" }}>
                         {p.review_notes}
                       </p>
                     )}

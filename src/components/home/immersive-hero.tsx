@@ -122,7 +122,7 @@ export function ImmersiveHero() {
             Vision, brought
             <br />
             into{" "}
-            <em className="lm-headline-focus" style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>focus</em>.
+            <em className="lm-headline-focus" style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>focus</em>.
           </h1>
           <p
             className="lm-focus-in d3 mt-7 max-w-md text-lg leading-relaxed"

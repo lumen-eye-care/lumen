@@ -78,7 +78,7 @@ export function TwoPaths() {
             >
               <span
                 className="lm-display block text-3xl"
-                style={{ color: "var(--lm-warm)" }}
+                style={{ color: "var(--lm-warm-text)" }}
               >
                 {s.n}
               </span>
@@ -137,7 +137,7 @@ function PathCard({
       <span aria-hidden="true" className="lm-card-shine" />
       <div
         className="flex h-12 w-12 items-center justify-center rounded-full"
-        style={{ background: "var(--lm-tint)", color: "var(--lm-warm)" }}
+        style={{ background: "var(--lm-tint)", color: "var(--lm-warm-text)" }}
       >
         <Icon name={icon} size={22} />
       </div>
@@ -156,7 +156,7 @@ function PathCard({
       </p>
       <span
         className="mt-7 inline-flex items-center gap-2 text-sm font-semibold transition-colors"
-        style={{ color: "var(--lm-warm)" }}
+        style={{ color: "var(--lm-warm-text)" }}
       >
         {cta}
         <Icon

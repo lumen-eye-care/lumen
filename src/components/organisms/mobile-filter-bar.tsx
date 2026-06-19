@@ -79,7 +79,7 @@ export function MobileFilterBar({ params, facets }: MobileFilterBarProps) {
                 {activeFilterCount > 0 && (
                   <span
                     className="ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
-                    style={{ background: "var(--lm-tint)", color: "var(--lm-warm)" }}
+                    style={{ background: "var(--lm-tint)", color: "var(--lm-warm-text)" }}
                   >
                     {activeFilterCount}
                   </span>

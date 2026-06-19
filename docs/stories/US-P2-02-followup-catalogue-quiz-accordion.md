@@ -1,7 +1,12 @@
 # US-P2-02 follow-up — Comprehensive catalogue + dynamic quiz + accordion builder
 
-**Status: PLANNED (not started).** Spec for the next session. The base lens builder
-(US-P2-02) is shipped + live-verified; this is the agreed enhancement pass.
+**Status: SHIPPED (2026-06-19).** Built across phases A–F; migration applied to staging,
+catalogue reseeded, and the quiz → "Build this" → builder-prefill flow live-verified. See
+the 2026-06-19 entry in `docs/PROGRESS.md`. Deviations from this spec: add-on `group` column
+named `addon_group` (reserved word); added a `plano` (non-prescription) lens type (drops the
+Rx requirement in the builder); blue-light kept buildable but **dropped from the quiz** (the
+honest, evidence-led call) — heavy-screen users get an office lens + a 20-20-20 note. Lens
+prices are placeholders pending Charity.
 
 ## Why
 

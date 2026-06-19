@@ -47,14 +47,18 @@
   --lm-deepest:    #d8d1c4; /* maximum contrast surface */
 
   --lm-text:       #0a1f35;
-  --lm-muted:      rgba(10, 31, 53, 0.58);
-  --lm-faint:      rgba(10, 31, 53, 0.34);
+  /* muted/faint darkened to clear WCAG AA 4.5:1 for informational text on --lm-base. */
+  --lm-muted:      rgba(10, 31, 53, 0.66);
+  --lm-faint:      rgba(10, 31, 53, 0.62);
   --lm-hair:       rgba(10, 31, 53, 0.09);
   --lm-tint:       rgba(10, 31, 53, 0.04);
 
-  --lm-warm:       #d97757;
+  --lm-warm:       #d97757; /* brand accent — backgrounds (buttons) + large display only */
   --lm-warm-soft:  #e0916f;
+  /* AA-safe variants for warm/sage used as TEXT or ICONS (≥4.5:1 on --lm-base). */
+  --lm-warm-text:  #a35941;
   --lm-sage:       #3d6b5c;
+  --lm-sage-text:  #3d6b5c;
   --lm-blue:       #0f4c81;
 
   /* Header glass + shadow */
@@ -89,13 +93,17 @@
 
   --lm-text:       #f2f2f0;
   --lm-muted:      rgba(242, 242, 240, 0.62);
-  --lm-faint:      rgba(242, 242, 240, 0.38);
+  /* faint raised to clear AA 4.5:1 on the navy --lm-base. */
+  --lm-faint:      rgba(242, 242, 240, 0.49);
   --lm-hair:       rgba(242, 242, 240, 0.1);
   --lm-tint:       rgba(242, 242, 240, 0.04);
 
   --lm-warm:       #d97757;
   --lm-warm-soft:  #e0916f;
+  /* warm reads fine on navy; sage darkens on navy → use a lighter sage for text. */
+  --lm-warm-text:  #d97757;
   --lm-sage:       #3d6b5c;
+  --lm-sage-text:  #6a8d81;
   --lm-blue:       #4a9de0; /* brighter blue reads on navy */
 
   --lm-base-glass: rgba(10, 31, 53, 0.88);

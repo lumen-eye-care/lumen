@@ -1,18 +1,26 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { getLensCatalogue } from "@/server/lenses";
 import { LensQuiz } from "./lens-quiz";
 
 export const metadata: Metadata = {
   title: "Lens Guide",
   description:
-    "Answer five quick questions and get a lens recommendation tuned to how you actually see — single-vision, varifocal, blue-light and more.",
+    "Answer five quick questions and get a lens recommendation tuned to how you actually see — single-vision, varifocal, office and more — then build it on any frame.",
   alternates: { canonical: "/lens-guide" },
 };
 
+// The quiz recommends from the live catalogue, so it must run server-side.
+export const dynamic = "force-dynamic";
+
 /**
- * Lens guide (US-P1-02). Server wrapper for SEO + the cinematic hero; the
- * interactive quiz + rule-based recommendation runs client-side in <LensQuiz>.
+ * Lens guide (US-P1-02 + US-P2-02 follow-up). Server wrapper for SEO + the
+ * cinematic hero; it loads the lens catalogue (the single source of truth) and
+ * hands it to the client quiz, so every recommendation maps to a buildable option.
  */
-export default function LensGuidePage() {
+export default async function LensGuidePage() {
+  const catalogue = await getLensCatalogue();
+  const hasCatalogue = catalogue.lensTypes.length > 0;
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -30,7 +38,7 @@ export default function LensGuidePage() {
             style={{ fontSize: "clamp(2.2rem, 6vw, 3.6rem)" }}
           >
             Find your lens in{" "}
-            <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+            <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>
               five questions
             </em>
             .
@@ -48,7 +56,24 @@ export default function LensGuidePage() {
 
       {/* Quiz */}
       <div className="px-6 pb-24 pt-10">
-        <LensQuiz />
+        {hasCatalogue ? (
+          <LensQuiz catalogue={catalogue} />
+        ) : (
+          <div className="lm-card mx-auto max-w-2xl p-6 text-center sm:p-10" data-animate>
+            <p className="text-[15px] leading-relaxed" style={{ color: "var(--lm-muted)" }}>
+              Our lens menu is being set up. In the meantime, open any frame to build
+              your lenses, or book an eye test and we&apos;ll guide you in person.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href="/shop" className="lm-pill">
+                Browse frames
+              </Link>
+              <Link href="/book" className="lm-ghost">
+                Book an eye test
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

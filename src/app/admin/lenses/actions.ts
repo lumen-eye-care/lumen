@@ -147,6 +147,8 @@ function buildLensAddonRow(formData: FormData): {
   const parsed = lensAddonSchema.safeParse({
     ...commonFields(formData),
     included: formData.get("included") === "on",
+    group: str(formData, "group"),
+    single_select: formData.get("single_select") === "on",
   });
   if (!parsed.success) {
     return { state: { fieldErrors: firstFieldErrors(parsed.error.flatten().fieldErrors) } };
@@ -159,6 +161,8 @@ function buildLensAddonRow(formData: FormData): {
       description: d.description || null,
       price_ghs: d.price_ghs,
       included: d.included,
+      addon_group: d.group,
+      single_select: d.single_select,
       sort_order: d.sort_order,
       is_active: d.is_active,
     },

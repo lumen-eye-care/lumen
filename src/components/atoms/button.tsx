@@ -15,7 +15,7 @@ const variantStyles: Record<Variant, CSSProperties> = {
   },
   tertiary: {
     background: "transparent",
-    color: "var(--lm-warm)",
+    color: "var(--lm-warm-text)",
   },
 };
 

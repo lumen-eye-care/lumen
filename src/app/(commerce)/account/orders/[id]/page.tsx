@@ -78,7 +78,7 @@ export default async function MyOrderDetailPage({
         <Link
           href="/account/orders"
           className="shrink-0 text-sm underline-offset-2 hover:underline"
-          style={{ color: "var(--lm-warm)" }}
+          style={{ color: "var(--lm-warm-text)" }}
         >
           ← All orders
         </Link>

@@ -289,7 +289,7 @@ export function CheckoutForm() {
                 className="mt-4 rounded-md px-3 py-2 text-sm"
                 style={{
                   background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
-                  color: "var(--lm-warm)",
+                  color: "var(--lm-warm-text)",
                 }}
               >
                 {error}

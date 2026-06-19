@@ -158,7 +158,7 @@ export default async function AccountDashboardPage() {
             <Link
               href={`/account/orders/${live.id}`}
               className="shrink-0 text-sm underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
-              style={{ color: "var(--lm-warm)" }}
+              style={{ color: "var(--lm-warm-text)" }}
             >
               Track order →
             </Link>

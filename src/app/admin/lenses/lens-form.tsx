@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/atoms/button";
 import { Field, Alert } from "../_components/admin-ui";
+import { LENS_ADDON_GROUPS, type LensAddonGroup } from "@/lib/lens-schemas";
 import {
   createLensType,
   updateLensType,
@@ -24,6 +25,14 @@ export type LensFormValues = {
   is_active: boolean;
   badge?: string | null; // type only
   included?: boolean; // addon only
+  group?: LensAddonGroup; // addon only
+  single_select?: boolean; // addon only
+};
+
+const GROUP_LABEL: Record<LensAddonGroup, string> = {
+  coating: "Coating",
+  sun: "Sun & tint",
+  thickness: "Lens thickness / index",
 };
 
 const initial: LensFormState = {};
@@ -142,15 +151,52 @@ export function LensForm({
       </div>
 
       {kind === "addon" && (
-        <label className="flex items-center gap-2.5 text-sm text-lumen-ink">
-          <input
-            type="checkbox"
-            name="included"
-            defaultChecked={values?.included ?? false}
-            className="h-4 w-4 accent-lumen-blue"
-          />
-          Included by default (always-on, shown with an “Included” badge)
-        </label>
+        <>
+          <div className="max-w-xs">
+            <label
+              htmlFor="group"
+              className="mb-1.5 block text-sm font-medium text-lumen-ink"
+            >
+              Group
+            </label>
+            <select
+              id="group"
+              name="group"
+              defaultValue={values?.group ?? "coating"}
+              className="w-full rounded-md border border-lumen-ink/15 bg-white px-3 py-2 text-sm text-lumen-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+            >
+              {LENS_ADDON_GROUPS.map((g) => (
+                <option key={g} value={g}>
+                  {GROUP_LABEL[g]}
+                </option>
+              ))}
+            </select>
+            {fe.group && <p className="mt-1 text-xs text-lumen-warm">{fe.group}</p>}
+            <p className="mt-1 text-xs text-lumen-ink/50">
+              Which builder section this option appears in.
+            </p>
+          </div>
+
+          <label className="flex items-center gap-2.5 text-sm text-lumen-ink">
+            <input
+              type="checkbox"
+              name="single_select"
+              defaultChecked={values?.single_select ?? false}
+              className="h-4 w-4 accent-lumen-blue"
+            />
+            Single-select group (customer picks exactly one — e.g. lens thickness)
+          </label>
+
+          <label className="flex items-center gap-2.5 text-sm text-lumen-ink">
+            <input
+              type="checkbox"
+              name="included"
+              defaultChecked={values?.included ?? false}
+              className="h-4 w-4 accent-lumen-blue"
+            />
+            Included by default (always-on, shown with an “Included” badge)
+          </label>
+        </>
       )}
 
       <label className="flex items-center gap-2.5 text-sm text-lumen-ink">

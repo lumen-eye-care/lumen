@@ -29,8 +29,16 @@ type LensAddonRow = {
   slug: string;
   price_ghs: number;
   included: boolean;
+  addon_group: string;
+  single_select: boolean;
   sort_order: number;
   is_active: boolean;
+};
+
+const GROUP_LABEL: Record<string, string> = {
+  coating: "Coating",
+  sun: "Sun & tint",
+  thickness: "Thickness",
 };
 
 function ArchiveRestore({
@@ -80,7 +88,9 @@ export default async function AdminLensesPage() {
       .order("sort_order"),
     supabase
       .from("lens_addons")
-      .select("id, name, slug, price_ghs, included, sort_order, is_active")
+      .select(
+        "id, name, slug, price_ghs, included, addon_group, single_select, sort_order, is_active",
+      )
       .order("is_active", { ascending: false })
       .order("sort_order"),
   ]);
@@ -180,6 +190,7 @@ export default async function AdminLensesPage() {
           <tr>
             <Th>Name</Th>
             <Th>Slug</Th>
+            <Th>Group</Th>
             <Th>Price</Th>
             <Th>Included</Th>
             <Th>Sort</Th>
@@ -190,7 +201,7 @@ export default async function AdminLensesPage() {
         <tbody>
           {lensAddons.length === 0 && !loadError ? (
             <tr>
-              <Td className="text-lumen-ink/50" colSpan={7}>
+              <Td className="text-lumen-ink/50" colSpan={8}>
                 No add-ons yet. Create the first one.
               </Td>
             </tr>
@@ -206,6 +217,10 @@ export default async function AdminLensesPage() {
                   </Link>
                 </Td>
                 <Td className="text-lumen-ink/70">{a.slug}</Td>
+                <Td className="text-lumen-ink/70">
+                  {GROUP_LABEL[a.addon_group] ?? a.addon_group}
+                  {a.single_select ? " · one only" : ""}
+                </Td>
                 <Td>{a.price_ghs > 0 ? formatGhs(a.price_ghs) : "Free"}</Td>
                 <Td className="text-lumen-ink/70">{a.included ? "Yes" : "No"}</Td>
                 <Td>{a.sort_order}</Td>

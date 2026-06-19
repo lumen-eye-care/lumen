@@ -21,7 +21,7 @@ export async function getLensCatalogue(): Promise<LensCatalogueView> {
       .order("sort_order", { ascending: true }),
     supabase
       .from("lens_addons")
-      .select("slug, name, description, price_ghs, included")
+      .select("slug, name, description, price_ghs, included, addon_group, single_select")
       .eq("is_active", true)
       .order("sort_order", { ascending: true }),
   ]);
@@ -36,6 +36,16 @@ export async function getLensCatalogue(): Promise<LensCatalogueView> {
 
   return {
     lensTypes: (typesRes.data ?? []) as LensTypeView[],
-    addons: (addonsRes.data ?? []) as LensAddonView[],
+    // Map the DB column names (addon_group / single_select) onto the view's
+    // camelCase group / singleSelect.
+    addons: (addonsRes.data ?? []).map((a) => ({
+      slug: a.slug,
+      name: a.name,
+      description: a.description,
+      price_ghs: a.price_ghs,
+      included: a.included,
+      group: a.addon_group,
+      singleSelect: a.single_select,
+    })) satisfies LensAddonView[],
   };
 }

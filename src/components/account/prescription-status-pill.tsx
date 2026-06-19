@@ -13,7 +13,7 @@ const STATUS_META: Record<string, { label: string; tone: Tone }> = {
 const TONE_STYLE: Record<Tone, React.CSSProperties> = {
   sage: {
     background: "color-mix(in srgb, var(--lm-sage) 15%, transparent)",
-    color: "var(--lm-sage)",
+    color: "var(--lm-sage-text)",
   },
   blue: {
     background: "color-mix(in srgb, var(--lm-blue) 15%, transparent)",
@@ -21,7 +21,7 @@ const TONE_STYLE: Record<Tone, React.CSSProperties> = {
   },
   warm: {
     background: "color-mix(in srgb, var(--lm-warm) 15%, transparent)",
-    color: "var(--lm-warm)",
+    color: "var(--lm-warm-text)",
   },
 };
 

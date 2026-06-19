@@ -11,7 +11,7 @@ export default function AuthLayout({
       <Link href="/" className="text-center">
         <span
           className="text-sm uppercase tracking-[0.2em]"
-          style={{ color: "var(--lm-sage)" }}
+          style={{ color: "var(--lm-sage-text)" }}
         >
           Lumen Eye Care
         </span>
