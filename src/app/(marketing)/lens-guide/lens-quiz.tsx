@@ -159,7 +159,10 @@ export function LensQuiz({ catalogue }: { catalogue: LensCatalogueView }) {
       )}
 
       {done && recommendation && (
-        <div data-stagger>
+        // Self-contained entrance (lm-rise) — NOT data-stagger: the global
+        // ScrollReveal observer runs at mount, so content rendered later (when the
+        // quiz finishes) would never be revealed and would stay at opacity:0.
+        <div className="lm-rise">
           <h2 className="lm-display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)" }}>
             We&apos;d suggest{" "}
             <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>

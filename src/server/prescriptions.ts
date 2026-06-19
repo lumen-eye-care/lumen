@@ -10,8 +10,11 @@ import { getSupabaseAdmin } from "@/server/supabase-admin";
 import {
   PRESCRIPTION_MIME_EXT,
   validatePrescriptionFile,
+  toRxValues,
   type PrescriptionMetaInput,
+  type ManualRxInput,
   type PrescriptionStatus,
+  type RxValues,
 } from "@/lib/prescription-schemas";
 
 /**
@@ -46,10 +49,12 @@ function hasSupabaseEnv(): boolean {
 export type PrescriptionRow = {
   id: string;
   user_id: string;
-  file_path: string;
+  source: string;
+  file_path: string | null;
   original_name: string | null;
-  mime_type: string;
-  size_bytes: number;
+  mime_type: string | null;
+  size_bytes: number | null;
+  rx_values: RxValues | null;
   status: string;
   practitioner_name: string | null;
   issued_on: string | null;
@@ -59,7 +64,7 @@ export type PrescriptionRow = {
 };
 
 const ROW_COLUMNS =
-  "id, user_id, file_path, original_name, mime_type, size_bytes, status, practitioner_name, issued_on, notes, review_notes, created_at";
+  "id, user_id, source, file_path, original_name, mime_type, size_bytes, rx_values, status, practitioner_name, issued_on, notes, review_notes, created_at";
 
 export type CreatePrescriptionResult =
   | { ok: true; id: string }
@@ -134,6 +139,7 @@ export async function createPrescription(
     .from("prescriptions")
     .insert({
       user_id: user.id,
+      source: "upload",
       file_path: path,
       original_name: validFile.name || null,
       mime_type: fileCheck.mime,
@@ -153,6 +159,54 @@ export async function createPrescription(
   }
 
   await logAccess({ actorId: user.id, prescriptionId: data.id, action: "upload" });
+  return { ok: true, id: data.id };
+}
+
+/**
+ * Save a manually-entered prescription (source='manual', no file) for the
+ * signed-in user. rx_values is structured health data — stored only behind the
+ * flag, with consent captured. requireUser → insert via RLS client → audit.
+ */
+export async function createManualPrescription(
+  meta: ManualRxInput,
+): Promise<CreatePrescriptionResult> {
+  if (!prescriptionUploadEnabled()) {
+    return { ok: false, error: "Prescription entry is not available." };
+  }
+  if (!hasSupabaseEnv()) {
+    return { ok: false, error: "Service temporarily unavailable." };
+  }
+
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  const { data, error: insertError } = await supabase
+    .from("prescriptions")
+    .insert({
+      user_id: user.id,
+      source: "manual",
+      rx_values: toRxValues(meta),
+      practitioner_name: meta.practitioner_name ? meta.practitioner_name : null,
+      issued_on: meta.issued_on ?? null,
+      notes: meta.notes ? meta.notes : null,
+      consent_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (insertError || !data) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[prescriptions] createManualPrescription error", insertError?.message);
+    }
+    return { ok: false, error: "Could not save your prescription. Please try again." };
+  }
+
+  await logAccess({
+    actorId: user.id,
+    prescriptionId: data.id,
+    action: "upload",
+    reason: "manual-entry",
+  });
   return { ok: true, id: data.id };
 }
 

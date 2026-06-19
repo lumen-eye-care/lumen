@@ -59,14 +59,15 @@ export default async function PrescriptionsPage() {
           <ul className="flex flex-col gap-3">
             {prescriptions.map((p) => {
               const stale = isStaleIssueDate(p.issued_on);
+              const isManual = p.source === "manual";
               return (
                 <li key={p.id} className="lm-card flex flex-wrap items-center justify-between gap-4 p-5">
                   <div className="flex min-w-0 flex-col gap-1.5">
                     <span className="truncate font-medium" style={{ color: "var(--lm-text)" }}>
-                      {p.original_name ?? "Prescription"}
+                      {isManual ? "Manually entered prescription" : p.original_name ?? "Prescription"}
                     </span>
                     <span className="text-sm" style={{ color: "var(--lm-muted)" }}>
-                      Uploaded {dateFmt.format(new Date(p.created_at))}
+                      {isManual ? "Entered" : "Uploaded"} {dateFmt.format(new Date(p.created_at))}
                       {p.issued_on ? ` · issued ${p.issued_on}` : ""}
                       {stale ? " (over a year old)" : ""}
                     </span>
@@ -79,12 +80,18 @@ export default async function PrescriptionsPage() {
                       </p>
                     )}
                   </div>
-                  <OpenFileButton
-                    id={p.id}
-                    getUrl={getOwnPrescriptionUrl}
-                    label="View"
-                    className="lm-ghost px-4 py-2 text-sm"
-                  />
+                  {isManual ? (
+                    <span className="text-xs" style={{ color: "var(--lm-faint)" }}>
+                      Entered manually
+                    </span>
+                  ) : (
+                    <OpenFileButton
+                      id={p.id}
+                      getUrl={getOwnPrescriptionUrl}
+                      label="View"
+                      className="lm-ghost px-4 py-2 text-sm"
+                    />
+                  )}
                 </li>
               );
             })}

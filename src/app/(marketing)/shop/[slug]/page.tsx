@@ -7,6 +7,7 @@ import {
   prescriptionUploadEnabled,
   listBuilderPrescriptions,
 } from "@/server/prescriptions";
+import { createClient } from "@/server/supabase";
 import { formatGhs } from "@/lib/format-money";
 import { FrameCard } from "@/components/molecules/frame-card";
 import { FramePurchasePanel } from "@/components/organisms/frame-purchase-panel";
@@ -80,10 +81,15 @@ export default async function FrameDetailPage({ params }: Props) {
   // Lens builder data: catalogue + (when the flag is on) the visitor's on-file
   // prescriptions. listBuilderPrescriptions never redirects an anon visitor.
   const rxEnabled = prescriptionUploadEnabled();
-  const [catalogue, onFilePrescriptions] = await Promise.all([
+  const [catalogue, onFilePrescriptions, rxUser] = await Promise.all([
     getLensCatalogue(),
     rxEnabled ? listBuilderPrescriptions() : Promise.resolve([]),
+    // Inline Rx create requires auth — only offer it to signed-in visitors.
+    rxEnabled
+      ? createClient().then((s) => s.auth.getUser()).then((r) => r.data.user)
+      : Promise.resolve(null),
   ]);
+  const canCreateRx = rxEnabled && !!rxUser;
 
   // "You might also like" — same category, current frame excluded, first 4.
   const related = (
@@ -137,6 +143,7 @@ export default async function FrameDetailPage({ params }: Props) {
         frame={frame}
         catalogue={catalogue}
         prescriptionUploadEnabled={rxEnabled}
+        canCreateRx={canCreateRx}
         onFilePrescriptions={onFilePrescriptions}
       />
 

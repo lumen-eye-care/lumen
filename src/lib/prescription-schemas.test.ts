@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   prescriptionMetaSchema,
+  manualRxSchema,
+  toRxValues,
   validatePrescriptionFile,
   isStaleIssueDate,
   PRESCRIPTION_MAX_BYTES,
@@ -107,6 +109,94 @@ describe("prescriptionMetaSchema", () => {
       prescriptionMetaSchema.safeParse({ consent: true, notes: "x".repeat(501) })
         .success,
     ).toBe(false);
+  });
+});
+
+describe("manualRxSchema", () => {
+  const base = {
+    right: { sph: "-1.25" },
+    left: { sph: "0" },
+    consent: true,
+  };
+
+  it("accepts minimal valid input (SPH only, both eyes) with consent", () => {
+    const result = manualRxSchema.safeParse(base);
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects without consent", () => {
+    expect(manualRxSchema.safeParse({ ...base, consent: false }).success).toBe(false);
+  });
+
+  it("requires SPH on each eye", () => {
+    expect(
+      manualRxSchema.safeParse({ right: { sph: "" }, left: { sph: "0" }, consent: true })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rejects SPH out of range", () => {
+    expect(
+      manualRxSchema.safeParse({ ...base, right: { sph: "25" } }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a dioptre value off the 0.25 step", () => {
+    expect(
+      manualRxSchema.safeParse({ ...base, right: { sph: "-1.30" } }).success,
+    ).toBe(false);
+  });
+
+  it("requires AXIS when CYL is given (and vice-versa)", () => {
+    expect(
+      manualRxSchema.safeParse({ ...base, right: { sph: "-1.00", cyl: "-0.75" } }).success,
+    ).toBe(false);
+    expect(
+      manualRxSchema.safeParse({ ...base, right: { sph: "-1.00", axis: "90" } }).success,
+    ).toBe(false);
+    expect(
+      manualRxSchema.safeParse({
+        ...base,
+        right: { sph: "-1.00", cyl: "-0.75", axis: "90" },
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects an out-of-range or non-integer axis", () => {
+    expect(
+      manualRxSchema.safeParse({
+        ...base,
+        right: { sph: "-1.00", cyl: "-0.75", axis: "181" },
+      }).success,
+    ).toBe(false);
+    expect(
+      manualRxSchema.safeParse({
+        ...base,
+        right: { sph: "-1.00", cyl: "-0.75", axis: "90.5" },
+      }).success,
+    ).toBe(false);
+  });
+
+  it("validates PD range + step", () => {
+    expect(manualRxSchema.safeParse({ ...base, pd: "63" }).success).toBe(true);
+    expect(manualRxSchema.safeParse({ ...base, pd: "62.5" }).success).toBe(true);
+    expect(manualRxSchema.safeParse({ ...base, pd: "39" }).success).toBe(false);
+    expect(manualRxSchema.safeParse({ ...base, pd: "62.3" }).success).toBe(false);
+  });
+
+  it("toRxValues normalises omitted fields to null", () => {
+    const parsed = manualRxSchema.safeParse({
+      right: { sph: "-1.25", cyl: "-0.50", axis: "180", add: "1.00" },
+      left: { sph: "0" },
+      pd: "63",
+      consent: true,
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    const rx = toRxValues(parsed.data);
+    expect(rx.right).toEqual({ sph: -1.25, cyl: -0.5, axis: 180, add: 1 });
+    expect(rx.left).toEqual({ sph: 0, cyl: null, axis: null, add: null });
+    expect(rx.pd).toBe(63);
   });
 });
 
