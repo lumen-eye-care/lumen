@@ -22,7 +22,7 @@ export async function SiteFooter() {
 
   return (
     <footer
-      className="mt-24 border-t"
+      className="border-t"
       style={{
         background: "var(--lm-deepest)",
         borderColor: "var(--lm-hair)",
