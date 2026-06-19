@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/server/auth-guards";
 import { getPrescription } from "@/server/prescriptions";
-import { isStaleIssueDate } from "@/lib/prescription-schemas";
+import { isStaleIssueDate, type RxValues } from "@/lib/prescription-schemas";
 import { OpenFileButton } from "@/components/prescriptions/open-file-button";
 import { PageHeader, StatusBadge, Alert } from "../../_components/admin-ui";
 import { reviewPrescription, getAdminPrescriptionUrl } from "../actions";
@@ -16,6 +16,52 @@ function formatSize(bytes: number): string {
   return `${(kb / 1024).toFixed(1)} MB`;
 }
 
+/** Signed dioptre, e.g. +1.25 / -0.50; null → em dash. */
+function fmtDioptre(v: number | null | undefined): string {
+  if (v === null || v === undefined) return "—";
+  return `${v > 0 ? "+" : ""}${v.toFixed(2)}`;
+}
+
+/** Structured manual Rx as a per-eye table. */
+function ManualRxTable({ rx }: { rx: RxValues }) {
+  const rows = [
+    { eye: "Right (OD)", e: rx.right },
+    { eye: "Left (OS)", e: rx.left },
+  ];
+  return (
+    <div className="mt-5 border-t border-lumen-ink/8 pt-5">
+      <dt className="mb-2 text-xs font-medium uppercase tracking-wide text-lumen-ink/40">
+        Prescription values
+      </dt>
+      <table className="w-full border-collapse text-sm text-lumen-ink">
+        <thead>
+          <tr className="text-left text-xs uppercase tracking-wide text-lumen-ink/40">
+            <th className="py-1 pr-3 font-medium">Eye</th>
+            <th className="py-1 pr-3 font-medium">SPH</th>
+            <th className="py-1 pr-3 font-medium">CYL</th>
+            <th className="py-1 pr-3 font-medium">Axis</th>
+            <th className="py-1 font-medium">Add</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ eye, e }) => (
+            <tr key={eye} className="border-t border-lumen-ink/8">
+              <td className="py-1.5 pr-3 font-medium">{eye}</td>
+              <td className="py-1.5 pr-3 tabular-nums">{fmtDioptre(e.sph)}</td>
+              <td className="py-1.5 pr-3 tabular-nums">{fmtDioptre(e.cyl)}</td>
+              <td className="py-1.5 pr-3 tabular-nums">{e.axis ?? "—"}</td>
+              <td className="py-1.5 tabular-nums">{fmtDioptre(e.add)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-2 text-xs text-lumen-ink/50">
+        PD: {rx.pd != null ? `${rx.pd} mm` : "Not specified"}
+      </p>
+    </div>
+  );
+}
+
 export default async function AdminPrescriptionDetailPage({
   params,
 }: {
@@ -27,12 +73,17 @@ export default async function AdminPrescriptionDetailPage({
   if (!p) notFound();
 
   const stale = isStaleIssueDate(p.issued_on);
+  const isManual = p.source === "manual";
 
   return (
     <>
       <PageHeader
         title={`Prescription — ${p.customer_name || p.customer_email || "Customer"}`}
-        description="Open the file (access is logged), then verify or reject."
+        description={
+          isManual
+            ? "Manually entered values — review, then verify or reject."
+            : "Open the file (access is logged), then verify or reject."
+        }
         action={
           <Link
             href="/admin/prescriptions"
@@ -50,8 +101,18 @@ export default async function AdminPrescriptionDetailPage({
             {[
               { label: "Customer", value: p.customer_name || "—" },
               { label: "Email", value: p.customer_email || "—" },
-              { label: "File", value: p.original_name || p.mime_type },
-              { label: "Type / size", value: `${p.mime_type} · ${formatSize(p.size_bytes)}` },
+              { label: "Source", value: isManual ? "Manual entry" : "Uploaded file" },
+              ...(isManual
+                ? []
+                : [
+                    { label: "File", value: p.original_name || p.mime_type || "—" },
+                    {
+                      label: "Type / size",
+                      value: `${p.mime_type ?? "—"} · ${
+                        p.size_bytes != null ? formatSize(p.size_bytes) : "—"
+                      }`,
+                    },
+                  ]),
               { label: "Practitioner", value: p.practitioner_name || "Not specified" },
               {
                 label: "Date issued",
@@ -60,7 +121,7 @@ export default async function AdminPrescriptionDetailPage({
                   : "Not specified",
               },
               {
-                label: "Uploaded",
+                label: "Submitted",
                 value: new Date(p.created_at).toLocaleString("en-GH", {
                   dateStyle: "medium",
                   timeStyle: "short",
@@ -85,18 +146,28 @@ export default async function AdminPrescriptionDetailPage({
             </div>
           )}
 
-          <div className="mt-6">
-            <OpenFileButton
-              id={p.id}
-              getUrl={getAdminPrescriptionUrl}
-              label="Open file (1-hour link)"
-              className="rounded-md bg-lumen-blue px-4 py-2 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-blue/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
-            />
-            <p className="mt-2 text-xs text-lumen-ink/50">
-              Opening generates a short-lived signed URL; every access is recorded in the
-              audit log.
-            </p>
-          </div>
+          {isManual ? (
+            p.rx_values ? (
+              <ManualRxTable rx={p.rx_values} />
+            ) : (
+              <p className="mt-6 text-sm text-lumen-ink/50">
+                No prescription values were recorded.
+              </p>
+            )
+          ) : (
+            <div className="mt-6">
+              <OpenFileButton
+                id={p.id}
+                getUrl={getAdminPrescriptionUrl}
+                label="Open file (1-hour link)"
+                className="rounded-md bg-lumen-blue px-4 py-2 text-sm font-medium text-lumen-cream transition-colors hover:bg-lumen-blue/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lumen-blue"
+              />
+              <p className="mt-2 text-xs text-lumen-ink/50">
+                Opening generates a short-lived signed URL; every access is recorded in the
+                audit log.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Review panel */}

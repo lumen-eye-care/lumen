@@ -17,7 +17,16 @@
  * to bag" so the PDP keeps working.
  */
 
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FrameSVG } from "@/components/atoms/frame-svg";
@@ -26,6 +35,11 @@ import { formatGhs } from "@/lib/format-money";
 import { LUMEN_WHATSAPP_E164 } from "@/lib/contact";
 import { waMeUrl } from "@/lib/wa-link";
 import { frameToCartItem, buildLensCartItem, type CartLens } from "@/lib/cart";
+import {
+  uploadRxInline,
+  createManualRxInline,
+  type InlineRxResult,
+} from "@/app/(marketing)/shop/[slug]/rx-actions";
 import {
   lensUnitPesewa,
   LENS_QUIZ_STORAGE_KEY,
@@ -79,6 +93,8 @@ export type FramePurchasePanelProps = {
   frame: ShopFrame;
   catalogue: LensCatalogueView;
   prescriptionUploadEnabled: boolean;
+  /** Signed-in + flag on → can create a prescription inline (upload / manual). */
+  canCreateRx: boolean;
   onFilePrescriptions: OnFilePrescription[];
 };
 
@@ -215,6 +231,7 @@ export function FramePurchasePanel({
   frame,
   catalogue,
   prescriptionUploadEnabled,
+  canCreateRx,
   onFilePrescriptions,
 }: FramePurchasePanelProps) {
   const { add, open } = useCart();
@@ -302,8 +319,9 @@ export function FramePurchasePanel({
   }
 
   // Rx is required to add — except plano (no prescription) and frame-only (no lenses).
-  const rxChosen =
-    rxMethod === "later" || (rxMethod === "onfile" && !!prescriptionId);
+  // `later` carries no Rx; onfile/upload/manual all resolve to an attached prescriptionId.
+  const rxNeedsId = rxMethod === "onfile" || rxMethod === "upload" || rxMethod === "manual";
+  const rxChosen = rxMethod === "later" || (rxNeedsId && !!prescriptionId);
   const rxSatisfied = isPlano || frameOnly || rxChosen;
   const canAdd =
     !outOfStock && !!color && (!hasBuilder || (!!lensTypeSlug && rxSatisfied));
@@ -325,7 +343,7 @@ export function FramePurchasePanel({
         addonNames: chosenAddons.map((a) => a.name),
         // Plano has no prescription; otherwise carry the chosen method.
         rxMethod: isPlano ? null : rxMethod,
-        prescriptionId: !isPlano && rxMethod === "onfile" ? prescriptionId : null,
+        prescriptionId: !isPlano && rxNeedsId ? prescriptionId : null,
       };
       item = buildLensCartItem(frame, colorIndex, lens);
     }
@@ -349,7 +367,11 @@ export function FramePurchasePanel({
     : rxChosen
       ? rxMethod === "later"
         ? "Send it later"
-        : "Using a prescription on file"
+        : rxMethod === "upload"
+          ? "Uploaded · pending review"
+          : rxMethod === "manual"
+            ? "Entered · pending review"
+            : "Using a prescription on file"
       : "Required to add to bag";
 
   return (
@@ -661,6 +683,55 @@ export function FramePurchasePanel({
                           )}
                         </div>
                       )}
+
+                      {/* Inline create — signed-in only (the action requires auth). */}
+                      {canCreateRx && (
+                        <>
+                          <div>
+                            <RxRadioCard
+                              checked={rxMethod === "upload"}
+                              onSelect={() => {
+                                setRxMethod("upload");
+                                setPrescriptionId(null);
+                              }}
+                              icon="upload"
+                              title="Upload it now"
+                              desc="Add a photo or PDF of your prescription."
+                            />
+                            {rxMethod === "upload" && (
+                              <InlineRxSubsection>
+                                {prescriptionId ? (
+                                  <RxCreatedNote onReset={() => setPrescriptionId(null)} />
+                                ) : (
+                                  <InlineRxUpload onCreated={setPrescriptionId} />
+                                )}
+                              </InlineRxSubsection>
+                            )}
+                          </div>
+
+                          <div>
+                            <RxRadioCard
+                              checked={rxMethod === "manual"}
+                              onSelect={() => {
+                                setRxMethod("manual");
+                                setPrescriptionId(null);
+                              }}
+                              icon="glasses"
+                              title="Enter it manually"
+                              desc="Type the values from your prescription."
+                            />
+                            {rxMethod === "manual" && (
+                              <InlineRxSubsection>
+                                {prescriptionId ? (
+                                  <RxCreatedNote onReset={() => setPrescriptionId(null)} />
+                                ) : (
+                                  <InlineRxManual onCreated={setPrescriptionId} />
+                                )}
+                              </InlineRxSubsection>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Secondary helper links */}
@@ -668,17 +739,17 @@ export function FramePurchasePanel({
                       className="mt-1 flex flex-col gap-1 border-t pt-3 text-xs"
                       style={{ borderColor: "var(--lm-hair)", color: "var(--lm-faint)" }}
                     >
-                      {prescriptionUploadEnabled && (
+                      {prescriptionUploadEnabled && !canCreateRx && (
                         <p>
-                          New prescription?{" "}
+                          Have a prescription?{" "}
                           <Link
-                            href="/account/prescriptions"
+                            href={`/sign-in?redirect=${encodeURIComponent(`/shop/${frame.slug}`)}`}
                             className="underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
                             style={{ color: "var(--lm-warm-text)" }}
                           >
-                            Upload or enter it in your account
+                            Sign in to upload or enter it now
                           </Link>
-                          , then select it here.
+                          .
                         </p>
                       )}
                       <p>
@@ -1247,4 +1318,262 @@ function onFileLabel(p: OnFilePrescription): string {
   const status = p.status.charAt(0).toUpperCase() + p.status.slice(1);
   const who = p.practitionerName ? ` · ${p.practitionerName}` : "";
   return `Shared ${when}${who} · ${status}`;
+}
+
+// ── Inline prescription create (signed-in only) ───────────────────────────────
+
+const rxInputClass =
+  "w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-raise)] px-3 py-2 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)] disabled:cursor-not-allowed disabled:opacity-50";
+const rxErrorClass = "mt-1 text-xs text-[color:var(--lm-warm-text)]";
+
+/** Indented sub-panel under the selected Rx create card. */
+function InlineRxSubsection({ children }: { children: ReactNode }) {
+  return (
+    <div className="mt-2 ml-7 border-l pl-4" style={{ borderColor: "var(--lm-hair)" }}>
+      {children}
+    </div>
+  );
+}
+
+/** Shown after a prescription is created inline — it's attached to the order. */
+function RxCreatedNote({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <span
+        className="inline-flex items-center gap-2 font-medium"
+        style={{ color: "var(--lm-sage-text)" }}
+      >
+        <Icon name="check" size={16} /> Added — pending review
+      </span>
+      <p className="text-xs" style={{ color: "var(--lm-muted)" }}>
+        Our team will review it and update its status. It&apos;s attached to this order.
+      </p>
+      <button
+        type="button"
+        onClick={onReset}
+        className="lm-ghost self-start px-3 py-1.5 text-xs"
+      >
+        Use a different prescription
+      </button>
+    </div>
+  );
+}
+
+/** Consent checkbox shared by the inline create forms. */
+function RxConsent({
+  checked,
+  onChange,
+  error,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  error?: string;
+}) {
+  return (
+    <>
+      <label className="flex items-start gap-2 text-xs" style={{ color: "var(--lm-muted)" }}>
+        <input
+          type="checkbox"
+          name="consent"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--lm-blue)]"
+        />
+        <span>
+          I confirm this is my own prescription from a certified eye-care practitioner, and
+          I consent to Lumen Eye Care securely storing it to process my order.
+        </span>
+      </label>
+      {error && <p className={rxErrorClass}>{error}</p>}
+    </>
+  );
+}
+
+/** Inline file upload (compact — practitioner/date/notes live on the account page). */
+function InlineRxUpload({ onCreated }: { onCreated: (id: string) => void }) {
+  const [consent, setConsent] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setError(null);
+    setFieldErrors({});
+    startTransition(async () => {
+      const res: InlineRxResult = await uploadRxInline(fd);
+      if (res.ok) onCreated(res.id);
+      else {
+        setError(res.error);
+        setFieldErrors(res.fieldErrors ?? {});
+      }
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
+      <RxConsent checked={consent} onChange={setConsent} error={fieldErrors.consent} />
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-medium" style={{ color: "var(--lm-text)" }}>
+          Prescription file
+        </span>
+        <input
+          type="file"
+          name="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          required
+          disabled={!consent}
+          className={`${rxInputClass} file:mr-3 file:rounded file:border-0 file:bg-[var(--lm-tint)] file:px-2 file:py-1 file:text-xs file:text-[color:var(--lm-text)]`}
+          aria-invalid={!!fieldErrors.file}
+        />
+        <span className="mt-1 block text-[11px]" style={{ color: "var(--lm-faint)" }}>
+          JPG, PNG, WebP or PDF · up to 5 MB.
+        </span>
+        {fieldErrors.file && <p className={rxErrorClass}>{fieldErrors.file}</p>}
+      </label>
+      {error && (
+        <p role="alert" className={rxErrorClass}>
+          {error}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={pending || !consent}
+        className="lm-pill justify-center px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {pending ? "Uploading…" : "Upload prescription"}
+      </button>
+    </form>
+  );
+}
+
+// Manual Rx entry — one row of values per eye.
+type EyeFields = { sph: string; cyl: string; axis: string; add: string };
+const EMPTY_EYE: EyeFields = { sph: "", cyl: "", axis: "", add: "" };
+
+function RxField({
+  label,
+  value,
+  onChange,
+  error,
+  step,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+  step: string;
+  placeholder: string;
+}) {
+  return (
+    <label className="block">
+      <span
+        className="mb-1 block text-[11px] font-medium uppercase tracking-wide"
+        style={{ color: "var(--lm-faint)" }}
+      >
+        {label}
+      </span>
+      <input
+        type="number"
+        inputMode="decimal"
+        step={step}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={rxInputClass}
+        aria-invalid={!!error}
+      />
+      {error && <p className={rxErrorClass}>{error}</p>}
+    </label>
+  );
+}
+
+function EyeRow({
+  eyeLabel,
+  fields,
+  onField,
+  errPrefix,
+  fieldErrors,
+}: {
+  eyeLabel: string;
+  fields: EyeFields;
+  onField: (next: EyeFields) => void;
+  errPrefix: "right" | "left";
+  fieldErrors: Record<string, string>;
+}) {
+  const set = (k: keyof EyeFields) => (v: string) => onField({ ...fields, [k]: v });
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-semibold" style={{ color: "var(--lm-text)" }}>
+        {eyeLabel}
+      </p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <RxField label="SPH" value={fields.sph} onChange={set("sph")} error={fieldErrors[`${errPrefix}.sph`]} step="0.25" placeholder="0.00" />
+        <RxField label="CYL" value={fields.cyl} onChange={set("cyl")} error={fieldErrors[`${errPrefix}.cyl`]} step="0.25" placeholder="—" />
+        <RxField label="Axis" value={fields.axis} onChange={set("axis")} error={fieldErrors[`${errPrefix}.axis`]} step="1" placeholder="—" />
+        <RxField label="Add" value={fields.add} onChange={set("add")} error={fieldErrors[`${errPrefix}.add`]} step="0.25" placeholder="—" />
+      </div>
+    </div>
+  );
+}
+
+function InlineRxManual({ onCreated }: { onCreated: (id: string) => void }) {
+  const [right, setRight] = useState<EyeFields>(EMPTY_EYE);
+  const [left, setLeft] = useState<EyeFields>(EMPTY_EYE);
+  const [pd, setPd] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setFieldErrors({});
+    const input = { right, left, pd, consent };
+    startTransition(async () => {
+      const res: InlineRxResult = await createManualRxInline(input);
+      if (res.ok) onCreated(res.id);
+      else {
+        setError(res.error);
+        setFieldErrors(res.fieldErrors ?? {});
+      }
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
+      <p className="text-xs leading-relaxed" style={{ color: "var(--lm-muted)" }}>
+        Enter the values exactly as written on your prescription. SPH is required for each
+        eye; if there&apos;s a cylinder (CYL) value, its axis goes with it.
+      </p>
+      <EyeRow eyeLabel="Right eye (OD)" fields={right} onField={setRight} errPrefix="right" fieldErrors={fieldErrors} />
+      <EyeRow eyeLabel="Left eye (OS)" fields={left} onField={setLeft} errPrefix="left" fieldErrors={fieldErrors} />
+      <div className="max-w-[8rem]">
+        <RxField
+          label="PD (mm)"
+          value={pd}
+          onChange={setPd}
+          error={fieldErrors.pd}
+          step="0.5"
+          placeholder="optional"
+        />
+      </div>
+      <RxConsent checked={consent} onChange={setConsent} error={fieldErrors.consent} />
+      {error && (
+        <p role="alert" className={rxErrorClass}>
+          {error}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={pending || !consent}
+        className="lm-pill justify-center px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {pending ? "Saving…" : "Save prescription"}
+      </button>
+    </form>
+  );
 }
