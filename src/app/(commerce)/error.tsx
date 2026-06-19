@@ -28,7 +28,7 @@ export default function CommerceError({
         className="flex h-14 w-14 items-center justify-center rounded-full"
         style={{
           background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
-          color: "var(--lm-warm)",
+          color: "var(--lm-warm-text)",
         }}
       >
         <Icon name="x" size={24} strokeWidth={1.5} />

@@ -48,7 +48,7 @@ export function ClinicsCta({ clinics }: { clinics: Clinic[] }) {
           style={{ fontSize: "clamp(2.4rem, 7vw, 5rem)" }}
         >
           Every great frame starts with an{" "}
-          <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+          <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>
             eye test
           </em>
           .

@@ -46,7 +46,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
             border: "1px solid var(--lm-hair)",
           }}
         >
-          <Icon name="pin" size={12} style={{ color: "var(--lm-warm)" }} />
+          <Icon name="pin" size={12} style={{ color: "var(--lm-warm-text)" }} />
           {clinic.name}
         </span>
       </div>
@@ -62,7 +62,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
               className="inline-block shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium"
               style={{
                 background: "color-mix(in srgb, var(--lm-sage) 15%, transparent)",
-                color: "var(--lm-sage)",
+                color: "var(--lm-sage-text)",
               }}
             >
               Flagship
@@ -148,7 +148,7 @@ export function ClinicCard({ clinic, now }: { clinic: Clinic; now: Date }) {
                     color: "var(--lm-muted)",
                   }}
                 >
-                  <Icon name="check" size={10} style={{ color: "var(--lm-sage)" }} />
+                  <Icon name="check" size={10} style={{ color: "var(--lm-sage-text)" }} />
                   {service}
                 </li>
               ))}

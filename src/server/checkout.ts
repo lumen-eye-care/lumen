@@ -69,7 +69,10 @@ export async function repriceCart(lines: CartLineInput[]): Promise<RepriceResult
   // Lens catalogue — active options only; RLS public-read.
   const [lensTypesRes, addonsRes] = await Promise.all([
     supabase.from("lens_types").select("slug, name, price_ghs").eq("is_active", true),
-    supabase.from("lens_addons").select("slug, name, price_ghs").eq("is_active", true),
+    supabase
+      .from("lens_addons")
+      .select("slug, name, price_ghs, addon_group, single_select")
+      .eq("is_active", true),
   ]);
   if (lensTypesRes.error || addonsRes.error) {
     console.error(
@@ -80,7 +83,13 @@ export async function repriceCart(lines: CartLineInput[]): Promise<RepriceResult
   }
   const catalogue: LensCatalogue = {
     lensTypes: lensTypesRes.data ?? [],
-    addons: addonsRes.data ?? [],
+    addons: (addonsRes.data ?? []).map((a) => ({
+      slug: a.slug,
+      name: a.name,
+      price_ghs: a.price_ghs,
+      group: a.addon_group,
+      single_select: a.single_select,
+    })),
   };
 
   // Verify any attached prescription belongs to this user and isn't rejected

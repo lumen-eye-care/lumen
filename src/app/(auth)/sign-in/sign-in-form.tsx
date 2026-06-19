@@ -47,7 +47,7 @@ export function SignInForm({
       <Link
         href="/reset-password"
         className="text-center text-sm underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
-        style={{ color: "var(--lm-warm)" }}
+        style={{ color: "var(--lm-warm-text)" }}
       >
         Forgot password?
       </Link>

@@ -14,7 +14,7 @@ import { requestAppointment, type BookFormState } from "./actions";
 const inputClass =
   "w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-raise)] px-3 py-2.5 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]";
 
-const errorClass = "mt-1 text-xs text-[color:var(--lm-warm)]";
+const errorClass = "mt-1 text-xs text-[color:var(--lm-warm-text)]";
 
 type Clinic = { id: string; name: string; whatsapp: string | null };
 
@@ -45,7 +45,7 @@ export function BookForm({
       >
         <span
           className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ background: "color-mix(in srgb, var(--lm-sage) 18%, transparent)", color: "var(--lm-sage)" }}
+          style={{ background: "color-mix(in srgb, var(--lm-sage) 18%, transparent)", color: "var(--lm-sage-text)" }}
         >
           <Icon name="check" size={20} />
         </span>
@@ -275,7 +275,7 @@ export function BookForm({
           className="rounded-md px-3 py-2.5 text-sm"
           style={{
             background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
-            color: "var(--lm-warm)",
+            color: "var(--lm-warm-text)",
           }}
         >
           {formError}

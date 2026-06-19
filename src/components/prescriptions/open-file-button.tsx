@@ -43,7 +43,7 @@ export function OpenFileButton({
         {pending ? "Opening…" : label}
       </button>
       {error && (
-        <span className="text-xs" style={{ color: "var(--lm-warm)" }} role="alert">
+        <span className="text-xs" style={{ color: "var(--lm-warm-text)" }} role="alert">
           {error}
         </span>
       )}

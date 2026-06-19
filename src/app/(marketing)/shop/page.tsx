@@ -76,12 +76,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             {heroTitle.includes(",") ? (
               <>
                 {heroTitle.split(",")[0]},&nbsp;
-                <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+                <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>
                   {heroTitle.split(",").slice(1).join(",").trim()}
                 </em>
               </>
             ) : (
-              <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+              <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>
                 {heroTitle}
               </em>
             )}

@@ -52,7 +52,14 @@ export type PriceableFrame = {
 
 /** Lens catalogue entries (subset of lens_types / lens_addons rows). */
 export type PriceableLensType = { slug: string; name: string; price_ghs: number };
-export type PriceableAddon = { slug: string; name: string; price_ghs: number };
+export type PriceableAddon = {
+  slug: string;
+  name: string;
+  price_ghs: number;
+  /** Builder bucket; used to enforce single-select groups at re-price. */
+  group: string;
+  single_select: boolean;
+};
 export type LensCatalogue = {
   lensTypes: PriceableLensType[];
   addons: PriceableAddon[];
@@ -81,10 +88,19 @@ function priceLens(
   }
 
   const addons: PricedAddon[] = [];
+  const singleSelectGroupsSeen = new Set<string>();
   for (const slug of lens.addonSlugs ?? []) {
     const addon = catalogue.addons.find((a) => a.slug === slug);
     if (!addon) {
       return { ok: false, error: "A lens add-on in your bag is no longer available." };
+    }
+    // A single-select group (e.g. lens thickness/index) may contribute at most one
+    // option — reject a stale/tampered line that picked two from the same group.
+    if (addon.single_select) {
+      if (singleSelectGroupsSeen.has(addon.group)) {
+        return { ok: false, error: "Please choose only one lens-thickness option." };
+      }
+      singleSelectGroupsSeen.add(addon.group);
     }
     addons.push({ slug: addon.slug, name: addon.name, pricePesewa: addon.price_ghs });
   }

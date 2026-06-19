@@ -22,7 +22,7 @@ export default function ResetPasswordPage() {
         <Link
           href="/sign-in"
           className="underline-offset-2 hover:underline"
-          style={{ color: "var(--lm-warm)" }}
+          style={{ color: "var(--lm-warm-text)" }}
         >
           Back to sign in
         </Link>

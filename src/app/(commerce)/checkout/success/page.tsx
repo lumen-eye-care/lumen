@@ -79,7 +79,7 @@ export default async function CheckoutSuccessPage({
             className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full"
             style={{
               background: "color-mix(in srgb, var(--lm-sage) 15%, transparent)",
-              color: "var(--lm-sage)",
+              color: "var(--lm-sage-text)",
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>

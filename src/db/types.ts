@@ -350,6 +350,7 @@ export type Database = {
       }
       lens_addons: {
         Row: {
+          addon_group: string
           created_at: string
           description: string | null
           id: string
@@ -357,11 +358,13 @@ export type Database = {
           is_active: boolean
           name: string
           price_ghs: number
+          single_select: boolean
           slug: string
           sort_order: number
           updated_at: string
         }
         Insert: {
+          addon_group?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -369,11 +372,13 @@ export type Database = {
           is_active?: boolean
           name: string
           price_ghs?: number
+          single_select?: boolean
           slug: string
           sort_order?: number
           updated_at?: string
         }
         Update: {
+          addon_group?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -381,6 +386,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           price_ghs?: number
+          single_select?: boolean
           slug?: string
           sort_order?: number
           updated_at?: string

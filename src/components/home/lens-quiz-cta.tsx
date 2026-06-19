@@ -70,7 +70,7 @@ export function LensQuizCta() {
               >
                 <span
                   className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                  style={{ background: "var(--lm-tint)", color: "var(--lm-warm)" }}
+                  style={{ background: "var(--lm-tint)", color: "var(--lm-warm-text)" }}
                 >
                   <Icon name="check" size={14} />
                 </span>

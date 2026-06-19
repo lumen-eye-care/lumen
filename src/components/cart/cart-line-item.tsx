@@ -64,11 +64,23 @@ export function CartLineItem({
               {item.colorName}
             </p>
             {item.lens.lensTypeName && (
-              <p className="mt-0.5 text-xs" style={{ color: "var(--lm-faint)" }}>
-                {item.lens.lensTypeName}
-                {item.lens.addonNames.length > 0 &&
-                  ` · ${item.lens.addonNames.join(" · ")}`}
-              </p>
+              <>
+                <p
+                  className="mt-1 truncate text-xs font-medium"
+                  style={{ color: "var(--lm-muted)" }}
+                >
+                  {item.lens.lensTypeName}
+                </p>
+                {item.lens.addonNames.length > 0 && (
+                  <p
+                    className="mt-0.5 truncate text-xs"
+                    style={{ color: "var(--lm-faint)" }}
+                    title={item.lens.addonNames.join(" · ")}
+                  >
+                    {item.lens.addonNames.join(" · ")}
+                  </p>
+                )}
+              </>
             )}
           </div>
           <button

@@ -141,7 +141,7 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
         </div>
         <p
           className="text-base font-semibold"
-          style={{ color: "var(--lm-warm)" }}
+          style={{ color: "var(--lm-warm-text)" }}
         >
           {formatGhs(frame.price_ghs)}
         </p>

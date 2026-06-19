@@ -13,14 +13,14 @@ export default function NotFound() {
         <Link
           href="/"
           className="underline underline-offset-2"
-          style={{ color: "var(--lm-warm)" }}
+          style={{ color: "var(--lm-warm-text)" }}
         >
           Home
         </Link>
         <Link
           href="/shop"
           className="underline underline-offset-2"
-          style={{ color: "var(--lm-warm)" }}
+          style={{ color: "var(--lm-warm-text)" }}
         >
           Shop the collection
         </Link>

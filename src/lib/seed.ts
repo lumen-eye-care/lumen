@@ -83,91 +83,201 @@ const frameCategories: TablesInsert<"frame_categories">[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// 1b. Lens builder catalogue  (docs/design/frame-detail.jsx:48-62 — the lensOptions
-// and addonOptions arrays). Global catalogue (one menu for all frames). Prices
-// converted GHS → integer pesewa (×100). US-P2-02.
+// 1b. Lens builder catalogue (US-P2-02 + follow-up). Global catalogue (one menu
+// for all frames) and the SINGLE SOURCE OF TRUTH shared by the /lens-guide quiz
+// and the PDP builder — anything the quiz recommends must exist here as a buildable
+// slug. Grouped + researched (optician-grade); see
+// docs/stories/US-P2-02-followup-catalogue-quiz-accordion.md.
+//
+// PRICES ARE PLACEHOLDERS — Charity sets the real surcharges in /admin/lenses.
+// Money is integer pesewa (×100). Add-on rows set addon_group / included /
+// single_select EXPLICITLY (a PostgREST bulk insert sends missing keys as NULL).
+// Honesty: no "Transitions®" trademark, no blue-light eye-health/strain claims.
 // ---------------------------------------------------------------------------
 const lensTypes: TablesInsert<"lens_types">[] = [
   {
     slug: "single",
     name: "Single vision",
-    description: "For distance OR reading. Most common.",
+    description: "One correction for distance or reading. The most common lens.",
     price_ghs: 0,
     badge: "Most popular",
     sort_order: 0,
   },
   {
-    slug: "varifocal",
-    name: "Varifocal",
-    description: "Distance, intermediate and reading in one.",
-    price_ghs: 48000,
+    slug: "reading",
+    name: "Reading",
+    description: "Tuned for close work — books, phones, fine print.",
+    price_ghs: 0,
     sort_order: 1,
   },
   {
-    slug: "reader",
-    name: "Reading",
-    description: "For close-up work and screens.",
-    price_ghs: 0,
+    slug: "office",
+    name: "Office / computer",
+    description: "Sharp from your screen to across the desk. Built for screen-heavy days.",
+    price_ghs: 8000,
+    badge: "For screens",
     sort_order: 2,
   },
   {
-    slug: "blue",
-    name: "Blue-light filter",
-    description: "If you're on screens 6+ hours a day.",
-    price_ghs: 12000,
-    badge: "Recommended",
+    slug: "bifocal",
+    name: "Bifocal",
+    description: "Distance and reading in one lens, with a visible line.",
+    price_ghs: 35000,
     sort_order: 3,
+  },
+  {
+    slug: "varifocal",
+    name: "Varifocal (progressive)",
+    description: "Distance, intermediate and reading blended with no visible line.",
+    price_ghs: 48000,
+    badge: "Recommended",
+    sort_order: 4,
+  },
+  {
+    slug: "plano",
+    name: "Plano (no prescription)",
+    description: "Zero-power lenses with no vision correction — for sunglasses or a blue-light pair without a prescription.",
+    price_ghs: 0,
+    sort_order: 5,
   },
 ];
 
 const lensAddons: TablesInsert<"lens_addons">[] = [
+  // ── Coatings (multi-select) ──────────────────────────────────────────────
   {
     slug: "antireflective",
     name: "Anti-reflective coating",
-    description: "Reduces glare on screens and at night.",
+    description: "Cuts glare and reflections on screens and at night.",
     price_ghs: 0,
     included: true,
+    addon_group: "coating",
+    single_select: false,
     sort_order: 0,
   },
   {
     slug: "scratch",
     name: "Scratch-resistant coating",
-    description: "Tougher lens for everyday wear.",
+    description: "A tougher surface that holds up to everyday wear.",
     price_ghs: 0,
     included: true,
+    addon_group: "coating",
+    single_select: false,
     sort_order: 1,
   },
   {
     slug: "uv",
     name: "UV400 protection",
-    description: "Full UV-A and UV-B protection.",
+    description: "Blocks UV-A and UV-B — important under the Ghana sun.",
     price_ghs: 0,
     included: true,
+    addon_group: "coating",
+    single_select: false,
     sort_order: 2,
   },
   {
-    slug: "transition",
-    name: "Transitions® light-reactive",
-    description: "Tints in sunlight, clear indoors.",
-    price_ghs: 32000,
+    slug: "bluelight",
+    name: "Blue-light filter",
+    description:
+      "A warmer tint some people prefer for long screen sessions. Current evidence doesn't show it prevents eye strain — it's a comfort choice, not a health one.",
+    price_ghs: 12000,
     included: false,
+    addon_group: "coating",
+    single_select: false,
     sort_order: 3,
   },
   {
-    slug: "thin",
-    name: "Thin & lightweight 1.67",
-    description: "Best for stronger prescriptions.",
-    price_ghs: 22000,
+    slug: "antifog",
+    name: "Anti-fog coating",
+    description: "Keeps lenses clear moving between air-con and humid outdoor air.",
+    price_ghs: 8000,
     included: false,
+    addon_group: "coating",
+    single_select: false,
     sort_order: 4,
+  },
+  // ── Sun & tint (multi-select) ────────────────────────────────────────────
+  {
+    slug: "photochromic",
+    name: "Light-reactive (photochromic)",
+    description: "Darkens in sunlight, clears indoors — one pair for both.",
+    price_ghs: 32000,
+    included: false,
+    addon_group: "sun",
+    single_select: false,
+    sort_order: 5,
+  },
+  {
+    slug: "polarised",
+    name: "Polarised sun lenses",
+    description: "Kills road and water glare — best for driving and bright days.",
+    price_ghs: 28000,
+    included: false,
+    addon_group: "sun",
+    single_select: false,
+    sort_order: 6,
   },
   {
     slug: "tint",
-    name: "Custom tint (sun)",
-    description: "Grey, brown, or rose gradient.",
+    name: "Fashion tint",
+    description: "A solid or gradient tint — grey, brown or rose.",
     price_ghs: 18000,
     included: false,
-    sort_order: 5,
+    addon_group: "sun",
+    single_select: false,
+    sort_order: 7,
+  },
+  // ── Lens thickness / material (single-select index) ──────────────────────
+  // Pick exactly one. Higher index = thinner & lighter for stronger prescriptions.
+  // Can't be auto-recommended (we don't capture Rx numbers in v1) — guidance only.
+  {
+    slug: "index150",
+    name: "Standard 1.50",
+    description: "Best value for mild prescriptions.",
+    price_ghs: 0,
+    included: true,
+    addon_group: "thickness",
+    single_select: true,
+    sort_order: 8,
+  },
+  {
+    slug: "poly159",
+    name: "Polycarbonate 1.59",
+    description: "Lighter and impact-resistant — good for active wear and kids.",
+    price_ghs: 15000,
+    included: false,
+    addon_group: "thickness",
+    single_select: true,
+    sort_order: 9,
+  },
+  {
+    slug: "index160",
+    name: "Thin 1.60",
+    description: "Noticeably thinner for moderate prescriptions.",
+    price_ghs: 18000,
+    included: false,
+    addon_group: "thickness",
+    single_select: true,
+    sort_order: 10,
+  },
+  {
+    slug: "index167",
+    name: "Extra-thin 1.67",
+    description: "Slim and light for strong prescriptions.",
+    price_ghs: 26000,
+    included: false,
+    addon_group: "thickness",
+    single_select: true,
+    sort_order: 11,
+  },
+  {
+    slug: "index174",
+    name: "Ultra-thin 1.74",
+    description: "Our thinnest lens for very strong prescriptions.",
+    price_ghs: 40000,
+    included: false,
+    addon_group: "thickness",
+    single_select: true,
+    sort_order: 12,
   },
 ];
 
@@ -290,17 +400,31 @@ async function main(): Promise<void> {
   const catIds = Object.fromEntries((catData ?? []).map((r) => [r.slug, r.id]));
 
   // 1b. Lens builder catalogue — global; no FK to frames (US-P2-02).
+  // The catalogue is the single source of truth for the quiz + builder, so the seed
+  // is AUTHORITATIVE: upsert the current set, then delete any slug no longer in it
+  // (e.g. the retired `blue` type / `transition` add-on). Safe — order_items keep a
+  // jsonb lens_config snapshot, there's no FK to these rows.
   console.log("  › lens_types");
   const { error: lensTypeErr } = await db
     .from("lens_types")
     .upsert(lensTypes, { onConflict: "slug" });
   if (lensTypeErr) throw new Error(`lens_types: ${lensTypeErr.message}`);
+  const { error: lensTypePruneErr } = await db
+    .from("lens_types")
+    .delete()
+    .not("slug", "in", `(${lensTypes.map((t) => t.slug).join(",")})`);
+  if (lensTypePruneErr) throw new Error(`lens_types prune: ${lensTypePruneErr.message}`);
 
   console.log("  › lens_addons");
   const { error: lensAddonErr } = await db
     .from("lens_addons")
     .upsert(lensAddons, { onConflict: "slug" });
   if (lensAddonErr) throw new Error(`lens_addons: ${lensAddonErr.message}`);
+  const { error: lensAddonPruneErr } = await db
+    .from("lens_addons")
+    .delete()
+    .not("slug", "in", `(${lensAddons.map((a) => a.slug).join(",")})`);
+  if (lensAddonPruneErr) throw new Error(`lens_addons prune: ${lensAddonPruneErr.message}`);
 
   // 2. Frames  (docs/design/shared.jsx:93-102 — FRAMES array)
   // Prices converted: GHS 1 = 100 pesewa (integer pesewa in price_ghs).

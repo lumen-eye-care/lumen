@@ -35,7 +35,7 @@ export function Manifesto() {
             }}
           >
             We build it{" "}
-            <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
+            <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>
               around your eyes
             </em>{" "}
             — measured by an optometrist, cut for your prescription, finished in

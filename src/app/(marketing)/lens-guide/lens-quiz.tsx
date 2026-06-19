@@ -3,6 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/atoms/icon";
+import { formatGhs } from "@/lib/format-money";
+import {
+  LENS_QUIZ_STORAGE_KEY,
+  type LensCatalogueView,
+} from "@/lib/lens-catalogue";
 import {
   QUESTIONS,
   recommendLens,
@@ -11,12 +16,16 @@ import {
 } from "@/lib/lens-quiz";
 
 /**
- * Interactive lens-recommendation quiz (US-P1-02). Pure-client: each answer
- * advances a step; the final screen runs the rule-based engine in
- * `recommendLens` and shows the result with the reasoning behind every line.
- * No server round-trip, no LLM — deterministic and explainable.
+ * Interactive lens-recommendation quiz (US-P1-02, catalogue-aware in the US-P2-02
+ * follow-up). Pure-client: each answer advances a step; the final screen runs the
+ * rule-based engine over the live catalogue and shows the result with the reasoning
+ * behind every line. No server round-trip, no LLM — deterministic and explainable.
+ *
+ * The result hands off to the builder: "Build this on a frame" persists the
+ * recommended slugs to localStorage and links to /shop, where the PDP builder
+ * prefills them (same catalogue, so the recommendation is always buildable).
  */
-export function LensQuiz() {
+export function LensQuiz({ catalogue }: { catalogue: LensCatalogueView }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [done, setDone] = useState(false);
@@ -26,18 +35,24 @@ export function LensQuiz() {
   const progress = done ? 100 : Math.round((step / total) * 100);
 
   const recommendation = useMemo(
-    () => (done ? recommendLens(answers) : null),
-    [done, answers],
+    () => (done ? recommendLens(answers, catalogue) : null),
+    [done, answers, catalogue],
   );
+
+  // Resolve recommended slugs → catalogue views for display.
+  const lensType = recommendation?.lensTypeSlug
+    ? catalogue.lensTypes.find((t) => t.slug === recommendation.lensTypeSlug) ?? null
+    : null;
+  const recommendedAddons = (recommendation?.addonSlugs ?? []).flatMap((slug) => {
+    const a = catalogue.addons.find((x) => x.slug === slug);
+    return a ? [a] : [];
+  });
 
   function choose(id: QuestionId, value: string) {
     const next = { ...answers, [id]: value };
     setAnswers(next);
-    if (step + 1 < total) {
-      setStep(step + 1);
-    } else {
-      setDone(true);
-    }
+    if (step + 1 < total) setStep(step + 1);
+    else setDone(true);
   }
 
   function back() {
@@ -54,11 +69,24 @@ export function LensQuiz() {
     setDone(false);
   }
 
+  /** Persist the recommended build for the PDP builder to pick up. */
+  function saveHandoff() {
+    if (!recommendation) return;
+    try {
+      window.localStorage.setItem(
+        LENS_QUIZ_STORAGE_KEY,
+        JSON.stringify({
+          lensTypeSlug: recommendation.lensTypeSlug,
+          addonSlugs: recommendation.addonSlugs,
+        }),
+      );
+    } catch {
+      // Private mode / storage disabled — the link still works, just no prefill.
+    }
+  }
+
   return (
-    <div
-      className="lm-card mx-auto max-w-2xl overflow-hidden p-6 sm:p-10"
-      data-animate
-    >
+    <div className="lm-card mx-auto max-w-2xl overflow-hidden p-6 sm:p-10" data-animate>
       {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -90,10 +118,7 @@ export function LensQuiz() {
 
       {!done && current && (
         <div>
-          <h2
-            className="lm-display"
-            style={{ fontSize: "clamp(1.5rem, 4vw, 2.2rem)" }}
-          >
+          <h2 className="lm-display" style={{ fontSize: "clamp(1.5rem, 4vw, 2.2rem)" }}>
             {current.prompt}
           </h2>
           <div className="mt-7 grid gap-3">
@@ -111,17 +136,11 @@ export function LensQuiz() {
                   }}
                 >
                   <span>
-                    <span
-                      className="block text-[15px] font-medium"
-                      style={{ color: "var(--lm-text)" }}
-                    >
+                    <span className="block text-[15px] font-medium" style={{ color: "var(--lm-text)" }}>
                       {opt.label}
                     </span>
                     {opt.hint && (
-                      <span
-                        className="mt-0.5 block text-sm"
-                        style={{ color: "var(--lm-muted)" }}
-                      >
+                      <span className="mt-0.5 block text-sm" style={{ color: "var(--lm-muted)" }}>
                         {opt.hint}
                       </span>
                     )}
@@ -130,7 +149,7 @@ export function LensQuiz() {
                     name="arrow"
                     size={18}
                     className="shrink-0 transition-transform group-hover:translate-x-1"
-                    style={{ color: "var(--lm-warm)" }}
+                    style={{ color: "var(--lm-warm-text)" }}
                   />
                 </button>
               );
@@ -141,103 +160,88 @@ export function LensQuiz() {
 
       {done && recommendation && (
         <div data-stagger>
-          <h2
-            className="lm-display"
-            style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)" }}
-          >
+          <h2 className="lm-display" style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)" }}>
             We&apos;d suggest{" "}
-            <em style={{ fontStyle: "italic", color: "var(--lm-warm)" }}>
-              {recommendation.lens.name}
+            <em style={{ fontStyle: "italic", color: "var(--lm-warm-text)" }}>
+              {lensType?.name ?? "a single-vision lens"}
             </em>
             .
           </h2>
-          <p
-            className="mt-4 text-[15px] leading-relaxed"
-            style={{ color: "var(--lm-muted)" }}
-          >
-            {recommendation.lens.why}
-          </p>
+          {lensType && recommendation.reasons[lensType.slug] && (
+            <p className="mt-4 text-[15px] leading-relaxed" style={{ color: "var(--lm-muted)" }}>
+              {recommendation.reasons[lensType.slug]}
+            </p>
+          )}
 
-          {/* Add-ons */}
-          <div className="mt-7 grid gap-3">
-            {recommendation.addOns.map((row) => (
-              <div
-                key={row.name}
-                className="flex items-start gap-4 rounded-xl p-4"
-                style={{
-                  background: "var(--lm-base)",
-                  border: "1px solid var(--lm-hair)",
-                }}
-              >
-                <span
-                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                  style={{ background: "var(--lm-tint)", color: "var(--lm-warm)" }}
+          {/* Recommended add-ons */}
+          {recommendedAddons.length > 0 && (
+            <div className="mt-7 grid gap-3">
+              {recommendedAddons.map((a) => (
+                <div
+                  key={a.slug}
+                  className="flex items-start gap-4 rounded-xl p-4"
+                  style={{ background: "var(--lm-base)", border: "1px solid var(--lm-hair)" }}
                 >
-                  <Icon name="check" size={14} />
-                </span>
-                <div>
-                  <p
-                    className="text-sm font-semibold"
-                    style={{ color: "var(--lm-text)" }}
+                  <span
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: "var(--lm-tint)", color: "var(--lm-warm-text)" }}
                   >
-                    {row.name}
-                  </p>
-                  <p
-                    className="mt-0.5 text-sm"
-                    style={{ color: "var(--lm-muted)" }}
-                  >
-                    {row.why}
-                  </p>
+                    <Icon name="check" size={14} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="text-sm font-semibold" style={{ color: "var(--lm-text)" }}>
+                        {a.name}
+                      </p>
+                      <span className="shrink-0 text-sm" style={{ color: "var(--lm-muted)" }}>
+                        {a.included ? "Included" : a.price_ghs > 0 ? `+ ${formatGhs(a.price_ghs)}` : "Free"}
+                      </span>
+                    </div>
+                    {recommendation.reasons[a.slug] && (
+                      <p className="mt-0.5 text-sm" style={{ color: "var(--lm-muted)" }}>
+                        {recommendation.reasons[a.slug]}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {recommendation.sun && (
-            <div
-              className="mt-3 flex items-start gap-4 rounded-xl p-4"
-              style={{
-                background: "var(--lm-tint)",
-                border: "1px solid var(--lm-hair)",
-              }}
-            >
-              <span
-                className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                style={{ background: "var(--lm-warm)", color: "#1a0f0a" }}
-              >
-                <Icon name="sun" size={14} />
-              </span>
-              <div>
-                <p
-                  className="text-sm font-semibold"
-                  style={{ color: "var(--lm-text)" }}
-                >
-                  Worth adding: {recommendation.sun.name}
-                </p>
-                <p className="mt-0.5 text-sm" style={{ color: "var(--lm-muted)" }}>
-                  {recommendation.sun.why}
-                </p>
-              </div>
+              ))}
             </div>
           )}
 
+          {/* Honest guidance notes (not products) */}
+          {recommendation.notes.length > 0 && (
+            <ul className="mt-6 grid gap-2.5">
+              {recommendation.notes.map((note) => (
+                <li
+                  key={note}
+                  className="flex items-start gap-3 text-sm leading-relaxed"
+                  style={{ color: "var(--lm-muted)" }}
+                >
+                  <Icon
+                    name="eye"
+                    size={15}
+                    className="mt-0.5 shrink-0"
+                    style={{ color: "var(--lm-sage-text)" }}
+                  />
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           {/* Honest disclaimer + CTAs */}
-          <p
-            className="mt-6 text-xs leading-relaxed"
-            style={{ color: "var(--lm-faint)" }}
-          >
-            This is guidance to help you choose — not a prescription. Your
-            optometrist confirms the exact lens and measurements at your eye
-            test.
+          <p className="mt-6 text-xs leading-relaxed" style={{ color: "var(--lm-faint)" }}>
+            This is guidance to help you choose — not a prescription. Your optometrist
+            confirms the exact lens and measurements at your eye test.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/book" className="lm-pill">
-              Book an eye test
+            <Link href="/shop" onClick={saveHandoff} className="lm-pill">
+              Build this on a frame
               <Icon name="arrow" size={16} />
             </Link>
-            <Link href="/shop" className="lm-ghost">
-              Browse frames
+            <Link href="/book" className="lm-ghost">
+              Book an eye test
             </Link>
             <button type="button" onClick={restart} className="lm-ghost">
               <Icon name="arrowLeft" size={14} />

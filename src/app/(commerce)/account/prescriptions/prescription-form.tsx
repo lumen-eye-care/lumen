@@ -6,7 +6,7 @@ import { uploadPrescription, type PrescriptionFormState } from "./actions";
 
 const inputClass =
   "w-full rounded-md border border-[color:var(--lm-hair)] bg-[var(--lm-raise)] px-3 py-2.5 text-sm text-[color:var(--lm-text)] placeholder:text-[color:var(--lm-faint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]";
-const errorClass = "mt-1 text-xs text-[color:var(--lm-warm)]";
+const errorClass = "mt-1 text-xs text-[color:var(--lm-warm-text)]";
 const labelText = "mb-1.5 block font-medium text-[color:var(--lm-text)]";
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 
@@ -31,7 +31,7 @@ export function PrescriptionForm() {
           className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full"
           style={{
             background: "color-mix(in srgb, var(--lm-sage) 18%, transparent)",
-            color: "var(--lm-sage)",
+            color: "var(--lm-sage-text)",
           }}
         >
           <Icon name="check" size={20} />
@@ -171,7 +171,7 @@ export function PrescriptionForm() {
           className="rounded-md px-3 py-2.5 text-sm"
           style={{
             background: "color-mix(in srgb, var(--lm-warm) 12%, transparent)",
-            color: "var(--lm-warm)",
+            color: "var(--lm-warm-text)",
           }}
         >
           {formError}

@@ -34,8 +34,10 @@ const catalogue: LensCatalogue = {
     { slug: "varifocal", name: "Varifocal", price_ghs: 48000 },
   ],
   addons: [
-    { slug: "antireflective", name: "Anti-reflective coating", price_ghs: 0 },
-    { slug: "transition", name: "Transitions® light-reactive", price_ghs: 32000 },
+    { slug: "antireflective", name: "Anti-reflective", price_ghs: 0, group: "coating", single_select: false },
+    { slug: "photochromic", name: "Light-reactive", price_ghs: 32000, group: "sun", single_select: false },
+    { slug: "index150", name: "Standard 1.50", price_ghs: 0, group: "thickness", single_select: true },
+    { slug: "index167", name: "Extra-thin 1.67", price_ghs: 26000, group: "thickness", single_select: true },
   ],
 };
 
@@ -93,7 +95,7 @@ describe("priceLines — lens build", () => {
           qty: 2,
           lens: {
             lensTypeSlug: "varifocal",
-            addonSlugs: ["antireflective", "transition"],
+            addonSlugs: ["antireflective", "photochromic"],
             rxMethod: "later",
           },
         },
@@ -105,16 +107,56 @@ describe("priceLines — lens build", () => {
     if (result.ok) {
       const line = result.lines[0];
       expect(line.unitPricePesewa).toBe(58000); // frame only
-      expect(line.lensUnitPricePesewa).toBe(80000); // 48000 varifocal + 0 AR + 32000 transition
+      expect(line.lensUnitPricePesewa).toBe(80000); // 48000 varifocal + 0 AR + 32000 photochromic
       expect(line.lineTotalPesewa).toBe((58000 + 80000) * 2);
       expect(result.totalPesewa).toBe(276000);
       expect(line.lensConfig?.lensTypeName).toBe("Varifocal");
       expect(line.lensConfig?.addons.map((a) => a.slug)).toEqual([
         "antireflective",
-        "transition",
+        "photochromic",
       ]);
       expect(line.lensConfig?.rxMethod).toBe("later");
     }
+  });
+
+  it("sums a grouped build (thickness + coating + sun) correctly", () => {
+    const result = priceLines(
+      [
+        {
+          frameId: ACCRA,
+          colorName: "Midnight",
+          qty: 1,
+          lens: {
+            lensTypeSlug: "single",
+            addonSlugs: ["antireflective", "index167", "photochromic"],
+          },
+        },
+      ],
+      frames,
+      catalogue,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // 0 single + 0 AR + 26000 (1.67) + 32000 (photochromic)
+      expect(result.lines[0].lensUnitPricePesewa).toBe(58000);
+      expect(result.totalPesewa).toBe(58000 + 58000);
+    }
+  });
+
+  it("rejects two options from the same single-select group (stale/tamper)", () => {
+    const result = priceLines(
+      [
+        {
+          frameId: ACCRA,
+          colorName: "Midnight",
+          qty: 1,
+          lens: { lensTypeSlug: "single", addonSlugs: ["index150", "index167"] },
+        },
+      ],
+      frames,
+      catalogue,
+    );
+    expect(result.ok).toBe(false);
   });
 
   it("treats included (price 0) options as no surcharge", () => {

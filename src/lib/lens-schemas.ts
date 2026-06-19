@@ -42,9 +42,15 @@ export const lensTypeSchema = z.object({
   badge: z.string().trim().max(40).optional().or(z.literal("")),
 });
 
+// Mirrors the lens_addons_group_check constraint (migration 20260617000002).
+export const LENS_ADDON_GROUPS = ["coating", "sun", "thickness"] as const;
+export type LensAddonGroup = (typeof LENS_ADDON_GROUPS)[number];
+
 export const lensAddonSchema = z.object({
   ...baseShape,
   included: z.boolean(),
+  group: z.enum(LENS_ADDON_GROUPS),
+  single_select: z.boolean(),
 });
 
 export type LensTypeInput = z.infer<typeof lensTypeSchema>;
