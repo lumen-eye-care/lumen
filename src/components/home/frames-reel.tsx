@@ -75,6 +75,7 @@ function FrameCardDark({ frame }: { frame: ShopFrame }) {
   const photo = frame.photo_urls[0];
 
   const onMove = useCallback((e: React.MouseEvent) => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const el = ref.current;
     if (!el) return;
