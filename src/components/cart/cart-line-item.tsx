@@ -87,7 +87,7 @@ export function CartLineItem({
             type="button"
             onClick={() => remove(key)}
             aria-label={`Remove ${item.name} from bag`}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+            className="lm-tap flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
             style={{ color: "var(--lm-faint)" }}
           >
             <Icon name="trash" size={15} />
@@ -104,7 +104,7 @@ export function CartLineItem({
               type="button"
               onClick={() => changeQty(key, -1)}
               aria-label={item.qty <= 1 ? `Remove ${item.name}` : "Decrease quantity"}
-              className="flex h-8 w-8 items-center justify-center rounded-l-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+              className="lm-tap flex h-8 w-8 items-center justify-center rounded-l-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
               style={{ color: "var(--lm-muted)" }}
             >
               <Icon name="minus" size={14} />
@@ -122,7 +122,7 @@ export function CartLineItem({
               disabled={atMax}
               aria-label="Increase quantity"
               title={atMax ? `Only ${item.stock} in stock` : undefined}
-              className="flex h-8 w-8 items-center justify-center rounded-r-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)] disabled:cursor-not-allowed disabled:opacity-40"
+              className="lm-tap flex h-8 w-8 items-center justify-center rounded-r-md transition-colors hover:bg-[color:var(--lm-tint)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)] disabled:cursor-not-allowed disabled:opacity-40"
               style={{ color: "var(--lm-muted)" }}
             >
               <Icon name="plus" size={14} />
