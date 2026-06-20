@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-06-20 — Launch wrap-up pass: env validation fix · 44px touch targets · launch/handoff checklist (build-complete + live-verified)
+
+**Status: shipped on branch.** v1 is **feature-complete for the 6–12 July launch**. A codebase audit confirmed the only unbuilt feature is the **Journal (US-P2-03)** — DB schema + 11 seeded posts exist but no front-end; **deliberately deferred out of v1** (nav link already removed, no broken links). This pass closes two small hardening items + documents the non-code launch checklist. No migration, no new deps.
+
+**What landed:**
+- **`APPOINTMENTS_NOTIFY_EMAIL` env validation** — `src/server/env.ts` now declares it as an `.email().optional()` field (was read at `src/server/appointments.ts:201` but never validated, so a typo failed silently and Charity got no booking alerts). Optional matches the no-throw best-effort `sendAppointmentEmails` design; `.env.example:56` already documented it.
+- **44px touch targets (WCAG 2.5.5 AAA)** — new reusable **`.lm-tap`** utility in `globals.css`: an absolutely-positioned `::before` centred over the control with `min-width/min-height:44px`, so the **visual size is unchanged** (no layout shift — `::before` is out of flow) while the tap area reaches 44×44px for thumb taps on the mid-range Android baseline. Applied to the cart qty steppers + remove button (`cart-line-item.tsx`, 32px visual) and the PDP colour swatches (`frame-purchase-panel.tsx`, 36px visual). The accordion colour-row dot stays decorative (its parent row is already >44px). Focus ring still tracks the visible control.
+- **Launch / handoff checklist** documented below (deploy-config + Charity's content workstream + explicit post-launch backlog).
+
+**Verified (2026-06-20):** `pnpm typecheck` ✓ · `pnpm lint` ✓ · **250/250 tests** ✓ · `pnpm build` ✓ (all 49 routes). Live (preview, env-less worktree → seeded a cart in localStorage): the cart qty steppers, remove button, and (by identical `.lm-tap` class) the swatches resolve their `::before` to **44×44px** while the visual box stays **32×32 / 36×36**; a hit-test 20px off-centre lands on the control; screenshot confirms the stepper looks visually identical (no ballooning). Only console errors were the expected "Supabase URL/Key required" (no `.env.local` in this worktree) — none from the change.
+
+**Launch checklist (non-code — owner-flagged):**
+- **Vercel env (dev/ops):** `RESEND_API_KEY` + verified sending domain (SPF/DKIM/DMARC) · `APPOINTMENTS_NOTIFY_EMAIL` (now schema-validated) · `UPSTASH_REDIS_REST_URL`/`_TOKEN` (rate limiter no-ops without them) · `NEXT_PUBLIC_SENTRY_DSN` + build-only `SENTRY_AUTH_TOKEN`/`SENTRY_ORG`/`SENTRY_PROJECT` · confirm `NEXT_PUBLIC_SITE_URL` = canonical domain · confirm Paystack **live** keys + per-env webhook URL (webhook itself already live + signature-gated — [[paystack-webhook-resolved]]).
+- **Dashboards (dev/ops):** Supabase auth — email-enumeration protection, min-password 8, secure-password-change, admin MFA, prod email templates → `/auth/confirm` · UptimeRobot on `/` + `/api/health` · Sentry project + payment-path alert.
+- **Charity's content (client):** set real **lens prices** in `/admin/lenses` (seed values are placeholders) · upload **real product photography** per frame (activates the multi-image gallery; FrameSVG renders until then) · supply real social handles (footer links removed until then) · keep `LUMEN_PRESCRIPTION_UPLOAD_ENABLED` **off in prod** until DPC + named lens-fulfilment partner clear ([[dpc-green-light-given]] — flag flip stays deliberate).
+
+**Post-launch backlog (out of v1):** Journal front-end + admin journal/frame-category CRUD (US-P2-03 / part of US-P2-04) · 3D try-on productionisation (`frames.model_url` column + per-frame GLB/USDZ, drop `NEXT_PUBLIC_DEMO_3D_ENABLED`) · optional qty-stepper/swatch visual-size bump (now they meet AAA via hit-area; visual stays compact).
+
+---
+
 ## 2026-06-19 — PDP/UX hardening pass: accessible Rx radio group · WCAG-AA contrast · multi-image gallery · frame-only purchase (build-complete + live-verified)
 
 **Status: shipped on branch.** A design/UX-critique pass over the shopping funnel (research-grounded vs Zenni/Warby Parker + WCAG 2.1 AA), then targeted fixes. No migration, no new deps.

@@ -831,7 +831,7 @@ export function FramePurchasePanel({
                       onClick={() => setColorIndex(i)}
                       aria-label={c.name}
                       aria-pressed={i === colorIndex}
-                      className="flex h-9 w-9 items-center justify-center rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
+                      className="lm-tap flex h-9 w-9 items-center justify-center rounded-full transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--lm-warm)]"
                       style={{
                         backgroundColor: c.hex,
                         boxShadow:

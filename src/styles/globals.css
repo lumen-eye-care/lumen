@@ -373,6 +373,25 @@ body.lm-transitioning * {
   outline-offset: 3px;
 }
 
+/* Touch-target expander. Keeps a control's visual size while guaranteeing a
+   ≥44×44px tap area (WCAG 2.5.5 AAA) for thumb taps on mid-range Android.
+   The invisible hit area is centred over the control, so the visible focus
+   ring still tracks the real element. */
+.lm-tap {
+  position: relative;
+}
+.lm-tap::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+}
+
 /* Surface card. */
 .lm-card {
   background: linear-gradient(160deg, var(--lm-raise), var(--lm-surface));

@@ -23,6 +23,9 @@ const envSchema = z.object({
   // without them (dev/CI/preview), same pattern as Sentry.
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  // Ops inbox for new-booking alerts (US-P1-01). Optional: the booking insert
+  // never blocks on it — sendAppointmentEmails skips the rep mail when unset.
+  APPOINTMENTS_NOTIFY_EMAIL: z.string().email().optional(),
   LUMEN_PRESCRIPTION_UPLOAD_ENABLED: z
     .enum(["true", "false"])
     .default("false"),
