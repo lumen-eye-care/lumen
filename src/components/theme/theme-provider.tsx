@@ -46,10 +46,10 @@ function getSnapshot(): Theme {
     : "light";
 }
 
-// SSR + first client render assume light (THEME_SCRIPT corrects the DOM before
+// SSR + first client render assume dark (THEME_SCRIPT corrects the DOM before
 // paint; useSyncExternalStore re-reads on mount without a hydration error).
 function getServerSnapshot(): Theme {
-  return "light";
+  return "dark";
 }
 
 function applyTheme(next: Theme) {
@@ -103,4 +103,4 @@ export function useTheme(): ThemeContextValue {
  * system preference) and sets data-theme synchronously so the first paint is
  * already correct — no flash of the wrong palette.
  */
-export const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
+export const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');if(!t){t='dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
