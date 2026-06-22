@@ -42,7 +42,7 @@ Server Components render catalogue + content. Client Components handle cart, len
 ```
 src/
   app/               # Next.js App Router routes
-    (marketing)/     # public: home, shop, frame-detail, clinics, journal
+    (marketing)/     # public: home, shop, frame-detail, clinics
     (auth)/          # sign-in, sign-up, reset-password
     (commerce)/      # checkout, account, account/orders
     admin/           # admin role only
@@ -295,7 +295,7 @@ Tune as needed for Paystack hosted-card form + Vercel analytics. Don't widen wit
 
 **P1 (Tier 2, standard):** US-P1-01 request appointment · US-P1-02 lens quiz · US-P1-03 prescription upload (flag-gated) · US-P1-04 WhatsApp prescription · US-P1-05 order tracking · US-P1-06 account dashboard · US-P1-07 basic admin.
 
-**P2 (Tier 3, stretch — at Week-5 checkpoint):** US-P2-01 virtual try-on · US-P2-02 lens builder · US-P2-03 journal · US-P2-04 full admin.
+**P2 (Tier 3, stretch — at Week-5 checkpoint):** US-P2-01 virtual try-on · US-P2-02 lens builder · ~~US-P2-03 journal~~ **(cut from scope — see PROGRESS 2026-06-22)** · US-P2-04 full admin.
 
 Full acceptance criteria in `docs/Lumen_Handoff_v1.docx` Section 6. Flow diagrams in `docs/app-flow.md`.
 

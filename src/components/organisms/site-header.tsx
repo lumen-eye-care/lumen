@@ -21,7 +21,6 @@ const NAV_LINKS = [
   { href: "/lens-guide", label: "Lens guide" },
   { href: "/book", label: "Eye tests" },
   { href: "/clinics", label: "Clinics" },
-  // TODO(US-P2-03): restore { href: "/journal", label: "Journal" }
 ] as const;
 
 export function SiteHeader() {

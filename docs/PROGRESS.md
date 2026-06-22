@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-06-22 — Journal (US-P2-03) cut from scope (docs + dead-code removal)
+
+**Status: shipped on branch.** The Journal is now **cut from scope**, not merely deferred. No journal front-end was ever built and none will be in this engagement. This pass removes the dead-code and tracking references so nobody picks it back up.
+
+**What landed (no migration, no new deps, no DB change):**
+- **`src/lib/seed.ts`** — removed the `journalCategories` array + the `journal_categories` / `journal_posts` seeding blocks (and the `journal.jsx` source note in the header comment). The seed no longer populates the journal tables.
+- **`src/components/organisms/site-header.tsx`** — removed the `// TODO(US-P2-03): restore /journal` nav comment.
+- **`CLAUDE.md`** — dropped `journal` from the `(marketing)` folder-structure note; struck US-P2-03 in the P2 cheat sheet with a "cut from scope" marker.
+- **Left intentionally in place (harmless):** the `journal_categories` / `journal_posts` tables + `journal` storage bucket from `20260608000002_content_catalogue.sql` (already applied to staging/prod; public-read RLS, now empty), their generated `src/db/types.ts` entries, and the `docs/design/journal.*` prototype mockups (historical reference). Dropping them would be a destructive, irreversible migration with no benefit — deliberately skipped.
+
+**Rationale:** de-scoping decision; frees the post-launch backlog to focus on 3D try-on productionisation. Dated historical PROGRESS entries below are left unedited (they record the state at the time).
+
+---
+
 ## 2026-06-20 — Launch wrap-up pass: env validation fix · 44px touch targets · launch/handoff checklist (build-complete + live-verified)
 
 **Status: shipped on branch.** v1 is **feature-complete for the 6–12 July launch**. A codebase audit confirmed the only unbuilt feature is the **Journal (US-P2-03)** — DB schema + 11 seeded posts exist but no front-end; **deliberately deferred out of v1** (nav link already removed, no broken links). This pass closes two small hardening items + documents the non-code launch checklist. No migration, no new deps.
@@ -20,7 +34,7 @@
 - **Dashboards (dev/ops):** Supabase auth — email-enumeration protection, min-password 8, secure-password-change, admin MFA, prod email templates → `/auth/confirm` · UptimeRobot on `/` + `/api/health` · Sentry project + payment-path alert.
 - **Charity's content (client):** set real **lens prices** in `/admin/lenses` (seed values are placeholders) · upload **real product photography** per frame (activates the multi-image gallery; FrameSVG renders until then) · supply real social handles (footer links removed until then) · keep `LUMEN_PRESCRIPTION_UPLOAD_ENABLED` **off in prod** until DPC + named lens-fulfilment partner clear ([[dpc-green-light-given]] — flag flip stays deliberate).
 
-**Post-launch backlog (out of v1):** Journal front-end + admin journal/frame-category CRUD (US-P2-03 / part of US-P2-04) · 3D try-on productionisation (`frames.model_url` column + per-frame GLB/USDZ, drop `NEXT_PUBLIC_DEMO_3D_ENABLED`) · optional qty-stepper/swatch visual-size bump (now they meet AAA via hit-area; visual stays compact).
+**Post-launch backlog (out of v1):** ~~Journal front-end (US-P2-03)~~ **cut from scope (2026-06-22)** · admin frame-category CRUD (part of US-P2-04) · 3D try-on productionisation (`frames.model_url` column + per-frame GLB/USDZ, drop `NEXT_PUBLIC_DEMO_3D_ENABLED`) · optional qty-stepper/swatch visual-size bump (now they meet AAA via hit-area; visual stays compact).
 
 ---
 
