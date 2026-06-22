@@ -117,7 +117,7 @@ In that Code tab session:
 - The parts with most server-side logic and financial risk.
 
 **Junior dev (the other one):**
-- Home page, Shop page (US-P0-01), Frame Detail page (US-P0-02), Cart Drawer (US-P0-03), Partner Clinics directory (US-P0-09), Lens Quiz (US-P1-02), Journal index (US-P2-03 if Tier 3).
+- Home page, Shop page (US-P0-01), Frame Detail page (US-P0-02), Cart Drawer (US-P0-03), Partner Clinics directory (US-P0-09), Lens Quiz (US-P1-02). (US-P2-03 Journal cut from scope — see PROGRESS 2026-06-22.)
 - The parts that are largely composition + content rendering — lower financial risk.
 
 **Pair-program** the first 2–3 days so the junior absorbs the patterns. After that, divide and review each other's PRs.

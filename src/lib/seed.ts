@@ -2,9 +2,8 @@
  * Dev seed — populates the local/staging database with realistic data so every
  * page that reads from the DB can render without manual inserts.
  *
- * Sources: docs/design/shared.jsx (FRAMES), docs/design/clinics.jsx (clinics),
- *          docs/design/journal.jsx (articles) — converted 1-to-1 so the seed
- *          matches what the prototype renders.
+ * Sources: docs/design/shared.jsx (FRAMES), docs/design/clinics.jsx (clinics)
+ *          — converted 1-to-1 so the seed matches what the prototype renders.
  *
  * Run with:  pnpm seed
  *
@@ -374,17 +373,6 @@ const clinics: TablesInsert<"clinics">[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// 3. Journal categories  (unique cats from docs/design/journal.jsx articles)
-// ---------------------------------------------------------------------------
-const journalCategories: TablesInsert<"journal_categories">[] = [
-  { slug: "eye-care", name: "Eye care", sort_order: 0 },
-  { slug: "lens-technology", name: "Lens technology", sort_order: 1 },
-  { slug: "style", name: "Style", sort_order: 2 },
-  { slug: "ghana", name: "Ghana", sort_order: 3 },
-  { slug: "children", name: "Children", sort_order: 4 },
-];
-
-// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 async function main(): Promise<void> {
@@ -580,99 +568,11 @@ async function main(): Promise<void> {
     .upsert(clinics, { onConflict: "slug" });
   if (clErr) throw new Error(`clinics: ${clErr.message}`);
 
-  // 4. Journal categories — needed before posts (FK)
-  console.log("  › journal_categories");
-  const { data: jcData, error: jcErr } = await db
-    .from("journal_categories")
-    .upsert(journalCategories, { onConflict: "slug" })
-    .select("id, slug");
-  if (jcErr) throw new Error(`journal_categories: ${jcErr.message}`);
-  const jcIds = Object.fromEntries((jcData ?? []).map((r) => [r.slug, r.id]));
+  // Journal (US-P2-03) was cut from scope — no journal seeding.
+  // The journal_categories / journal_posts tables remain in the schema (harmless,
+  // public-read RLS) but are intentionally left empty.
 
-  // 5. Journal posts  (docs/design/journal.jsx:5-55 — articles array)
-  // status = 'published' so public RLS exposes them immediately.
-  // body left empty — prototype has no body copy yet.
-  console.log("  › journal_posts");
-  const journalPosts: TablesInsert<"journal_posts">[] = [
-    {
-      slug: "how-often-eye-test",
-      title: "How often should you get an eye test?",
-      excerpt:
-        "Most adults should test every two years — but if you spend more than six hours on screens, sooner. Here's how to know.",
-      category_id: jcIds["eye-care"],
-      read_minutes: 6,
-      author: "Lumen Optometrists",
-      is_featured: true,
-      status: "published",
-      published_at: "2026-05-12T00:00:00Z",
-    },
-    {
-      slug: "blue-light-explained",
-      title: "Blue light, explained — and what the research actually says.",
-      excerpt:
-        "There's a lot of noise about blue light. We break down which lenses are worth it, and which are marketing fluff.",
-      category_id: jcIds["lens-technology"],
-      read_minutes: 8,
-      author: "Lumen Optometrists",
-      is_featured: false,
-      status: "published",
-      published_at: "2026-04-29T00:00:00Z",
-    },
-    {
-      slug: "round-square-cateye-face-shapes",
-      title: "Round, square, or cat-eye? A guide to face shapes.",
-      excerpt:
-        "Picking frames that fit your face is less about rules and more about proportion. Our optometrists share their cheat sheet.",
-      category_id: jcIds["style"],
-      read_minutes: 5,
-      author: "Lumen Optometrists",
-      is_featured: false,
-      status: "published",
-      published_at: "2026-04-14T00:00:00Z",
-    },
-    {
-      slug: "why-we-built-lumen-in-accra",
-      title: "Why we built Lumen in Accra.",
-      excerpt:
-        "Eye care should be premium and accessible. A note from our founders on why we started Lumen here.",
-      category_id: jcIds["ghana"],
-      read_minutes: 4,
-      author: "Charity Adomah Sasu",
-      is_featured: false,
-      status: "published",
-      published_at: "2026-04-02T00:00:00Z",
-    },
-    {
-      slug: "child-first-eye-test",
-      title: "When should your child have their first eye test?",
-      excerpt:
-        "Pediatric optometry isn't about Snellen charts. Here's what we look for at every age.",
-      category_id: jcIds["children"],
-      read_minutes: 7,
-      author: "Lumen Optometrists",
-      is_featured: false,
-      status: "published",
-      published_at: "2026-03-20T00:00:00Z",
-    },
-    {
-      slug: "single-vision-varifocal-reader",
-      title: "Single vision, varifocal, reader: which lens is right for you?",
-      excerpt:
-        "A plain-English guide to lens types. We answer the questions our optometrists hear every week.",
-      category_id: jcIds["lens-technology"],
-      read_minutes: 9,
-      author: "Lumen Optometrists",
-      is_featured: false,
-      status: "published",
-      published_at: "2026-03-12T00:00:00Z",
-    },
-  ];
-  const { error: jpErr } = await db
-    .from("journal_posts")
-    .upsert(journalPosts, { onConflict: "slug" });
-  if (jpErr) throw new Error(`journal_posts: ${jpErr.message}`);
-
-  // 6. Admin user + mock orders (US-P1-07 testability)
+  // 4. Admin user + mock orders (US-P1-07 testability)
   await seedAdminAndOrders();
 
   console.log("Lumen seed: done ✓");
