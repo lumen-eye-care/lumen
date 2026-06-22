@@ -52,9 +52,6 @@ export function AccountSidebar({
     prescriptionsEnabled
       ? { href: "/account/prescriptions", label: "Prescriptions", icon: "eye" }
       : { label: "Prescriptions", icon: "eye", soon: true },
-    { label: "Saved frames", icon: "heart", soon: true },
-    { label: "Addresses", icon: "pin", soon: true },
-    { label: "Payment methods", icon: "phone", soon: true },
     { href: "/account/settings", label: "Settings", icon: "user" },
   ];
 
