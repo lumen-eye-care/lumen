@@ -5,7 +5,6 @@ export const APPOINTMENT_SERVICES = [
   "eye-test",
   "contact-lens",
   "glasses-fitting",
-  "home-visit",
   "other",
 ] as const;
 export type AppointmentService = (typeof APPOINTMENT_SERVICES)[number];
@@ -14,7 +13,6 @@ export const SERVICE_LABELS: Record<AppointmentService, string> = {
   "eye-test": "Eye test",
   "contact-lens": "Contact lens fitting",
   "glasses-fitting": "Glasses fitting",
-  "home-visit": "Home visit eye test",
   other: "Other / not sure",
 };
 

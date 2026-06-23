@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getActiveClinics } from "@/server/clinics";
 import { ClinicCard } from "@/components/organisms/clinic-card";
-import { HomeVisitBanner } from "@/components/organisms/home-visit-banner";
 import { EmptyState } from "@/components/atoms/empty-state";
 import { Icon } from "@/components/atoms/icon";
 
@@ -11,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Clinics & Eye Tests",
   description:
-    "Lumen eye clinics across Ghana — eye tests, contact lens fitting and glasses fitting, plus home visits in Accra and Kumasi.",
+    "Lumen eye clinics across Ghana — eye tests, contact lens fitting and glasses fitting in Accra and Kumasi.",
 };
 
 /** "Accra" from "12 Lagos Avenue, East Legon, Accra". */
@@ -36,8 +35,6 @@ export default async function ClinicsPage() {
     style: "long",
     type: "conjunction",
   }).format(cities);
-
-  const flagship = clinics.find((c) => c.is_flagship) ?? clinics[0] ?? null;
 
   return (
     <div className="min-h-screen">
@@ -89,8 +86,8 @@ export default async function ClinicsPage() {
               {clinics.length === 1
                 ? `Our clinic in ${cityList}`
                 : `${clinics.length} locations across ${cityList}`}
-              , plus home visits. Every clinic has the same equipment and the
-              same clinical standard.
+              . Every clinic has the same equipment and the same clinical
+              standard.
             </p>
           )}
         </div>
@@ -111,15 +108,6 @@ export default async function ClinicsPage() {
             ))}
           </div>
         )}
-
-        {/* ── Home visits ─────────────────────────────────────────────────── */}
-        <div className="mt-14">
-          <HomeVisitBanner
-            clinicSlug={flagship?.slug ?? null}
-            whatsapp={flagship?.whatsapp ?? null}
-            phone={flagship?.phone ?? null}
-          />
-        </div>
       </div>
     </div>
   );

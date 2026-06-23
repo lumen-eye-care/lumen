@@ -25,20 +25,6 @@ test.describe("/book page renders", () => {
       await expect(bookLinks.nth(i)).toHaveAttribute("href", /^\/book/);
     }
   });
-
-  test("home-visit banner 'Book a home visit' points to /book with service=home-visit", async ({
-    page,
-  }) => {
-    await page.goto("/clinics");
-    const bookLink = page.getByRole("link", { name: /Book a home visit/i });
-    const visible = await bookLink.isVisible();
-    if (visible) {
-      await expect(bookLink).toHaveAttribute(
-        "href",
-        /\/book\?clinic=.+&service=home-visit/,
-      );
-    }
-  });
 });
 
 // Full form submission flow. Requires a seeded Supabase instance.

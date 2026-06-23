@@ -20,7 +20,7 @@ describe("buildBookingWhatsAppText", () => {
   it("appends the preferred date when present", () => {
     const text = buildBookingWhatsAppText({
       name: "Kofi",
-      serviceLabel: "Home visit eye test",
+      serviceLabel: "Glasses fitting",
       clinicName: "Lumen Osu",
       preferredDate: "2026-07-10",
     });
