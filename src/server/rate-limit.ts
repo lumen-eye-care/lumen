@@ -18,7 +18,12 @@ import { firstForwardedIp, secondsUntil } from "@/lib/rate-limit";
  * third-party cache being up; the limiter is abuse control, not a gate.
  */
 
-type LimiterName = "signIn" | "signUp" | "passwordReset" | "checkoutInitiate";
+type LimiterName =
+  | "signIn"
+  | "signUp"
+  | "passwordReset"
+  | "checkoutInitiate"
+  | "newsletter";
 
 // Sliding windows per the audit: sign-in 5/15 min per IP+email; signup 5/h
 // per IP; reset 3/h per email (protects the inbox + Resend quota); checkout
@@ -44,6 +49,12 @@ function buildLimiters(redis: Redis): Record<LimiterName, Ratelimit> {
       redis,
       limiter: Ratelimit.slidingWindow(10, "1 h"),
       prefix: "rl:checkout",
+    }),
+    // Open insert endpoint (footer) — cap signups per IP.
+    newsletter: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "1 h"),
+      prefix: "rl:newsletter",
     }),
   };
 }
