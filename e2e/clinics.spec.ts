@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
-// These render checks need no backend — the hero + home-visit banner render
-// regardless of clinic data, and the proxy skips Supabase when its env vars
-// are unset (matches auth.spec.ts). Card content is data-driven and guarded
-// behind SUPABASE_LINKED below.
+// These render checks need no backend — the hero renders regardless of clinic
+// data, and the proxy skips Supabase when its env vars are unset (matches
+// auth.spec.ts). Card content is data-driven and guarded behind
+// SUPABASE_LINKED below.
 test.describe("clinics page renders", () => {
   test("hero shows the heading and breadcrumb", async ({ page }) => {
     await page.goto("/clinics");
@@ -13,14 +13,6 @@ test.describe("clinics page renders", () => {
     await expect(
       page.getByRole("navigation", { name: "Breadcrumb" }),
     ).toContainText("Clinics");
-  });
-
-  test("home-visit banner is present", async ({ page }) => {
-    await page.goto("/clinics");
-    await expect(
-      page.getByRole("heading", { name: /We'll come to you/i }),
-    ).toBeVisible();
-    await expect(page.getByText("₵250")).toBeVisible();
   });
 
   // Placeholder social links (bare instagram.com / x.com / facebook.com)

@@ -39,7 +39,7 @@ export default async function AppointmentsPage() {
         <EmptyState
           icon="calendar"
           title="No appointments yet"
-          description="Book an eye test, contact-lens fitting or home visit and it'll show up here."
+          description="Book an eye test, contact-lens fitting or glasses fitting and it'll show up here."
           cta={{ label: "Book an appointment", href: "/book" }}
         />
       ) : (

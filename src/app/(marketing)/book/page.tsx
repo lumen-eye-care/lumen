@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Request an Appointment",
   description:
-    "Book an eye test, contact lens fitting, or home visit at a Lumen Eye Care clinic in Ghana.",
+    "Book an eye test, contact lens fitting, or glasses fitting at a Lumen Eye Care clinic in Ghana.",
 };
 
 function isValidService(v: string): v is AppointmentService {
@@ -60,10 +60,7 @@ export default async function BookPage({
     whatsapp: c.whatsapp ?? c.phone,
   }));
 
-  const heading =
-    defaultService === "home-visit"
-      ? "Request a home visit"
-      : "Request an appointment";
+  const heading = "Request an appointment";
 
   return (
     <div className="min-h-screen">
